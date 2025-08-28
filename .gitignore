@@ -1,0 +1,21 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+
+# Node/Angular
+node_modules/
+dist/
+.angular/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Docker
+*.pid
+*.sock
