@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: shipmate-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - shipmate_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shipmate-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - ${DOCKER_NETWORK}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shipmate-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-4200}:4200"
+    networks:
+      - shipmate_net
+    depends_on:
+      - backend
+
+volumes:
+  pg_data:
+
+networks:
+  shipmate_net:
+    driver: bridge
