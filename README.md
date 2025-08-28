@@ -1,15 +1,27 @@
-# ShipMate – Crowd-Shipping Platform
+## Development Environment
 
-ShipMate is a crowd-shipping platform connecting **senders** and **drivers**.  
-It is developed as a final project for the _Concepteur Développeur d'Applications (CDA)_ diploma.
+### Required versions
 
-## Structure
+- **Java (JDK):** 21.0.7
+- **Maven:** 3.9.9
+- **Node.js:** 22.14.0
+- **npm:** 11.4.2
+- **Angular CLI:** 20.2.0
+- **Docker Desktop:** 28.0.4
+- **Docker Compose:** v2.34.0
+- **Git:** latest stable
 
-- **/backend** → Spring Boot application
-- **/frontend** → Angular application
-- **/docker** → Docker & database setup
-- **/.github/workflows** → CI/CD pipeline configs
+### Verify installation
 
-## Status
+Run these commands to confirm your setup:
 
-Project is in early setup phase (Milestone 1).
+```bash
+java -version
+mvn -v
+node -v
+npm -v
+ng version
+docker -v
+docker compose version
+git --version
+```
