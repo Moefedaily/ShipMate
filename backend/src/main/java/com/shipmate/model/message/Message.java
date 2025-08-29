@@ -1,0 +1,51 @@
+package com.shipmate.model.message;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.shipmate.model.booking.Booking;
+import com.shipmate.model.user.User;
+
+import java.time.Instant;
+
+@Entity
+@Table(name = "messages")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Message {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+
+    @Column(name = "message_content", columnDefinition = "TEXT", nullable = false)
+    private String messageContent;
+
+    @Builder.Default
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type", nullable = false)
+    private MessageType messageType;
+
+    @CreationTimestamp
+    @Column(name = "sent_at", updatable = false)
+    private Instant sentAt;
+}
