@@ -9,6 +9,7 @@ import com.shipmate.model.user.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "insurance_claims")
@@ -20,8 +21,8 @@ import java.time.Instant;
 public class InsuranceClaim {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "shipment_id", nullable = false)

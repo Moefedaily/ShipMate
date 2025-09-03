@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.shipmate.model.user.User;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notifications")
@@ -18,8 +19,8 @@ import java.time.Instant;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
