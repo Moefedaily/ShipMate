@@ -72,7 +72,7 @@ public class AuthService {
         );
 
         // Load user (business layer, not security layer)
-        var user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
         // Generate new access token
@@ -82,27 +82,39 @@ public class AuthService {
                 user.getRole().name()
         );
 
-        //  Rotate or create refresh token for this session
-        refreshTokenRepository.findByUserAndDeviceIdAndSessionIdAndRevokedFalse( user,request.getDeviceId(),request.getSessionId())
-            .ifPresent(existingToken -> {
-                existingToken.setRevoked(true);
-                refreshTokenRepository.save(existingToken);
-            });
+        // Find existing refresh token for this session (ANY state)
+        RefreshToken refreshToken = refreshTokenRepository
+                .findByUserAndDeviceIdAndSessionId(
+                        user,
+                        request.getDeviceId(),
+                        request.getSessionId()
+                )
+                .orElse(null);
 
-
-        // Create new refresh token
         String newRefreshTokenValue = jwtUtil.generateRefreshToken(user.getId());
 
-        RefreshToken newRefreshToken = RefreshToken.builder()
-                .user(user)
-                .deviceId(request.getDeviceId())
-                .sessionId(request.getSessionId())
-                .token(newRefreshTokenValue)
-                .expiresAt(Instant.now().plusSeconds(jwtUtil.getRefreshTokenTtl()))
-                .revoked(false)
-                .build();
+        if (refreshToken != null) {
+            // Rotate existing token IN PLACE
+            refreshToken.setToken(newRefreshTokenValue);
+            refreshToken.setExpiresAt(
+                    Instant.now().plusSeconds(jwtUtil.getRefreshTokenTtl())
+            );
+            refreshToken.setRevoked(false);
+        } else {
+            // First login for this session so create row
+            refreshToken = RefreshToken.builder()
+                    .user(user)
+                    .deviceId(request.getDeviceId())
+                    .sessionId(request.getSessionId())
+                    .token(newRefreshTokenValue)
+                    .expiresAt(
+                            Instant.now().plusSeconds(jwtUtil.getRefreshTokenTtl())
+                    )
+                    .revoked(false)
+                    .build();
+        }
 
-        refreshTokenRepository.save(newRefreshToken);
+        refreshTokenRepository.save(refreshToken);
 
         // Return tokens
         return AuthResponse.builder()
