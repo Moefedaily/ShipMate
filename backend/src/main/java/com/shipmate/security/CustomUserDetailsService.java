@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.UUID;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -20,19 +20,36 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String identifier)
+            throws UsernameNotFoundException {
 
-        // Map our User entity to Spring Security's UserDetails
+        User user;
+
+        // LOGIN: identifier is email
+        if (identifier.contains("@")) {
+            user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() ->
+                            new UsernameNotFoundException("User not found with email: " + identifier));
+        }
+        // JWT: identifier is UUID
+        else {
+            UUID userId;
+            try {
+                userId = UUID.fromString(identifier);
+            } catch (IllegalArgumentException e) {
+                throw new UsernameNotFoundException("Invalid user identifier");
+            }
+
+            user = userRepository.findById(userId)
+                    .orElseThrow(() ->
+                            new UsernameNotFoundException("User not found with id: " + identifier));
+        }
+
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword()) // password hashed with Argon2
-                .authorities(Collections.singletonList(() -> "ROLE_" + user.getRole().name()))
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(!user.isVerified()) // only enable verified users
+                .withUsername(user.getId().toString())
+                .password(user.getPassword())
+                .authorities("ROLE_" + user.getRole().name())
+                .disabled(!user.isVerified())
                 .build();
     }
 }

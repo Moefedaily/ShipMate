@@ -72,4 +72,8 @@ public class JwtUtil {
     private boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }
+
+    public long getRefreshTokenTtl() {
+        return refreshTokenTtl;
+    }
 }
