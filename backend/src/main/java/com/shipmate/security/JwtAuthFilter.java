@@ -33,41 +33,41 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+            @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String token;
-        final String userId;
 
-        // Check for Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        token = authHeader.substring(7); // remove "Bearer "
-        Claims claims;
+        final String token = authHeader.substring(7);
+
         try {
-            claims = jwtUtil.extractClaims(token);
-            userId = claims.getSubject();
-        } catch (Exception e) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+            Claims claims = jwtUtil.extractClaims(token);
+            String userId = claims.getSubject();
 
-        // If not already authenticated
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(userId);
 
-            if (jwtUtil.isTokenValid(token, UUID.fromString(userId))) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtUtil.isTokenValid(token, UUID.fromString(userId))) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+        } catch (Exception e) {
+            // token invalid → ignore and continue filter chain
         }
 
         filterChain.doFilter(request, response);

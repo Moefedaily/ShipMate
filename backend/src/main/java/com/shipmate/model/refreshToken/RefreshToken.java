@@ -10,7 +10,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "refresh_tokens")
+@Table(
+    name = "refresh_tokens",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_refresh_token_session",
+            columnNames = { "user_id", "device_id", "session_id" }
+        )
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +34,21 @@ public class RefreshToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /**
+     * Frontend-generated UUID identifying the physical device
+     */
+    @Column(name = "device_id", nullable = false, length = 36)
+    private String deviceId;
+
+    /**
+     * Frontend-generated UUID identifying the browser/session context
+     */
+    @Column(name = "session_id", nullable = false, length = 36)
+    private String sessionId;
+
+    /**
+     * The actual refresh token value
+     */
     @Column(nullable = false, unique = true, length = 512)
     private String token;
 
