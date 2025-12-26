@@ -56,7 +56,11 @@ public class User {
 
     @Builder.Default
     @Column(name = "is_verified", nullable = false)
-    private boolean isVerified = false;
+    private boolean verified = false;
+
+    @Builder.Default
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

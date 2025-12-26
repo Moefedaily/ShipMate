@@ -1,7 +1,7 @@
 package com.shipmate.security;
 
 import com.shipmate.model.user.User;
-import com.shipmate.repository.UserRepository;
+import com.shipmate.repository.user.UserRepository;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -49,7 +49,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .withUsername(user.getId().toString())
                 .password(user.getPassword())
                 .authorities("ROLE_" + user.getRole().name())
-                .disabled(!user.isVerified())
+                .disabled(!user.isVerified() || !user.isActive())
                 .build();
     }
 }

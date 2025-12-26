@@ -1,10 +1,15 @@
 package com.shipmate.controller;
 
 import com.shipmate.dto.AuthResponse;
+import com.shipmate.dto.ForgotPasswordRequest;
+import com.shipmate.dto.ForgotPasswordResponse;
 import com.shipmate.dto.LoginRequest;
 import com.shipmate.dto.RegisterRequest;
 import com.shipmate.dto.RegisterResponse;
+import com.shipmate.dto.ResetPasswordRequest;
+import com.shipmate.dto.ResetPasswordResponse;
 import com.shipmate.dto.TokenRequest;
+import com.shipmate.dto.VerifyEmailResponse;
 import com.shipmate.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -95,4 +100,59 @@ public class AuthController {
         authService.logout(request.getRefreshToken());
         return ResponseEntity.noContent().build();
     }
+
+    // ===================== VERIFY EMAIL =====================
+
+    @Operation(
+        summary = "Verify email",
+        description = "Marks the user as verified using a verification token."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Email verified successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+    })
+    @GetMapping("/verify-email")
+    public ResponseEntity<VerifyEmailResponse> verifyEmail(
+            @RequestParam("token") String token) {
+
+        VerifyEmailResponse response = authService.verifyEmail(token);
+        return ResponseEntity.ok(response);
+    }
+
+    // ===================== FORGOT PASSWORD =====================
+
+    @Operation(
+        summary = "Forgot password",
+        description = "Sends a password reset email if the account exists."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Request accepted"),
+        @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+
+        ForgotPasswordResponse response = authService.forgotPassword(request);
+        return ResponseEntity.ok(response);
+    }
+
+    // ===================== RESET PASSWORD =====================
+
+    @Operation(
+        summary = "Reset password",
+        description = "Resets the user's password using a reset token."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Password reset successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid token / invalid request")
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResetPasswordResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+
+        ResetPasswordResponse response = authService.resetPassword(request);
+        return ResponseEntity.ok(response);
+    }
+
 }

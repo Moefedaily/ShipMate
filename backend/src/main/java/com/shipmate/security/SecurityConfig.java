@@ -56,7 +56,7 @@ public class SecurityConfig {
                 }) // use default CORS config
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login","/api/auth/logout", "/api/auth/register", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/login","/api/auth/logout", "/api/auth/register", "/api/auth/refresh", "/api/auth/verify-email", "/api/auth/reset-password", "/api/auth/forgot-password").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())

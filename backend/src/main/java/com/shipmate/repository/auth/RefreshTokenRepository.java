@@ -1,9 +1,10 @@
-package com.shipmate.repository;
+package com.shipmate.repository.auth;
 
 import com.shipmate.model.refreshToken.RefreshToken;
 import com.shipmate.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,4 +52,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
      */
     void deleteByUser(User user);
 
+    /**
+     * All refresh tokens for a user
+     */
+    List<RefreshToken> findAllByUser(User user);
+
+    @org.springframework.data.jpa.repository.Modifying
+        @org.springframework.data.jpa.repository.Query("""
+        update RefreshToken rt set rt.revoked = true where rt.user.id = :userId and rt.revoked = false """)
+        void revokeAllActiveByUserId(java.util.UUID userId);
 }
