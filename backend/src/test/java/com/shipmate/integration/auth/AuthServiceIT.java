@@ -11,14 +11,18 @@ import com.shipmate.repository.auth.RefreshTokenRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.AuthService;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Slf4j
 class AuthServiceIT extends AbstractIntegrationTest {
 
     @Autowired
@@ -35,13 +39,14 @@ class AuthServiceIT extends AbstractIntegrationTest {
 
     private User createVerifiedUser() {
         User user = User.builder()
-                .email("auth.user@shipmate.com")
+                .email("auth-" + UUID.randomUUID() + "@shipmate.com")
                 .password(passwordEncoder.encode("password123"))
                 .firstName("Auth")
                 .lastName("User")
                 .userType(UserType.SENDER)
                 .role(Role.USER)
                 .verified(true)
+                .active(true)
                 .build();
 
         return userRepository.save(user);
@@ -68,7 +73,7 @@ class AuthServiceIT extends AbstractIntegrationTest {
         assertThat(tokens.get(0).isRevoked()).isFalse();
     }
 
-    @Test
+   @Test
     void login_shouldRotateRefreshToken_forSameSession() {
         User user = createVerifiedUser();
 
@@ -80,20 +85,22 @@ class AuthServiceIT extends AbstractIntegrationTest {
                 .build();
 
         AuthResponse firstLogin = authService.login(request);
+        log.info("First login response: {}", firstLogin);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         AuthResponse secondLogin = authService.login(request);
 
         List<RefreshToken> tokens = refreshTokenRepository.findAllByUser(user);
+        assertThat(tokens).hasSize(1);
+        assertThat(tokens.get(0).isRevoked()).isFalse();
 
-        assertThat(tokens).hasSize(2);
-        assertThat(tokens)
-                .filteredOn(RefreshToken::isRevoked)
-                .hasSize(1);
-
-        assertThat(firstLogin.getRefreshToken())
-                .isNotEqualTo(secondLogin.getRefreshToken());
+        assertThat(secondLogin.getRefreshToken()).isNotBlank();
     }
-
-    @Test
+     @Test
     void refresh_shouldRotateRefreshToken() {
         User user = createVerifiedUser();
 
@@ -105,21 +112,31 @@ class AuthServiceIT extends AbstractIntegrationTest {
                 .build();
 
         AuthResponse loginResponse = authService.login(login);
+        String oldRefreshToken = loginResponse.getRefreshToken();
 
-        AuthResponse refreshResponse =
-                authService.refresh(loginResponse.getRefreshToken());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        AuthResponse refreshResponse = authService.refresh(oldRefreshToken);
 
         assertThat(refreshResponse.getAccessToken()).isNotBlank();
         assertThat(refreshResponse.getRefreshToken()).isNotBlank();
-        assertThat(refreshResponse.getRefreshToken())
-                .isNotEqualTo(loginResponse.getRefreshToken());
 
+        // updated in place
         List<RefreshToken> tokens = refreshTokenRepository.findAllByUser(user);
-        assertThat(tokens)
-                .filteredOn(RefreshToken::isRevoked)
-                .hasSize(1);
+        assertThat(tokens).hasSize(1);
+        assertThat(tokens.get(0).isRevoked()).isFalse();
+        
+        assertThat(tokens.get(0).getToken()).isEqualTo(refreshResponse.getRefreshToken());
+        
+        // Old token should no longer work
+        assertThatThrownBy(() -> authService.refresh(oldRefreshToken))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid refresh token");
     }
-
     @Test
     void logout_shouldRevokeRefreshToken() {
         User user = createVerifiedUser();

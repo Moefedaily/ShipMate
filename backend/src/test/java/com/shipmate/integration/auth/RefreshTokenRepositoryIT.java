@@ -26,13 +26,14 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    // Generate unique email per test to avoid duplicates
     private User createUser() {
         User user = User.builder()
-                .email("test.user@shipmate.com")
+                .email("test-" + UUID.randomUUID() + "@shipmate.com")
                 .password("hashed-password")
                 .firstName("Test")
                 .lastName("User")
-                .userType(UserType.SENDER)
+                .userType(UserType.SENDER) 
                 .role(Role.USER)
                 .verified(true)
                 .build();
@@ -91,7 +92,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
                         .user(user)
                         .deviceId("device-1")
                         .sessionId("session-1")
-                        .token("token-1")
+                        .token(UUID.randomUUID().toString())
                         .expiresAt(Instant.now().plusSeconds(3600))
                         .revoked(false)
                         .build()
@@ -101,7 +102,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
                 .user(user)
                 .deviceId("device-1")
                 .sessionId("session-1")
-                .token("token-2")
+                .token(UUID.randomUUID().toString())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .revoked(false)
                 .build();
@@ -119,7 +120,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
                         .user(user)
                         .deviceId("device-1")
                         .sessionId("session-1")
-                        .token("token-1")
+                        .token(UUID.randomUUID().toString())
                         .expiresAt(Instant.now().plusSeconds(3600))
                         .revoked(false)
                         .build()

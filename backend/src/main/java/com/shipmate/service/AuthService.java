@@ -17,7 +17,7 @@ import com.shipmate.model.user.User;
 import com.shipmate.repository.auth.RefreshTokenRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.security.JwtUtil;
-import com.shipmate.service.mail.EmailService;
+import com.shipmate.service.mail.MailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private final EmailService mailService;
+    private final MailService mailService;
     private final VerificationTokenService verificationTokenService;
         public RegisterResponse register(RegisterRequest request) {
 
