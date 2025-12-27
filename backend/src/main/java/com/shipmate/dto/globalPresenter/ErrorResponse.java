@@ -1,4 +1,4 @@
-package com.shipmate.dto;
+package com.shipmate.dto.globalPresenter;
 
 import lombok.Builder;
 import lombok.Getter;

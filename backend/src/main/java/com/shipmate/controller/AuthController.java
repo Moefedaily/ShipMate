@@ -1,15 +1,15 @@
 package com.shipmate.controller;
 
-import com.shipmate.dto.AuthResponse;
-import com.shipmate.dto.ForgotPasswordRequest;
-import com.shipmate.dto.ForgotPasswordResponse;
-import com.shipmate.dto.LoginRequest;
-import com.shipmate.dto.RegisterRequest;
-import com.shipmate.dto.RegisterResponse;
-import com.shipmate.dto.ResetPasswordRequest;
-import com.shipmate.dto.ResetPasswordResponse;
-import com.shipmate.dto.TokenRequest;
-import com.shipmate.dto.VerifyEmailResponse;
+import com.shipmate.dto.request.auth.ForgotPasswordRequest;
+import com.shipmate.dto.request.auth.LoginRequest;
+import com.shipmate.dto.request.auth.RegisterRequest;
+import com.shipmate.dto.request.auth.ResetPasswordRequest;
+import com.shipmate.dto.request.auth.ResetPasswordResponse;
+import com.shipmate.dto.request.auth.TokenRequest;
+import com.shipmate.dto.response.auth.AuthResponse;
+import com.shipmate.dto.response.auth.ForgotPasswordResponse;
+import com.shipmate.dto.response.auth.RegisterResponse;
+import com.shipmate.dto.response.auth.VerifyEmailResponse;
 import com.shipmate.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;

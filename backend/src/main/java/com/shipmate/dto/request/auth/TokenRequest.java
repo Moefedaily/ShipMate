@@ -1,4 +1,4 @@
-package com.shipmate.dto;
+package com.shipmate.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

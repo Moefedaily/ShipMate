@@ -1,4 +1,4 @@
-package com.shipmate.dto;
+package com.shipmate.dto.response.auth;
 
 import lombok.*;
 

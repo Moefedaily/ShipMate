@@ -1,6 +1,6 @@
 package com.shipmate.mapper;
 
-import com.shipmate.dto.RegisterRequest;
+import com.shipmate.dto.request.auth.RegisterRequest;
 import com.shipmate.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

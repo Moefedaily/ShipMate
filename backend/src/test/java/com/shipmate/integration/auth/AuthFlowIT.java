@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.shipmate.config.AbstractIntegrationTest;
-import com.shipmate.dto.AuthResponse;
-import com.shipmate.dto.LoginRequest;
-import com.shipmate.dto.RegisterRequest;
+import com.shipmate.dto.request.auth.LoginRequest;
+import com.shipmate.dto.request.auth.RegisterRequest;
+import com.shipmate.dto.response.auth.AuthResponse;
 import com.shipmate.model.auth.VerificationToken;
 import com.shipmate.model.auth.VerificationTokenType;
 import com.shipmate.model.user.Role;
