@@ -2,8 +2,8 @@ package com.shipmate.api.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipmate.config.AbstractIntegrationTest;
-import com.shipmate.dto.LoginRequest;
-import com.shipmate.dto.RegisterRequest;
+import com.shipmate.dto.request.auth.LoginRequest;
+import com.shipmate.dto.request.auth.RegisterRequest;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;

@@ -1,8 +1,8 @@
 package com.shipmate.integration.auth;
 
 import com.shipmate.config.AbstractIntegrationTest;
-import com.shipmate.dto.AuthResponse;
-import com.shipmate.dto.LoginRequest;
+import com.shipmate.dto.request.auth.LoginRequest;
+import com.shipmate.dto.response.auth.AuthResponse;
 import com.shipmate.model.refreshToken.RefreshToken;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;

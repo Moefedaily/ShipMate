@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.shipmate.config.AbstractIntegrationTest;
-import com.shipmate.dto.ForgotPasswordRequest;
-import com.shipmate.dto.ResetPasswordRequest;
+import com.shipmate.dto.request.auth.ForgotPasswordRequest;
+import com.shipmate.dto.request.auth.ResetPasswordRequest;
 import com.shipmate.model.auth.VerificationToken;
 import com.shipmate.model.auth.VerificationTokenType;
 import com.shipmate.model.user.Role;

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.shipmate.config.AbstractIntegrationTest;
-import com.shipmate.dto.LoginRequest;
+import com.shipmate.dto.request.auth.LoginRequest;
 import com.shipmate.model.auth.VerificationToken;
 import com.shipmate.model.auth.VerificationTokenType;
 import com.shipmate.model.refreshToken.RefreshToken;

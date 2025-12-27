@@ -1,10 +1,10 @@
-package com.shipmate.dto;
+package com.shipmate.dto.response.auth;
 
 import lombok.*;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class ResetPasswordResponse {
+public class VerifyEmailResponse {
     private String message;
 }

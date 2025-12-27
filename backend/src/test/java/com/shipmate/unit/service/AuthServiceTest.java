@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.shipmate.dto.RegisterRequest;
 import com.shipmate.model.refreshToken.RefreshToken;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.auth.RefreshTokenRepository;
@@ -25,6 +24,7 @@ import com.shipmate.security.JwtUtil;
 import com.shipmate.service.AuthService;
 import com.shipmate.service.VerificationTokenService;
 import com.shipmate.service.mail.MailService;
+import com.shipmate.dto.request.auth.RegisterRequest;
 import com.shipmate.mapper.UserMapper;
 
 @ExtendWith(MockitoExtension.class)
