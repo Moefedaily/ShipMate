@@ -1,4 +1,4 @@
-package com.shipmate.service;
+package com.shipmate.service.auth;
 
 import com.shipmate.dto.request.auth.ForgotPasswordRequest;
 import com.shipmate.dto.request.auth.LoginRequest;

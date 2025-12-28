@@ -41,7 +41,7 @@ public class SecurityConfig {
         return provider;
     }
 
-    // AuthenticationManager (used later in AuthService)
+    // AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

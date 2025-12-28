@@ -35,4 +35,7 @@ build/
 # Environment
 .env
 .env.local
+src/doc/postman/postman_environment.json
+*.log
+/logs
 

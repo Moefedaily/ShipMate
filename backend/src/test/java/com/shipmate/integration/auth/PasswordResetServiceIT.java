@@ -18,7 +18,7 @@ import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.repository.auth.VerificationTokenRepository;
 import com.shipmate.repository.user.UserRepository;
-import com.shipmate.service.AuthService;
+import com.shipmate.service.auth.AuthService;
 
 class PasswordResetServiceIT extends AbstractIntegrationTest {
 
