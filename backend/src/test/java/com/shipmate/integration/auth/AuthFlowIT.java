@@ -18,8 +18,8 @@ import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.repository.user.UserRepository;
-import com.shipmate.service.AuthService;
-import com.shipmate.service.VerificationTokenService;
+import com.shipmate.service.auth.AuthService;
+import com.shipmate.service.auth.VerificationTokenService;
 
 class AuthFlowIT extends AbstractIntegrationTest {
 

@@ -1,7 +1,10 @@
 package com.shipmate.exception;
 
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,14 +49,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalState(
-            IllegalStateException ex) {
-
+        public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
         return buildError(
-                HttpStatus.UNAUTHORIZED,
+                HttpStatus.BAD_REQUEST,
                 ex.getMessage()
         );
-    }
+        }
 
     // ===================== VALIDATION =====================
 
@@ -65,6 +66,39 @@ public class GlobalExceptionHandler {
                 "Invalid request data"
         );
     }
+
+    // ===================== NOT FOUND =====================
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound() {
+
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "Resource not found"
+        );
+    }
+
+    // ===================== BAD REQUEST =====================
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest() {
+
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "Bad request"
+        );
+    }
+    
+
+    // ===================== ACCESS DENIED =====================
+    @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ErrorResponse> handleAccessDenied() {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "Access is denied"
+        );
+        }
+
 
     // ===================== FALLBACK =====================
 

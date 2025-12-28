@@ -9,7 +9,7 @@ import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.repository.auth.RefreshTokenRepository;
 import com.shipmate.repository.user.UserRepository;
-import com.shipmate.service.AuthService;
+import com.shipmate.service.auth.AuthService;
 
 import lombok.extern.slf4j.Slf4j;
 

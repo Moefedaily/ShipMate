@@ -1,4 +1,4 @@
-package com.shipmate.controller;
+package com.shipmate.controller.auth;
 
 import com.shipmate.dto.request.auth.ForgotPasswordRequest;
 import com.shipmate.dto.request.auth.LoginRequest;
@@ -10,7 +10,7 @@ import com.shipmate.dto.response.auth.AuthResponse;
 import com.shipmate.dto.response.auth.ForgotPasswordResponse;
 import com.shipmate.dto.response.auth.RegisterResponse;
 import com.shipmate.dto.response.auth.VerifyEmailResponse;
-import com.shipmate.service.AuthService;
+import com.shipmate.service.auth.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

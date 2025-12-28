@@ -21,8 +21,8 @@ import com.shipmate.model.user.UserType;
 import com.shipmate.repository.auth.RefreshTokenRepository;
 import com.shipmate.repository.auth.VerificationTokenRepository;
 import com.shipmate.repository.user.UserRepository;
-import com.shipmate.service.AuthService;
-import com.shipmate.service.VerificationTokenService;
+import com.shipmate.service.auth.AuthService;
+import com.shipmate.service.auth.VerificationTokenService;
 
 class AuthPersistenceIT extends AbstractIntegrationTest {
 

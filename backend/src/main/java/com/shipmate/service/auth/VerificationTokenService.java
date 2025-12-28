@@ -1,4 +1,4 @@
-package com.shipmate.service;
+package com.shipmate.service.auth;
 
 import java.time.Duration;
 import java.time.Instant;

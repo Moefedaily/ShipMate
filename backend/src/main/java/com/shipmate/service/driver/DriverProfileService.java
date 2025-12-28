@@ -1,0 +1,106 @@
+package com.shipmate.service.driver;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.shipmate.dto.request.driver.DriverApplyRequest;
+import com.shipmate.dto.response.driver.DriverProfileResponse;
+import com.shipmate.mapper.DriverProfileMapper;
+import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.DriverProfile.DriverStatus;
+import com.shipmate.model.user.User;
+import com.shipmate.repository.driver.DriverProfileRepository;
+import com.shipmate.repository.user.UserRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
+public class DriverProfileService {
+
+    private final DriverProfileRepository driverProfileRepository;
+    private final DriverProfileMapper mapper;
+    private final UserRepository userRepository;
+
+    public DriverProfileResponse apply(UUID userId, DriverApplyRequest request) {
+
+    User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        if (driverProfileRepository.existsByUser(user)) {
+            throw new IllegalStateException("Driver profile already exists");
+        }
+        
+        DriverProfile profile = mapper.toEntity(request, user);
+        DriverProfile saved = driverProfileRepository.save(profile);
+        return mapper.toResponse(saved);
+    }
+
+    public DriverProfileResponse getMyProfile(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        DriverProfile profile = driverProfileRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalStateException("Driver profile not found"));
+        return mapper.toResponse(profile);
+    }
+
+    // ---------------- ADMIN ----------------
+
+    public List<DriverProfileResponse> getPendingDrivers() {
+        return driverProfileRepository.findByStatus(DriverStatus.PENDING)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    public DriverProfileResponse approve(UUID driverProfileId) {
+        DriverProfile profile = getProfileOrThrow(driverProfileId);
+
+        if (profile.getStatus() != DriverStatus.PENDING) {
+            throw new IllegalStateException("Only pending drivers can be approved");
+        }
+
+        profile.setStatus(DriverStatus.APPROVED);
+        profile.setApprovedAt(Instant.now());
+
+        return mapper.toResponse(profile);
+    }
+
+    public DriverProfileResponse reject(UUID driverProfileId) {
+        DriverProfile profile = getProfileOrThrow(driverProfileId);
+
+        if (profile.getStatus() != DriverStatus.PENDING) {
+            throw new IllegalStateException("Only pending drivers can be rejected");
+        }
+
+        profile.setStatus(DriverStatus.REJECTED);
+        profile.setApprovedAt(Instant.now());
+
+        return mapper.toResponse(profile);
+    }
+
+    private DriverProfile getProfileOrThrow(UUID id) {
+        return driverProfileRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
+    }
+
+    public DriverProfileResponse suspend(UUID driverProfileId) {
+        DriverProfile profile = getProfileOrThrow(driverProfileId);
+
+        if (profile.getStatus() != DriverStatus.APPROVED) {
+            throw new IllegalStateException("Only approved drivers can be suspended");
+        }
+
+        profile.setStatus(DriverStatus.SUSPENDED);
+
+        return mapper.toResponse(profile);
+    }
+
+}
