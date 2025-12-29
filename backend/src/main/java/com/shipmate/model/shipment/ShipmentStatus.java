@@ -1,8 +1,8 @@
 package com.shipmate.model.shipment;
 
 public enum ShipmentStatus {
-    PENDING,
-    ACCEPTED,
+    CREATED,
+    ASSIGNED,
     IN_TRANSIT,
     DELIVERED,
     CANCELLED

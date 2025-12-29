@@ -1,4 +1,4 @@
-package com.shipmate.integration.auth;
+package com.shipmate.unit.service.auth;
 
 import com.shipmate.config.AbstractIntegrationTest;
 import com.shipmate.dto.request.auth.LoginRequest;

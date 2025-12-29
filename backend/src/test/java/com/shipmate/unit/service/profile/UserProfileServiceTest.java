@@ -1,4 +1,4 @@
-package com.shipmate.unit.service;
+package com.shipmate.unit.service.profile;
 
 
 import static org.assertj.core.api.Assertions.*;

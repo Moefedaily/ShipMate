@@ -1,4 +1,4 @@
-package com.shipmate.unit.service;
+package com.shipmate.unit.service.auth;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
