@@ -1,4 +1,4 @@
-package com.shipmate.integration.auth;
+package com.shipmate.unit.service.auth;
 
 import static org.assertj.core.api.Assertions.*;
 
