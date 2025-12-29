@@ -35,7 +35,7 @@ build/
 # Environment
 .env*
 .env.local
-src/doc/postman/*
+src/doc/postman*
 *.log
 /logs
 
