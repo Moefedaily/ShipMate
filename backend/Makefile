@@ -38,22 +38,22 @@ dev: ## Run with dev profile
 .PHONY: test
 test: ## Run all tests
 	@echo "$(GREEN)Running tests...$(NC)"
-	mvn test
+	mvn test -X
 
 .PHONY: test-unit
 test-unit: ## Run only unit tests
 	@echo "$(GREEN)Running unit tests...$(NC)"
-	mvn test -Dtest="*Test"
+	mvn test -Dtest="*Test" -X
 
 .PHONY: test-int
 test-int: ## Run only integration tests
 	@echo "$(GREEN)Running integration tests...$(NC)"
-	mvn test -Dtest="*IT"
+	mvn test -Dtest="*IT" -X
 
 .PHONY: test-one
 test-one: ## Run a specific test (usage: make test-one TEST=ClassName)
 	@echo "$(GREEN)Running test: $(TEST)$(NC)"
-	mvn test -Dtest=$(TEST)
+	mvn test -Dtest=$(TEST) -X
 
 .PHONY: clean
 clean: ## Clean build artifacts

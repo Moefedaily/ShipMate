@@ -5,11 +5,13 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -64,4 +66,8 @@ public class Booking {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
+    private List<Shipment> shipments;
+
 }

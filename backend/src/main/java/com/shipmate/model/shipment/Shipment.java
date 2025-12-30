@@ -1,5 +1,6 @@
 package com.shipmate.model.shipment;
 
+import com.shipmate.model.booking.Booking;
 import com.shipmate.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -85,8 +86,10 @@ public class Shipment {
     private List<String> photos;
 
 
-    @Column(name = "booking_id")
-    private UUID bookingId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
