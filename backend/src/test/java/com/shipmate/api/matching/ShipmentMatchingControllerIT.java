@@ -74,7 +74,7 @@ class ShipmentMatchingControllerIT extends AbstractIntegrationTest {
     @Test
     void matchShipments_shouldFail_whenUnauthenticated() throws Exception {
         mockMvc.perform(get("/api/matching/shipments"))
-                .andExpect(status().isForbidden()); // <-- your security returns 403
+                .andExpect(status().isForbidden());
     }
 
     // ===================== DRIVER LOCATION =====================
@@ -113,7 +113,6 @@ class ShipmentMatchingControllerIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        // IMPORTANT: create DriverProfile because location endpoint expects it
         driverProfileRepository.saveAndFlush(
                 DriverProfile.builder()
                         .user(driver)
@@ -172,4 +171,40 @@ class ShipmentMatchingControllerIT extends AbstractIntegrationTest {
 
         shipmentRepository.saveAndFlush(shipment);
     }
+
+    @Test
+    void matchShipments_shouldFail_whenAuthenticatedSender() throws Exception {
+        // --------------------
+        // GIVEN an authenticated sender
+        // --------------------
+        String email = "sender-" + UUID.randomUUID() + "@shipmate.com";
+
+        User sender = userRepository.save(
+                User.builder()
+                        .email(email)
+                        .password(passwordEncoder.encode(PASSWORD))
+                        .firstName("Sender")
+                        .lastName("Test")
+                        .role(Role.USER)
+                        .userType(UserType.SENDER)
+                        .verified(true)
+                        .active(true)
+                        .build()
+        );
+
+        String token = obtainAccessToken(sender.getEmail(), PASSWORD);
+
+        // --------------------
+        // WHEN accessing matching endpoint
+        // --------------------
+        mockMvc.perform(get("/api/matching/shipments")
+                        .header("Authorization", "Bearer " + token)
+                        .param("radiusKm", "20")
+                        .param("maxResults", "10"))
+                // --------------------
+                // THEN access is denied
+                // --------------------
+                .andExpect(status().isForbidden());
+    }
+
 }
