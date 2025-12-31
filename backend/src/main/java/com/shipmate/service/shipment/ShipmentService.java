@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -72,6 +73,17 @@ public class ShipmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
         return shipmentMapper.toResponse(shipment);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Shipment> getAllShipments() {
+        return shipmentRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Shipment getShipmentById(UUID id) {
+        return shipmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
     }
 
     /* =========================
