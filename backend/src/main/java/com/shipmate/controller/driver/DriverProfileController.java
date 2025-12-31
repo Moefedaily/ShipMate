@@ -1,7 +1,10 @@
 package com.shipmate.controller.driver;
 
 import com.shipmate.dto.request.driver.DriverApplyRequest;
+import com.shipmate.dto.request.driver.UpdateDriverLocationRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;
+import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.service.driver.DriverProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class DriverProfileController {
 
     private final DriverProfileService driverProfileService;
+    private final DriverProfileRepository driverProfileRepository;
 
     // ===================== APPLY AS DRIVER =====================
 
@@ -60,6 +65,32 @@ public class DriverProfileController {
     public ResponseEntity<DriverProfileResponse> getMyProfile(
     @AuthenticationPrincipal(expression = "username") String userId) {
         return ResponseEntity.ok(driverProfileService.getMyProfile(UUID.fromString(userId)));
+    }
+
+    // ===================== UPDATE MY LOCATION =====================
+
+    @Operation(
+        summary = "Update my location",
+        description = "Updates the authenticated user's location."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Location updated successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+     @PostMapping("/me/location")
+    public void updateMyLocation(
+            @AuthenticationPrincipal(expression = "username") String userId,
+            @RequestBody UpdateDriverLocationRequest request
+    ) {
+        DriverProfile profile = driverProfileRepository
+                .findById(UUID.fromString(userId))
+                .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
+
+        profile.setLastLatitude(request.getLatitude());
+        profile.setLastLongitude(request.getLongitude());
+        profile.setLastLocationUpdatedAt(Instant.now());
+
+        driverProfileRepository.save(profile);
     }
 
 }
