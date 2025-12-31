@@ -46,7 +46,7 @@ public class ShipmentService {
         shipment.setExtraInsuranceFee(BigDecimal.ZERO);
 
         log.debug("shipment: {}", shipment);
-        Shipment saved = shipmentRepository.save(shipment);
+        Shipment saved = shipmentRepository.saveAndFlush(shipment);
         return shipmentMapper.toResponse(saved);
     }
 
@@ -74,7 +74,7 @@ public class ShipmentService {
 
         return shipmentMapper.toResponse(shipment);
     }
-    
+
     @Transactional(readOnly = true)
     public List<Shipment> getAllShipments() {
         return shipmentRepository.findAll();
