@@ -71,4 +71,14 @@ public class DriverProfile {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
+
+    @Column(name = "last_latitude", precision = 9, scale = 6)
+    private BigDecimal lastLatitude;
+
+    @Column(name = "last_longitude", precision = 9, scale = 6)
+    private BigDecimal lastLongitude;
+
+    @Column(name = "last_location_updated_at")
+    private Instant lastLocationUpdatedAt;
+
 }
