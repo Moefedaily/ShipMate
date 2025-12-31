@@ -17,4 +17,6 @@ public interface DriverProfileRepository extends JpaRepository<DriverProfile, UU
     boolean existsByUser(User user);
 
     List<DriverProfile> findByStatus(DriverStatus status);
+
+    Optional<DriverProfile> findByUser_Id(UUID userId);
 }

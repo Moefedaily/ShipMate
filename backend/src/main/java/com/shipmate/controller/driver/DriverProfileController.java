@@ -20,10 +20,12 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@PreAuthorize("@driverSecurity.isDriver(authentication)")
 @RequestMapping("/api/drivers")
 @RequiredArgsConstructor
 @Tag(name = "Driver Profile", description = "Driver profile management APIs")
@@ -83,7 +85,7 @@ public class DriverProfileController {
             @RequestBody UpdateDriverLocationRequest request
     ) {
         DriverProfile profile = driverProfileRepository
-                .findById(UUID.fromString(userId))
+                .findByUser_Id(UUID.fromString(userId))
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
 
         profile.setLastLatitude(request.getLatitude());

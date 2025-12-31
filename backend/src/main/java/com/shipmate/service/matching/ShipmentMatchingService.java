@@ -57,7 +57,7 @@ public class ShipmentMatchingService {
     ) {
 
         DriverProfile driverProfile = driverProfileRepository
-                .findById(driverId)
+                .findByUser_Id(driverId)
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
 
         // -----------------------------

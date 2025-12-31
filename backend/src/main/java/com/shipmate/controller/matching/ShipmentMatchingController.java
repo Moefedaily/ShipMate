@@ -22,9 +22,9 @@ import com.shipmate.service.matching.ShipmentMatchingService;
 
 import lombok.RequiredArgsConstructor;
 
-@PreAuthorize("hasRole('DRIVER')")
 @RestController
 @RequestMapping("/api/matching")
+@PreAuthorize("@driverSecurity.isDriver(authentication)")
 @RequiredArgsConstructor
 public class ShipmentMatchingController {
 
