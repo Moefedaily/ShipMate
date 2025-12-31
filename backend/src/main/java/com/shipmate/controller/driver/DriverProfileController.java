@@ -83,7 +83,7 @@ public class DriverProfileController {
             @RequestBody UpdateDriverLocationRequest request
     ) {
         DriverProfile profile = driverProfileRepository
-                .findById(UUID.fromString(userId))
+                .findByUser_Id(UUID.fromString(userId))
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
 
         profile.setLastLatitude(request.getLatitude());
