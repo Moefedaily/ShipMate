@@ -1,20 +1,23 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
+import { LoaderStore } from './loader.store';
+
 
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
-  private readonly _activeRequests = signal(0);
 
-  readonly loading = computed(() => this._activeRequests() > 0);
+  private readonly store = inject(LoaderStore);
 
-  show() {
-    this._activeRequests.update(v => v + 1);
+  readonly isLoading = computed(() => this.store.isLoading() > 0);
+
+  show(): void {
+    this.store.show();
   }
 
-  hide() {
-    this._activeRequests.update(v => Math.max(0, v - 1));
+  hide(): void {
+    this.store.hide();
   }
 
-  reset() {
-    this._activeRequests.set(0);
+  reset(): void {
+    this.store.reset();
   }
 }
