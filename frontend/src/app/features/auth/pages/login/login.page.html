@@ -1,0 +1,38 @@
+<div class="login-container">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+    <h1>Login</h1>
+
+    <!-- Email -->
+    <div class="form-field">
+      <label>Email</label>
+      <input
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+      />
+      <small *ngIf="form.controls.email.touched && form.controls.email.invalid">
+        Please enter a valid email.
+      </small>
+    </div>
+
+    <!-- Password -->
+    <div class="form-field">
+      <label>Password</label>
+      <input
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+      />
+      <small *ngIf="form.controls.password.touched && form.controls.password.invalid">
+        Password must be at least 8 characters.
+      </small>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Signing in...' : 'Login' }}
+    </button>
+
+  </form>
+</div>

@@ -16,3 +16,20 @@ export interface JwtPayload {
   userType: UserType;
   exp: number;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+  deviceId: string;
+  sessionId: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  userType: UserType;
+  phone?: string;
+}
+

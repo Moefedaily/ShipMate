@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthState } from './auth.state';
-import { AuthUser } from './auth.models';
+import { AuthUser, RegisterRequest } from './auth.models';
 import { environment } from '../../../environments/environment';
+import { getDeviceId, getSessionId } from './session.util';
 import { catchError, EMPTY, map, Observable, of, switchMap, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -19,11 +20,32 @@ export class AuthService {
 
 login(email: string, password: string) {
   return this.http
-    .post<void>(`${this.api}/auth/login`, { email, password }, { withCredentials: true })
+    .post<{ accessToken: string }>(`${this.api}/auth/login`, {
+      email,
+      password,
+      deviceId: getDeviceId(),
+      sessionId: getSessionId()
+    })
     .pipe(
-      switchMap(() => this.fetchMe())
+      switchMap(res =>
+        this.http.get<AuthUser>(`${this.api}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${res.accessToken}`
+          }
+        }).pipe(
+          tap(user => this.authState.setSession(user, res.accessToken))
+        )
+      )
     );
 }
+
+// =====================
+// REGISTER
+// =====================
+register(request: RegisterRequest) {
+  return this.http.post<void>(`${this.api}/auth/register`, request);
+}
+
 
 
 // =====================

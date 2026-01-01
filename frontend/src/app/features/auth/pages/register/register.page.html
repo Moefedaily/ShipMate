@@ -1,0 +1,66 @@
+<div class="register-container">
+  @if (!success) {
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h1>Create account</h1>
+      <!-- Email -->
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" formControlName="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small>Enter a valid email.</small>
+        }
+      </div>
+      <!-- Password -->
+      <div class="form-field">
+        <label>Password</label>
+        <input type="password" formControlName="password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small>Minimum 8 characters.</small>
+        }
+      </div>
+      <!-- Confirm -->
+      <div class="form-field">
+        <label>Confirm password</label>
+        <input type="password" formControlName="confirmPassword" />
+        @if (form.errors?.['passwordMismatch']) {
+          <small>Passwords do not match.</small>
+        }
+      </div>
+      <!-- User type -->
+      <div class="form-field">
+        <label>Account type</label>
+        <select formControlName="userType">
+          <option value="SENDER">Sender</option>
+          <option value="DRIVER">Driver</option>
+        </select>
+      </div>
+      <!-- First name -->
+      <div class="form-field">
+        <label>First name</label>
+        <input type="text" formControlName="firstName" />
+        @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+          <small>First name is required.</small>
+        }
+      </div>
+      <!-- Last name -->
+      <div class="form-field">
+        <label>Last name</label>
+        <input type="text" formControlName="lastName" />
+        @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+          <small>Last name is required.</small>
+        }
+      </div>
+      <button type="submit" [disabled]="submitting">
+        {{ submitting ? 'Creating account...' : 'Register' }}
+      </button>
+    </form>
+  }
+  <!-- Success -->
+  @if (success) {
+    <div class="success">
+      <h2>Account created 🎉</h2>
+      <p>Please check your email to verify your account.</p>
+      <p>Redirecting to login…</p>
+    </div>
+  }
+</div>
