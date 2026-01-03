@@ -17,12 +17,12 @@ export class LoginPage {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  submitting = false;
+
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]]
   });
-
-  submitting = false;
 
   submit(): void {
     if (this.form.invalid || this.submitting) {
@@ -36,7 +36,14 @@ export class LoginPage {
 
     this.authService.login(email, password).subscribe({
       next: () => {
-        this.router.navigateByUrl('/');
+        this.authService.fetchMe().subscribe({
+          next: () => {
+            this.router.navigateByUrl('/');
+          },
+          error: () => {
+            this.submitting = false;
+          }
+        });
       },
       error: () => {
         this.submitting = false;

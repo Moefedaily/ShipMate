@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap, switchMap, catchError, of, Observable } from 'rxjs';
+import { tap, map, catchError, of, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AuthState } from './auth.state';
-import { AuthUser, RegisterRequest } from './auth.models';
+import { RegisterRequest } from './auth.models';
 import { getDeviceId, getSessionId } from './session.util';
 
 interface AuthTokensResponse {
@@ -24,35 +24,32 @@ export class AuthService {
   // =====================
   // LOGIN
   // =====================
-  login(email: string, password: string): Observable<AuthUser> {
-    return this.http.post<AuthTokensResponse>(`${this.api}/auth/login`, {
-      email,
-      password,
-      deviceId: getDeviceId(),
-      sessionId: getSessionId()
-    }).pipe(
-      tap(tokens => this.storeTokens(tokens)),
-      switchMap(() => this.fetchMe())
-    );
+  login(email: string, password: string): Observable<void> {
+    return this.http
+      .post<AuthTokensResponse>(`${this.api}/auth/login`, {
+        email,
+        password,
+        deviceId: getDeviceId(),
+        sessionId: getSessionId()
+      })
+      .pipe(
+        tap(tokens => this.storeTokens(tokens)),
+        map(() => void 0)
+      );
   }
 
   // =====================
   // REGISTER
   // =====================
-  // =====================
-// REGISTER
-// =====================
-register(request: RegisterRequest): Observable<void> {
-  return this.http.post<void>(`${this.api}/auth/register`, request);
-}
-
-
+  register(request: RegisterRequest): Observable<void> {
+    return this.http.post<void>(`${this.api}/auth/register`, request);
+  }
 
   // =====================
   // FETCH CURRENT USER
   // =====================
-  fetchMe(): Observable<AuthUser> {
-    return this.http.get<AuthUser>(`${this.api}/users/me`).pipe(
+  fetchMe(): Observable<any> {
+    return this.http.get<any>(`${this.api}/users/me`).pipe(
       tap(user => {
         const token = this.authState.accessToken();
         if (token) {
@@ -76,19 +73,20 @@ register(request: RegisterRequest): Observable<void> {
       })
       .pipe(
         tap(tokens => this.storeTokens(tokens)),
-        switchMap(tokens => of(tokens.accessToken))
+        map(tokens => tokens.accessToken),
+        catchError(() => of(null))
       );
   }
 
   // =====================
-  // RESTORE SESSION (APP BOOTSTRAP)
+  // RESTORE SESSION
   // =====================
-  restoreSession(): Observable<AuthUser | null> {
+  restoreSession(): Observable<void> {
     return this.refreshAccessToken().pipe(
-      switchMap(() => this.fetchMe()),
+      map(() => void 0),
       catchError(() => {
         this.clearSession();
-        return of(null);
+        return of(void 0);
       })
     );
   }
@@ -96,9 +94,9 @@ register(request: RegisterRequest): Observable<void> {
   // =====================
   // LOGOUT
   // =====================
-  logout(): Observable<null> {
+  logout(): Observable<void> {
     this.clearSession();
-    return of(null);
+    return of(void 0);
   }
 
   // =====================
