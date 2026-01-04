@@ -34,7 +34,7 @@ public class EmailService implements MailService {
     @Override
     public void sendVerificationEmail(String toEmail, String verificationToken) {
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/api/auth/verify-email?token=" + verificationToken);
+        context.setVariable("verificationLink", baseUrl + "/verify-email?token=" + verificationToken);
 
         String htmlContent = templateEngine.process("email/verification", context);
         sendHtmlEmail(toEmail, "Verify your SHIPMATE account", htmlContent);
@@ -44,7 +44,7 @@ public class EmailService implements MailService {
     @Override
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         Context context = new Context();
-        context.setVariable("resetLink", baseUrl + "/api/auth/reset-password?token=" + resetToken);
+        context.setVariable("resetLink", baseUrl + "/reset-password?token=" + resetToken);
 
         String htmlContent = templateEngine.process("email/password-reset", context);
         sendHtmlEmail(toEmail, "Reset your SHIPMATE password", htmlContent);

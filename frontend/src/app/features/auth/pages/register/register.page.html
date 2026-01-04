@@ -1,66 +1,174 @@
 <div class="register-container">
-  @if (!success) {
+  @if (!success()) {
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <h1>Create account</h1>
+
+      <!-- Global error message -->
+      @if (errorMessage()) {
+        <div class="error-banner" role="alert" aria-live="polite">
+          {{ errorMessage() }}
+        </div>
+      }
+
       <!-- Email -->
       <div class="form-field">
-        <label>Email</label>
-        <input type="email" formControlName="email" />
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <small>Enter a valid email.</small>
+        <label for="email">Email</label>
+        <input 
+          id="email"
+          type="email" 
+          formControlName="email"
+          [attr.aria-invalid]="isEmailInvalid()"
+          [attr.aria-describedby]="isEmailInvalid() ? 'email-error' : null"
+          autocomplete="email"
+        />
+        @if (isEmailInvalid()) {
+          <small id="email-error" class="error" role="alert">
+            Enter a valid email address.
+          </small>
         }
       </div>
+
+      <!-- First name -->
+      <div class="form-field">
+        <label for="firstName">First name</label>
+        <input 
+          id="firstName"
+          type="text" 
+          formControlName="firstName"
+          [attr.aria-invalid]="isFirstNameInvalid()"
+          [attr.aria-describedby]="isFirstNameInvalid() ? 'firstName-error' : null"
+          autocomplete="given-name"
+        />
+        @if (isFirstNameInvalid()) {
+          <small id="firstName-error" class="error" role="alert">
+            First name is required (min 2 characters).
+          </small>
+        }
+      </div>
+
+      <!-- Last name -->
+      <div class="form-field">
+        <label for="lastName">Last name</label>
+        <input 
+          id="lastName"
+          type="text" 
+          formControlName="lastName"
+          [attr.aria-invalid]="isLastNameInvalid()"
+          [attr.aria-describedby]="isLastNameInvalid() ? 'lastName-error' : null"
+          autocomplete="family-name"
+        />
+        @if (isLastNameInvalid()) {
+          <small id="lastName-error" class="error" role="alert">
+            Last name is required (min 2 characters).
+          </small>
+        }
+      </div>
+
       <!-- Password -->
       <div class="form-field">
-        <label>Password</label>
-        <input type="password" formControlName="password" />
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <small>Minimum 8 characters.</small>
+        <label for="password">Password</label>
+        <div class="password-input">
+          <input 
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            [attr.aria-invalid]="isPasswordInvalid()"
+            [attr.aria-describedby]="isPasswordInvalid() ? 'password-error password-requirements' : 'password-requirements'"
+            autocomplete="new-password"
+          />
+          <button 
+            type="button" 
+            class="toggle-visibility"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            {{ showPassword() ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <small id="password-requirements" class="hint">
+          Must be at least 8 characters with uppercase, lowercase, and number.
+        </small>
+        @if (isPasswordInvalid()) {
+          <small id="password-error" class="error" role="alert">
+            @if (passwordControl().errors?.['required']) {
+              Password is required.
+            } @else if (passwordControl().errors?.['minlength']) {
+              Password must be at least 8 characters.
+            } @else if (passwordControl().errors?.['weakPassword']) {
+              Password must include uppercase, lowercase, and number.
+            }
+          </small>
         }
       </div>
-      <!-- Confirm -->
+
+      <!-- Confirm Password -->
       <div class="form-field">
-        <label>Confirm password</label>
-        <input type="password" formControlName="confirmPassword" />
-        @if (form.errors?.['passwordMismatch']) {
-          <small>Passwords do not match.</small>
+        <label for="confirmPassword">Confirm password</label>
+        <div class="password-input">
+          <input 
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            [attr.aria-invalid]="hasPasswordMismatch()"
+            [attr.aria-describedby]="hasPasswordMismatch() ? 'confirm-error' : null"
+            autocomplete="new-password"
+          />
+          <button 
+            type="button" 
+            class="toggle-visibility"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+          >
+            {{ showConfirmPassword() ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        @if (hasPasswordMismatch()) {
+          <small id="confirm-error" class="error" role="alert">
+            Passwords do not match.
+          </small>
         }
       </div>
+
       <!-- User type -->
       <div class="form-field">
-        <label>Account type</label>
-        <select formControlName="userType">
+        <label for="userType">Account type</label>
+        <select 
+          id="userType"
+          formControlName="userType"
+          autocomplete="off"
+        >
           <option value="SENDER">Sender</option>
           <option value="DRIVER">Driver</option>
         </select>
       </div>
-      <!-- First name -->
-      <div class="form-field">
-        <label>First name</label>
-        <input type="text" formControlName="firstName" />
-        @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
-          <small>First name is required.</small>
-        }
-      </div>
-      <!-- Last name -->
-      <div class="form-field">
-        <label>Last name</label>
-        <input type="text" formControlName="lastName" />
-        @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
-          <small>Last name is required.</small>
-        }
-      </div>
-      <button type="submit" [disabled]="submitting">
-        {{ submitting ? 'Creating account...' : 'Register' }}
+
+      <button 
+        type="submit" 
+        [disabled]="submitting()"
+        [attr.aria-busy]="submitting()"
+      >
+        {{ submitting() ? 'Creating account...' : 'Register' }}
       </button>
+
+      <p class="login-link">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
     </form>
   }
-  <!-- Success -->
-  @if (success) {
-    <div class="success">
-      <h2>Account created 🎉</h2>
-      <p>Please check your email to verify your account.</p>
-      <p>Redirecting to login…</p>
+
+  <!-- Success state -->
+  @if (success()) {
+    <div class="success" role="status" aria-live="polite">
+      <div class="success-icon">✓</div>
+      <h2>Account created successfully!</h2>
+      <p>Please check your email to verify your account before signing in.</p>
+      <button 
+        type="button" 
+        class="btn-primary"
+        (click)="navigateToLogin()"
+      >
+        Continue to login
+      </button>
     </div>
   }
 </div>

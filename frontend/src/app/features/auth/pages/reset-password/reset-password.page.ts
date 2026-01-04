@@ -1,75 +1,125 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-
+import { Component, inject, signal, computed, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   standalone: true,
   selector: 'app-reset-password-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.page.html',
   styleUrl: './reset-password.page.scss'
 })
-export class ResetPasswordPage {
-
+export class ResetPasswordPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  submitting = false;
-  success = false;
-  token: string | null;
+  // Signals for reactive state
+  readonly submitting = signal(false);
+  readonly success = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+  readonly showPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
+  readonly token = signal<string | null>(null);
 
+  // Form definition
   readonly form = this.fb.nonNullable.group(
     {
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required]
+      password: this.fb.nonNullable.control('', [
+        Validators.required,
+        Validators.minLength(8),
+        this.passwordStrengthValidator
+      ]),
+      confirmPassword: this.fb.nonNullable.control('', Validators.required)
     },
     { validators: this.passwordMatchValidator }
   );
 
-  constructor() {
-    this.token = this.route.snapshot.queryParamMap.get('token');
+  // Computed getters for cleaner template access
+  readonly passwordControl = computed(() => this.form.controls.password);
+  readonly confirmPasswordControl = computed(() => this.form.controls.confirmPassword);
 
-    if (!this.token) {
-      // Invalid access → send back to login
+  readonly isPasswordInvalid = computed(() => 
+    this.passwordControl().touched && this.passwordControl().invalid
+  );
+  readonly hasPasswordMismatch = computed(() => 
+    this.confirmPasswordControl().touched && this.form.errors?.['passwordMismatch']
+  );
+
+  ngOnInit(): void {
+    const tokenParam = this.route.snapshot.queryParamMap.get('token');
+    
+    if (!tokenParam) {
       this.router.navigateByUrl('/login');
+      return;
     }
+
+    this.token.set(tokenParam);
   }
 
   submit(): void {
-    if (this.form.invalid || this.submitting || !this.token) {
+    this.errorMessage.set(null);
+
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.submitting = true;
+    if (this.submitting() || !this.token()) return;
+
+    this.submitting.set(true);
 
     const { password } = this.form.getRawValue();
 
-    this.authService.resetPassword(this.token, password).subscribe({
-      next: () => {
-        this.success = true;
-        this.submitting = false;
-
-        // Redirect after short delay
-        setTimeout(() => {
-          this.router.navigateByUrl('/login');
-        }, 2000);
-      },
-      error: () => {
-        // Token invalid / expired
-        this.submitting = false;
-        this.form.setErrors({ invalidToken: true });
-      }
-    });
+    this.authService.resetPassword(this.token()!, password)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.success.set(true);
+          this.submitting.set(false);
+          this.form.disable();
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.errorMessage.set(
+            err.error?.message || 
+            'This reset link is invalid or has expired. Please request a new one.'
+          );
+        }
+      });
   }
 
-  private passwordMatchValidator(group: any) {
-    const { password, confirmPassword } = group.value;
+  navigateToLogin(): void {
+    this.router.navigateByUrl('/login');
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(val => !val);
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword.update(val => !val);
+  }
+
+  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = group.get('password')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
     return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  private passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string;
+    if (!value) return null;
+
+    const hasNumber = /[0-9]/.test(value);
+    const hasUpper = /[A-Z]/.test(value);
+    const hasLower = /[a-z]/.test(value);
+
+    const valid = hasNumber && hasUpper && hasLower;
+    return valid ? null : { weakPassword: true };
   }
 }

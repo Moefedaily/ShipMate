@@ -187,7 +187,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(false) // true in prod (HTTPS)
                 .sameSite("Lax")
-                .path("/api/auth/refresh")
+                .path("/api/auth")
                 .maxAge(jwtUtil.getRefreshTokenTtl())
                 .build();
 
@@ -199,7 +199,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")
-                .path("/api/auth/refresh")
+                .path("/api/auth")
                 .maxAge(0)
                 .build();
 
