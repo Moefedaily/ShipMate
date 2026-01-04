@@ -73,7 +73,7 @@ export class AuthService {
   }
 
   // =====================
-  // RESTORE SESSION (BOOTSTRAP)
+  // RESTORE SESSION
   // =====================
   restoreSession(): Observable<AuthUser | null> {
     return this.refreshAccessToken().pipe(
@@ -104,4 +104,35 @@ export class AuthService {
       map(() => void 0)
     );
   }
+
+  // =====================
+  // PASSWORD RESET
+  // =====================
+  forgotPassword(email: string) {
+    return this.http.post(
+      `${this.api}/auth/forgot-password`,
+      { email }
+    );
+  }
+
+  // =====================
+  // PASSWORD RESET
+  // =====================
+  resetPassword(token: string, newPassword: string) {
+    return this.http.post(
+      `${this.api}/auth/reset-password`,
+      { token, newPassword }
+    );
+  }
+
+  // =====================
+  // EMAIL VERIFICATION
+  // =====================
+  verifyEmail(token: string) {
+    return this.http.get(
+      `${this.api}/auth/verify-email`,
+      { params: { token } }
+    );
+  }
+
 }
