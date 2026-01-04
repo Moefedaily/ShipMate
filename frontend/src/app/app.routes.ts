@@ -23,6 +23,18 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./features/auth/pages/forgot-password/forgot-password.page')
             .then(m => m.ForgotPasswordPage)
+   },
+   {
+    path: 'reset-password',
+    loadComponent: () =>
+        import('./features/auth/pages/reset-password/reset-password.page')
+        .then(m => m.ResetPasswordPage)
+   },
+   {
+    path: 'verify-email',
+    loadComponent: () =>
+        import('./features/auth/pages/verify-email/verify-email.page')
+        .then(m => m.VerifyEmailPage)
    }
 
 ];
