@@ -17,5 +17,12 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./features/auth/pages/register/register.page')
             .then(m => m.RegisterPage)
-    }
+    },
+    {
+        path: 'forgot-password',
+        loadComponent: () =>
+            import('./features/auth/pages/forgot-password/forgot-password.page')
+            .then(m => m.ForgotPasswordPage)
+   }
+
 ];
