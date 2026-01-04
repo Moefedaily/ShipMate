@@ -1,15 +1,8 @@
 package com.shipmate.controller.auth;
 
-import com.shipmate.dto.request.auth.ForgotPasswordRequest;
-import com.shipmate.dto.request.auth.LoginRequest;
-import com.shipmate.dto.request.auth.RegisterRequest;
-import com.shipmate.dto.request.auth.ResetPasswordRequest;
-import com.shipmate.dto.request.auth.ResetPasswordResponse;
-import com.shipmate.dto.request.auth.TokenRequest;
-import com.shipmate.dto.response.auth.AuthResponse;
-import com.shipmate.dto.response.auth.ForgotPasswordResponse;
-import com.shipmate.dto.response.auth.RegisterResponse;
-import com.shipmate.dto.response.auth.VerifyEmailResponse;
+import com.shipmate.dto.request.auth.*;
+import com.shipmate.dto.response.auth.*;
+import com.shipmate.security.JwtUtil;
 import com.shipmate.service.auth.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,10 +10,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     // ===================== REGISTER =====================
 
@@ -46,8 +43,9 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        RegisterResponse response = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(authService.register(request));
     }
 
     // ===================== LOGIN =====================
@@ -62,9 +60,19 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest request) {
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response) {
 
-        return ResponseEntity.ok(authService.login(request));
+        AuthResponse auth = authService.login(request);
+
+        setRefreshCookie(response, auth.getRefreshToken());
+
+        // never expose refresh token to frontend
+        return ResponseEntity.ok(
+                AuthResponse.builder()
+                        .accessToken(auth.getAccessToken())
+                        .build()
+        );
     }
 
     // ===================== REFRESH =====================
@@ -79,9 +87,23 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(
-            @Valid @RequestBody TokenRequest request) {
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response) {
 
-        return ResponseEntity.ok(authService.refresh(request.getRefreshToken()));
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        AuthResponse auth = authService.refresh(refreshToken);
+
+        // rotate cookie
+        setRefreshCookie(response, auth.getRefreshToken());
+
+        return ResponseEntity.ok(
+                AuthResponse.builder()
+                        .accessToken(auth.getAccessToken())
+                        .build()
+        );
     }
 
     // ===================== LOGOUT =====================
@@ -95,9 +117,15 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            @Valid @RequestBody TokenRequest request) {
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response) {
 
-        authService.logout(request.getRefreshToken());
+        if (refreshToken != null) {
+            authService.logout(refreshToken);
+        }
+
+        clearRefreshCookie(response);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -115,8 +143,7 @@ public class AuthController {
     public ResponseEntity<VerifyEmailResponse> verifyEmail(
             @RequestParam("token") String token) {
 
-        VerifyEmailResponse response = authService.verifyEmail(token);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.verifyEmail(token));
     }
 
     // ===================== FORGOT PASSWORD =====================
@@ -133,8 +160,7 @@ public class AuthController {
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
 
-        ForgotPasswordResponse response = authService.forgotPassword(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.forgotPassword(request));
     }
 
     // ===================== RESET PASSWORD =====================
@@ -151,8 +177,32 @@ public class AuthController {
     public ResponseEntity<ResetPasswordResponse> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
 
-        ResetPasswordResponse response = authService.resetPassword(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 
+    // ===================== COOKIE HELPERS =====================
+
+    private void setRefreshCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
+                .httpOnly(true)
+                .secure(false) // true in prod (HTTPS)
+                .sameSite("Lax")
+                .path("/api/auth/refresh")
+                .maxAge(jwtUtil.getRefreshTokenTtl())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private void clearRefreshCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/api/auth/refresh")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
 }
