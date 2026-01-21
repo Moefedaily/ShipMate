@@ -1,5 +1,111 @@
+@use '../../../../../styles/variables/colors' as *;
+@use '../../../../../styles/variables/typography' as *;
+
 .auth-container {
   max-width: 400px;
   margin: 4rem auto;
   text-align: center;
+}
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $bg-app;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: $bg-card;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  border: 1px solid $border-default;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.auth-subtitle {
+  font-size: $text-size-label;
+  color: $text-muted;
+  margin-top: 0.5rem;
+  line-height: $line-height-loose;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.state-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.state-icon--success {
+  background-color: $color-success-subtle;
+  color: $color-success;
+}
+
+.state-icon--error {
+  background-color: $color-danger-subtle;
+  color: $color-danger;
+}
+
+.state-icon--loading {
+  background-color: $bg-surface;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.12);
+    border-top-color: $color-primary;
+    animation: spin 0.8s linear infinite;
+    display: block;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.button-row {
+  width: 100%;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+
+  .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+  }
+}
+
+.hint {
+  margin-top: 1rem;
+  font-size: $text-size-caption;
+  color: $text-muted;
 }

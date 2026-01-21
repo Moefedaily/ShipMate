@@ -18,12 +18,10 @@ export class LoginPage {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  // Signals for reactive state
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly showPassword = signal(false);
 
-  // Form definition
   readonly form = this.fb.nonNullable.group({
     email: this.fb.nonNullable.control('', [
       Validators.required,
@@ -35,7 +33,6 @@ export class LoginPage {
     ])
   });
 
-  // Computed getters for cleaner template access
   readonly emailControl = computed(() => this.form.controls.email);
   readonly passwordControl = computed(() => this.form.controls.password);
 
