@@ -1,48 +1,50 @@
-<div class="auth-container">
-  <!-- LOADING -->
-  @if (isVerifying()) {
-    <div class="loading-state" role="status" aria-live="polite" aria-busy="true">
-      <div class="spinner" aria-hidden="true"></div>
-      <h2>Verifying your email…</h2>
-      <p>Please wait while we confirm your account.</p>
-    </div>
-  }
+<div class="auth-page">
+  <div class="auth-card">
 
-  <!-- SUCCESS -->
-  @if (isSuccess()) {
-    <div class="success-state" role="status" aria-live="polite">
-      <div class="success-icon">✓</div>
-      <h2>Email verified successfully!</h2>
-      <p>Your account is now active. You can sign in to get started.</p>
-      <button 
-        type="button" 
-        class="btn-primary"
-        (click)="goToLogin()"
-      >
-        Go to login
-      </button>
-    </div>
-  }
+    <!-- LOADING -->
+    @if (isVerifying()) {
+      <div class="state state--loading" role="status" aria-live="polite" aria-busy="true">
+        <div class="state-icon state-icon--loading" aria-hidden="true"></div>
+        <p class="auth-subtitle">Please wait while we confirm your account.</p>
+      </div>
+    }
 
-  <!-- ERROR -->
-  @if (isError()) {
-    <div class="error-state" role="alert" aria-live="polite">
-      <div class="error-icon">✕</div>
-      <h2>Verification failed</h2>
-      <p>{{ errorMessage() || 'This verification link is invalid or has expired.' }}</p>
-      <p class="hint">Please try registering again or contact support if the problem persists.</p>
-      <div class="button-group">
-        <button 
-          type="button" 
-          class="btn-primary"
-          (click)="goToLogin()"
-        >
+    <!-- SUCCESS -->
+    @if (isSuccess()) {
+      <div class="state state--success" role="status" aria-live="polite">
+        <div class="state-icon state-icon--success" aria-hidden="true">✓</div>
+        <h1>Email verified</h1>
+        <p class="auth-subtitle">Your account is now active. You can sign in to get started.</p>
+
+        <button type="button" class="btn btn--primary auth-submit" (click)="goToLogin()">
           Go to login
         </button>
-        <a routerLink="/register" class="btn-secondary">
-          Register again
-        </a>
       </div>
-    </div>
-  }
+    }
+
+    <!-- ERROR -->
+    @if (isError()) {
+      <div class="state state--error" role="alert" aria-live="polite">
+        <div class="state-icon state-icon--error" aria-hidden="true">✕</div>
+        <h1>Verification failed</h1>
+        <p class="auth-subtitle">
+          {{ errorMessage() || 'This verification link is invalid or has expired.' }}
+        </p>
+
+        <div class="button-row">
+          <button type="button" class="btn btn--primary" (click)="goToLogin()">
+            Go to login
+          </button>
+          <a routerLink="/register" class="btn btn--secondary">
+            Register again
+          </a>
+        </div>
+
+        <p class="hint">
+          If the problem persists, contact support.
+        </p>
+      </div>
+    }
+
+  </div>
 </div>

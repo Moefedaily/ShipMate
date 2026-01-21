@@ -1,79 +1,83 @@
-<div class="login-container">
-  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-    <h1>Login</h1>
+<div class="auth-page">
+  <div class="auth-card">
 
-    <!-- Global error message -->
+    <p class="auth-subtitle">
+      Sign in to continue to ShipMate
+    </p>
+
+    <!-- Global error -->
     @if (errorMessage()) {
-      <div class="error-banner" role="alert" aria-live="polite">
+      <div class="error-banner" role="alert">
         {{ errorMessage() }}
       </div>
     }
 
-    <!-- Email -->
-    <div class="form-field">
-      <label for="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        formControlName="email"
-        [attr.aria-invalid]="isEmailInvalid()"
-        [attr.aria-describedby]="isEmailInvalid() ? 'email-error' : null"
-        autocomplete="email"
-      />
-      @if (isEmailInvalid()) {
-        <small id="email-error" class="error" role="alert">
-          @if (emailControl().errors?.['required']) {
-            Email is required.
-          } @else if (emailControl().errors?.['email']) {
-            Please enter a valid email address.
-          }
-        </small>
-      }
-    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
 
-    <!-- Password -->
-    <div class="form-field">
-      <label for="password">Password</label>
-      <div class="password-input">
+      <!-- Email -->
+      <div class="form-field">
+        <label for="email">Email</label>
         <input
-          id="password"
-          [type]="showPassword() ? 'text' : 'password'"
-          formControlName="password"
-          [attr.aria-invalid]="isPasswordInvalid()"
-          [attr.aria-describedby]="isPasswordInvalid() ? 'password-error' : null"
-          autocomplete="current-password"
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
         />
-        <button 
-          type="button" 
-          class="toggle-visibility"
-          (click)="togglePasswordVisibility()"
-          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
-        >
-          {{ showPassword() ? '👁️' : '👁️‍🗨️' }}
-        </button>
+        @if (isEmailInvalid()) {
+          <small class="error">
+            @if (emailControl().errors?.['required']) {
+              Email is required.
+            } @else {
+              Please enter a valid email address.
+            }
+          </small>
+        }
       </div>
-      @if (isPasswordInvalid()) {
-        <small id="password-error" class="error" role="alert">
-          @if (passwordControl().errors?.['required']) {
-            Password is required.
-          } @else if (passwordControl().errors?.['minlength']) {
+
+      <!-- Password -->
+      <div class="form-field">
+        <label for="password">Password</label>
+        <div class="password-input">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            aria-label="Toggle password visibility"
+          >
+            {{ showPassword() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        @if (isPasswordInvalid()) {
+          <small class="error">
             Password must be at least 8 characters.
-          }
-        </small>
-      }
+          </small>
+        }
+      </div>
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        class="btn btn--primary auth-submit"
+        [disabled]="submitting()"
+      >
+        {{ submitting() ? 'Signing in…' : 'Login' }}
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      <a routerLink="/forgot-password">Forgot password?</a>
+      <span>
+        Don’t have an account?
+        <a routerLink="/register">Create one</a>
+      </span>
     </div>
 
-    <!-- Submit -->
-    <button 
-      type="submit" 
-      [disabled]="submitting()"
-      [attr.aria-busy]="submitting()"
-    >
-      {{ submitting() ? 'Signing in...' : 'Login' }}
-    </button>
-
-    <p class="register-link">
-      Don't have an account? <a routerLink="/register">Create one</a>
-    </p>
-  </form>
+  </div>
 </div>

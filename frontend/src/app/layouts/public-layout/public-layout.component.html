@@ -1,0 +1,18 @@
+<app-header
+  [isAuthenticated]="isAuthenticated()"
+  [userName]="userName()"
+  [userType]="userType()"
+  [activeRole]="activeRole()"
+
+  (roleChange)="onRoleChange($event)"
+  (logoutClick)="onLogout()"
+  (loginClick)="onLogin()"
+  (signupClick)="onSignup()"
+></app-header>
+
+
+<main class="public-content">
+  <router-outlet></router-outlet>
+</main>
+
+<app-footer></app-footer>
