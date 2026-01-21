@@ -1,0 +1,449 @@
+<!-- HERO SECTION -->
+<section class="landing-hero">
+  <div class="hero-content">
+    <span class="hero-badge">NEW: EXPRESS ROUTES</span>
+
+    <h1>
+      Ship anything,<br />
+      anywhere, with<br />
+      <span class="highlight">local drivers.</span>
+    </h1>
+
+    <p>
+      Connect with trusted travelers heading your way.
+      Save money on shipping or earn extra cash on your daily commute.
+      Fast, secure, and eco-friendly.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn btn--primary">Get started</button>
+      <button class="btn btn--secondary">Become a driver</button>
+    </div>
+
+    <ul class="hero-trust">
+      <li>
+        <mat-icon>verified</mat-icon>
+        Verified Drivers
+      </li>
+      <li>
+        <mat-icon>shield</mat-icon>
+        Fully Insured
+      </li>
+      <li>
+        <mat-icon>eco</mat-icon>
+        Eco-Friendly
+      </li>
+    </ul>
+  </div>
+
+  <div class="hero-visual"></div>
+</section>
+
+<!-- LATEST DELIVERIES -->
+<section class="latest-deliveries">
+  <h2>Latest Deliveries</h2>
+  <p>See what’s being delivered right now in the community</p>
+
+  <div class="delivery-cards">
+
+    <!-- CARD 1 -->
+    <div class="card card--interactive">
+      <div class="delivery-header">
+        <div class="delivery-route">
+          <small>Route</small>
+          <div class="route-line">
+            <span>San Francisco</span>
+            <mat-icon class="route-arrow">arrow_forward</mat-icon>
+            <span>Oakland</span>
+          </div>
+        </div>
+
+        <span class="badge badge--success">Delivered</span>
+      </div>
+
+      <div class="delivery-item">
+        <img src="graphic-card.jpg" alt="Package" />
+        <div>
+          <span class="delivery-tag">Same-day delivery</span>
+          <p>Designer travel bag</p>
+        </div>
+      </div>
+
+          <div class="delivery-footer">
+  <div class="delivery-user">
+    <div class="delivery-users">
+      <img src="avatar-girl.png" alt="" />
+      <img src="avatar-man.png" alt="" />
+    </div>
+
+    <div class="delivery-user-info">
+      <small>Sender & Driver</small>
+      <strong>Sarah & Mike</strong>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="card card--interactive">
+      <div class="delivery-header">
+        <div class="delivery-route">
+          <small>Route</small>
+          <div class="route-line">
+            <span>Brooklyn</span>
+            <mat-icon class="route-arrow">arrow_forward</mat-icon>
+            <span>Queens</span>
+          </div>
+        </div>
+
+        <span class="badge badge--success">Delivered</span>
+      </div>
+
+      <div class="delivery-item">
+        <img src="graphic-card.jpg" alt="Package" />
+        <div>
+          <span class="delivery-tag">Priority express</span>
+          <p>Electronic components</p>
+        </div>
+      </div>
+
+         <div class="delivery-footer">
+  <div class="delivery-user">
+    <div class="delivery-users">
+      <img src="avatar-girl.png" alt="" />
+      <img src="avatar-man.png" alt="" />
+    </div>
+
+    <div class="delivery-user-info">
+      <small>Sender & Driver</small>
+      <strong>Sarah & Mike</strong>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="card card--interactive">
+      <div class="delivery-header">
+        <div class="delivery-route">
+          <small>Route</small>
+          <div class="route-line">
+            <span>Austin</span>
+            <mat-icon class="route-arrow">arrow_forward</mat-icon>
+            <span>Round Rock</span>
+          </div>
+        </div>
+
+        <span class="badge badge--success">Delivered</span>
+      </div>
+
+      <div class="delivery-item">
+        <img src="graphic-card.jpg" alt="Package" />
+        <div>
+          <span class="delivery-tag">Fragile care</span>
+          <p>Vintage acoustic guitar</p>
+        </div>
+      </div>
+
+      <div class="delivery-footer">
+  <div class="delivery-user">
+    <div class="delivery-users">
+      <img src="avatar-girl.png" alt="" />
+      <img src="avatar-man.png" alt="" />
+    </div>
+
+    <div class="delivery-user-info">
+      <small>Sender & Driver</small>
+      <strong>Sarah & Mike</strong>
+    </div>
+  </div>
+</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONNECTING CITIES (PARALLAX) -->
+<section class="parallax-section">
+  <div class="parallax-overlay"></div>
+
+  <div class="parallax-content">
+    <div class="parallax-icon">
+      <mat-icon>hub</mat-icon>
+    </div>
+
+    <h2>Connecting Cities Everywhere</h2>
+
+    <p>
+      Our network spans thousands of routes, bringing communities
+      closer with every delivery.
+    </p>
+  </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="how-container">
+    <h2>How ShipMate Works</h2>
+
+    <p class="how-subtitle">
+      Whether you are sending a package or driving locally, we make it simple.
+      Choose your path below to get started.
+    </p>
+
+    <!-- TABS -->
+    <div class="how-tabs" role="tablist" aria-label="How it works tabs">
+      <button
+        type="button"
+        class="how-tab"
+        [class.how-tab--active]="isSenderTab()"
+        (click)="setHowTab('SENDER')"
+        role="tab"
+        [attr.aria-selected]="isSenderTab()"
+      >
+        <span class="how-tab-title">For Senders</span>
+        <span class="how-tab-sub">Ship items quickly with verified drivers.</span>
+      </button>
+
+      <button
+        type="button"
+        class="how-tab"
+        [class.how-tab--active]="isDriverTab()"
+        (click)="setHowTab('DRIVER')"
+        role="tab"
+        [attr.aria-selected]="isDriverTab()"
+      >
+        <span class="how-tab-title">For Drivers</span>
+        <span class="how-tab-sub">Turn your extra space into extra cash.</span>
+      </button>
+    </div>
+
+  <!-- TIMELINE -->
+<div
+  class="how-timeline-wrapper"
+  [class.is-sender]="isSenderTab()"
+  [class.is-driver]="isDriverTab()"
+>
+  @if (isSenderTab()) {
+    <ul class="how-timeline" role="tabpanel">
+      <li>
+        <span class="step-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>1. Post Item</strong>
+          <p>Describe your item, set pick-up and drop-off locations.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>search</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>2. Match Driver</strong>
+          <p>Our algorithm finds the perfect driver heading your way.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>location_on</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>3. Track Delivery</strong>
+          <p>Follow your package in real time on our map interface.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>check_circle</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>4. Delivered</strong>
+          <p>Receive confirmation and photo proof upon arrival.</p>
+        </div>
+      </li>
+    </ul>
+  } @else {
+    <ul class="how-timeline" role="tabpanel">
+      <li>
+        <span class="step-icon">
+          <mat-icon>task_alt</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>1. Accept Gig</strong>
+          <p>Browse available shipments and choose ones that fit your route.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>inventory</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>2. Pick Up</strong>
+          <p>Meet the sender and securely load the item into your vehicle.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>local_shipping</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>3. Deliver</strong>
+          <p>Drop off the package at the destination and confirm delivery.</p>
+        </div>
+      </li>
+
+      <li>
+        <span class="step-icon">
+          <mat-icon>payments</mat-icon>
+        </span>
+        <div class="step-content">
+          <strong>4. Earn Money</strong>
+          <p>Get paid directly to your account immediately after completion.</p>
+        </div>
+      </li>
+    </ul>
+  }
+</div>
+</div>
+</section>
+
+<!-- OUR SERVICES -->
+<section class="services">
+  <div class="services-container">
+    <h2>Our Services</h2>
+    <p class="services-subtitle">
+      Reliable, fast, and secure shipping solutions powered by the community.
+    </p>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <h3>Local Deliveries</h3>
+        <p>
+          Fast same-day delivery within your city limits for documents,
+          parcels, and groceries.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">
+          <mat-icon>group</mat-icon>
+        </div>
+        <h3>Flexible Drivers</h3>
+        <p>
+          Access a vast network of vetted community drivers ready to pick
+          up whenever you need.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+        <h3>Secure Payments</h3>
+        <p>
+          Your funds are held safely in escrow and only released once
+          the delivery is confirmed.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">
+          <mat-icon>map</mat-icon>
+        </div>
+        <h3>Real-time Tracking</h3>
+        <p>
+          Watch your shipment move across the map with GPS updates every
+          step of the way.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- FOOTER -->
+<footer class="app-footer">
+  <div class="footer-container">
+
+    <!-- Top -->
+    <div class="footer-top">
+
+      <!-- Brand -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <mat-icon>local_shipping</mat-icon>
+          <span>ShipMate</span>
+        </div>
+
+        <p class="footer-desc">
+          Connecting senders with local drivers for faster, friendlier,
+          and more affordable shipping.
+        </p>
+
+        <div class="footer-subscribe">
+          <input type="email" placeholder="Enter your email" />
+          <button class="btn btn--primary">Subscribe</button>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="footer-links">
+
+        <div class="footer-column">
+          <h4>ShipMate</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Press</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Trust & Safety</a></li>
+            <li><a href="#">Shipping Guide</a></li>
+            <li><a href="#">Driver Rules</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">Dispute Resolution</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="footer-divider"></div>
+
+    <!-- Bottom -->
+    <div class="footer-bottom">
+      <span>© 2026 ShipMate Inc. All rights reserved.</span>
+
+    <div class="footer-socials">
+    <a href="#"><mat-icon svgIcon="facebook"></mat-icon></a>
+    <a href="#"><mat-icon svgIcon="twitter"></mat-icon></a>
+    <a href="#"><mat-icon svgIcon="instagram"></mat-icon></a>
+    </div>
+
+    </div>
+
+  </div>
+</footer>
