@@ -1,0 +1,59 @@
+@use '../variables/colors' as *;
+@use '../variables/typography' as *;
+
+/* ---------- Base Badge ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+/* ---------- Status Variants ---------- */
+
+/* Success — delivered, approved */
+.badge--success {
+  background-color: $color-success-subtle;
+  color: $color-success;
+}
+
+/* Warning — pending, in review */
+.badge--warning {
+  background-color: $color-warning-subtle;
+  color: $color-warning;
+}
+
+/* Info — in transit, processing */
+.badge--info {
+  background-color: $color-info-subtle;
+  color: $color-info;
+}
+
+/* Danger — rejected, escalated */
+.badge--danger {
+  background-color: $color-danger-subtle;
+  color: $color-danger;
+}
+
+/* ---------- Neutral / Meta Badge ---------- */
+
+.badge--neutral {
+  background-color: $bg-surface;
+  color: $text-secondary;
+}
+
+/* ---------- Compact Badge (Admin UI) ---------- */
+
+.badge--compact {
+  padding: 0.125rem 0.5rem;
+  font-size: $text-size-caption;
+}

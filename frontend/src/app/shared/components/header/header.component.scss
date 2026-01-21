@@ -1,0 +1,99 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  background-color: $bg-card;
+  border-bottom: 1px solid $border-default;
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  height: 76px;
+  padding: 0 1.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left */
+.logo {
+  font-size: 1.1rem;
+  font-weight: $font-weight-bold;
+  letter-spacing: -0.02em;
+  color: $text-primary;
+}
+
+/* Center */
+.header-center {
+  display: flex;
+  gap: 2rem;
+
+  a {
+    position: relative;
+
+    font-size: $text-size-label;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    text-decoration: none;
+
+    padding: 0.25rem 0;
+
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: $text-primary;
+    }
+
+    &.is-active {
+      color: $text-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    /* underline animation */
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+
+      width: 100%;
+      height: 2px;
+      background-color: $color-primary;
+
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover::after,
+    &.is-active::after {
+      transform: scaleX(1);
+    }
+  }
+}
+/* Right */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: $text-size-label;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-center {
+    display: none;
+  }
+}
+
+
