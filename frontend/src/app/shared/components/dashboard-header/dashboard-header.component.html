@@ -1,0 +1,97 @@
+<header class="app-header dashboard-header">
+  <div class="header-inner">
+
+    <!-- LEFT -->
+    <div class="header-left">
+      <div class="logo">
+        <mat-icon>local_shipping</mat-icon>
+        <span>ShipMate</span>
+      </div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="header-center">
+      @if (userType === 'BOTH') {
+        <div class="role-toggle">
+          <button
+            class="role-btn"
+            [class.active]="activeRole === 'SENDER'"
+            (click)="switchRole('SENDER')">
+            Sender
+          </button>
+
+          <button
+            class="role-btn"
+            [class.active]="activeRole === 'DRIVER'"
+            (click)="switchRole('DRIVER')">
+            Driver
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT -->
+  <div class="header-right">
+
+    <div class="header-actions">
+      <button class="icon-btn">
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <button class="icon-btn">
+        <mat-icon>chat_bubble</mat-icon>
+      </button>
+    </div>
+
+    <div class="header-divider"></div>
+
+    <button class="profile-btn" [matMenuTriggerFor]="menu">
+      <div class="profile-text">
+        <span class="profile-name">{{ userName }}</span>
+        <span class="profile-role">
+          @if (userType === 'SENDER') { Sender account }
+          @else if (userType === 'DRIVER') { Driver account }
+          @else { Sender & Driver account }
+        </span>
+      </div>
+
+      <img class="avatar" src="assets/avatar-man.png" alt="avatar" />
+      <mat-icon>expand_more</mat-icon>
+    </button>
+
+    <mat-menu #menu="matMenu" class="profile-menu">
+      <div class="menu-user">
+        <img src="assets/avatar-man.png" alt="avatar" />
+        <div>
+          <strong>{{ userName }}</strong>
+          <small>
+            @if (userType === 'SENDER') { Sender account }
+            @else if (userType === 'DRIVER') { Driver account }
+            @else { Sender & Driver account }
+          </small>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="menuAction.emit('profile')">
+        <mat-icon>person</mat-icon>
+        Profile
+      </button>
+
+      <button mat-menu-item (click)="menuAction.emit('settings')">
+        <mat-icon>settings</mat-icon>
+        Settings
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item class="logout" (click)="logout.emit()">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </mat-menu>
+    </div>
+
+  </div>
+</header>

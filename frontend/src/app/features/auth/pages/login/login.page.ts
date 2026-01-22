@@ -72,12 +72,16 @@ export class LoginPage {
         })
       )
       .subscribe({
-        next: (user) => {
-          if (user) {
-            this.router.navigateByUrl('/');
-          }
+      next: (user) => {
+        if (!user) return;
+
+        if (user.userType === 'DRIVER') {
+          this.router.navigateByUrl('/dashboard/driver');
+        } else {
+          this.router.navigateByUrl('/dashboard/sender');
         }
-      });
+      }
+    });
   }
 
   togglePasswordVisibility(): void {

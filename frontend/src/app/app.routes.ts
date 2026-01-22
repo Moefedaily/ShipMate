@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { LandingPage } from './features/landing/landing.page';
+import { authGuard } from './core/guards/auth.guard';
+import { senderGuard } from './core/guards/sender.guard';
+import { driverGuard } from './core/guards/driver.guard';
 
 export const routes: Routes = [
+
+  /* ================= PUBLIC ================= */
   {
     path: '',
     component: PublicLayoutComponent,
@@ -42,5 +48,35 @@ export const routes: Routes = [
             .then(m => m.VerifyEmailPage)
       }
     ]
+  },
+
+  /* ================= DASHBOARD ================= */
+  {
+    path: 'dashboard',
+    component: DashboardLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'sender',
+        canActivate: [senderGuard],
+        loadComponent: () =>
+          import('./features/dashboard/sender/sender-home.page')
+            .then(m => m.SenderHomePage)
+      },
+      {
+        path: 'driver',
+        canActivate: [driverGuard],
+        loadComponent: () =>
+          import('./features/dashboard/driver/driver-home.page')
+            .then(m => m.DriverHomePage)
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'sender' // safe default
+      }
+    ]
   }
+
+
 ];
