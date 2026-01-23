@@ -46,7 +46,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/pages/verify-email/verify-email.page')
             .then(m => m.VerifyEmailPage)
+      },
+      {
+        path: 'check-email',
+        loadComponent: () =>
+          import('./features/auth/pages/check-email/check-email.page')
+            .then(m => m.CheckEmailPage)
       }
+
     ]
   },
 

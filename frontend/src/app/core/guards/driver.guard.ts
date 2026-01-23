@@ -6,9 +6,13 @@ export const driverGuard: CanActivateFn = () => {
   const authState = inject(AuthState);
   const router = inject(Router);
 
-  if (authState.isAuthenticated() && authState.isDriver()) {
-    return true;
+  if (!authState.isAuthenticated()) {
+    return router.parseUrl('/login');
   }
 
-  return router.parseUrl('/forbidden');
+  if (!authState.isDriver()) {
+    return router.parseUrl('/forbidden');
+  }
+
+  return true;
 };

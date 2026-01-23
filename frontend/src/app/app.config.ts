@@ -26,7 +26,7 @@ function initializeAuth() {
   return () => {
     const authService = inject(AuthService);
     return firstValueFrom(
-      authService.refreshAccessToken()
+      authService.restoreSession()
     ).catch(() => null);
   };
 }

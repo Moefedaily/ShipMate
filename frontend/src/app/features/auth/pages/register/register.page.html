@@ -1,157 +1,111 @@
 <div class="auth-page">
   <div class="auth-card">
 
-    @if (!success()) {
-      <p class="auth-subtitle">
-        Join ShipMate and start shipping smarter
-      </p>
+    <p class="auth-subtitle">
+      Join ShipMate and start shipping smarter
+    </p>
 
-      <!-- Global error -->
-      @if (errorMessage()) {
-        <div class="error-banner" role="alert">
-          {{ errorMessage() }}
-        </div>
-      }
+    @if (errorMessage()) {
+      <div class="error-banner" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
 
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
 
-        <!-- Email -->
+      <!-- Email -->
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" />
+        @if (isEmailInvalid()) {
+          <small class="error">Enter a valid email address.</small>
+        }
+      </div>
+
+      <!-- Names -->
+      <div class="form-row">
         <div class="form-field">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-          />
-          @if (isEmailInvalid()) {
-            <small class="error">Enter a valid email address.</small>
+          <label for="firstName">First name</label>
+          <input id="firstName" type="text" formControlName="firstName" />
+          @if (isFirstNameInvalid()) {
+            <small class="error">Min. 2 characters.</small>
           }
         </div>
 
-        <!-- First / Last name -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="firstName">First name</label>
-            <input
-              id="firstName"
-              type="text"
-              formControlName="firstName"
-              autocomplete="given-name"
-            />
-            @if (isFirstNameInvalid()) {
-              <small class="error">Min. 2 characters.</small>
-            }
-          </div>
+        <div class="form-field">
+          <label for="lastName">Last name</label>
+          <input id="lastName" type="text" formControlName="lastName" />
+          @if (isLastNameInvalid()) {
+            <small class="error">Min. 2 characters.</small>
+          }
+        </div>
+      </div>
 
-          <div class="form-field">
-            <label for="lastName">Last name</label>
-            <input
-              id="lastName"
-              type="text"
-              formControlName="lastName"
-              autocomplete="family-name"
-            />
-            @if (isLastNameInvalid()) {
-              <small class="error">Min. 2 characters.</small>
-            }
-          </div>
+      <!-- Password -->
+      <div class="form-field">
+        <label for="password">Password</label>
+        <div class="password-input">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+          />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            {{ showPassword() ? 'Hide' : 'Show' }}
+          </button>
         </div>
 
-        <!-- Password -->
-        <div class="form-field">
-          <label for="password">Password</label>
-          <div class="password-input">
-            <input
-              id="password"
-              [type]="showPassword() ? 'text' : 'password'"
-              formControlName="password"
-              autocomplete="new-password"
-            />
-            <button
-              type="button"
-              class="password-toggle"
-              (click)="togglePasswordVisibility()"
-            >
-              {{ showPassword() ? 'Hide' : 'Show' }}
-            </button>
-          </div>
-
-          <small class="hint">
+        @if (passwordControl().errors?.['weakPassword'] && passwordControl().touched) {
+          <small class="error">
             At least 8 characters with uppercase, lowercase, and number.
           </small>
+        }
 
-          @if (isPasswordInvalid()) {
-            <small class="error">Password is too weak.</small>
-          }
-        </div>
-
-        <!-- Confirm password -->
-        <div class="form-field">
-          <label for="confirmPassword">Confirm password</label>
-          <div class="password-input">
-            <input
-              id="confirmPassword"
-              [type]="showConfirmPassword() ? 'text' : 'password'"
-              formControlName="confirmPassword"
-              autocomplete="new-password"
-            />
-            <button
-              type="button"
-              class="password-toggle"
-              (click)="toggleConfirmPasswordVisibility()"
-            >
-              {{ showConfirmPassword() ? 'Hide' : 'Show' }}
-            </button>
-          </div>
-
-          @if (hasPasswordMismatch()) {
-            <small class="error">Passwords do not match.</small>
-          }
-        </div>
-
-        <!-- Account type -->
-        <div class="form-field">
-          <label for="userType">Account type</label>
-          <select id="userType" formControlName="userType">
-            <option value="SENDER">Sender</option>
-            <option value="DRIVER">Driver</option>
-            <option value="BOTH">Both</option>
-          </select>
-        </div>
-
-        <!-- Submit -->
-        <button
-          type="submit"
-          class="btn btn--primary auth-submit"
-          [disabled]="submitting()"
-        >
-          {{ submitting() ? 'Creating account…' : 'Create account' }}
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        Already have an account?
-        <a routerLink="/login">Sign in</a>
       </div>
-    }
 
-    <!-- SUCCESS STATE -->
-    @if (success()) {
-      <div class="auth-success">
-        <div class="success-icon">✓</div>
-        <h2>Account created</h2>
-        <p>
-          Please check your email to verify your account before signing in.
-        </p>
-        <button
-          class="btn btn--primary"
-          (click)="navigateToLogin()"
-        >
-          Continue to login
-        </button>
+      <!-- Confirm -->
+      <div class="form-field">
+        <label for="confirmPassword">Confirm password</label>
+        <div class="password-input">
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+          />
+          <button type="button" class="password-toggle" (click)="toggleConfirmPasswordVisibility()">
+            {{ showConfirmPassword() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+
+        @if (hasPasswordMismatch()) {
+          <small class="error">Passwords do not match.</small>
+        }
       </div>
-    }
+
+      <!-- Account type -->
+      <div class="form-field">
+        <label for="userType">Account type</label>
+        <select id="userType" formControlName="userType">
+          <option value="SENDER">Sender</option>
+          <option value="DRIVER">Driver</option>
+          <option value="BOTH">Both</option>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn--primary auth-submit"
+        [disabled]="submitting() || form.invalid"
+      >
+        {{ submitting() ? 'Creating account…' : 'Create account' }}
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </div>
 
   </div>
 </div>
