@@ -1,0 +1,10 @@
+export enum DriverDashboardState {
+  INIT = 'INIT',
+
+  NOT_APPLIED = 'NOT_APPLIED',
+  APPLYING = 'APPLYING',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED'
+}
