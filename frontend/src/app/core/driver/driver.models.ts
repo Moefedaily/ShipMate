@@ -1,4 +1,12 @@
 
+/**
+ * DriverStatus represents the BACKEND / DOMAIN state.
+ * 
+ * - Comes directly from the API and database
+ * - Used for business rules, permissions, and lifecycle enforcement
+ * - MUST NOT include UI-only states
+ * - MUST NOT be mutated by the frontend
+ */
 export enum DriverStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',

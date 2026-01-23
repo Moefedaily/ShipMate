@@ -1,6 +1,6 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { catchError, of } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 import { DriverDashboardState } from './state/driver-dashboard.state';
 
@@ -11,15 +11,11 @@ import { DriverRejectedState } from './components/driver-rejected-state/driver-r
 import { DriverSuspendedState } from './components/driver-suspended-state/driver-suspended-state.component';
 import { DriverApplyFormComponent } from './components/driver-apply-form/driver-apply-form.component';
 
-import { DriverService } from '../../../core/driver/driver.service';
-import { mapDriverStatusToDashboardState } from '../../../core/driver/driver.mapper';
-
 @Component({
   standalone: true,
   selector: 'app-driver-home',
   imports: [
     CommonModule,
-
     DriverApprovedState,
     DriverNotAppliedState,
     DriverPendingState,
@@ -30,53 +26,16 @@ import { mapDriverStatusToDashboardState } from '../../../core/driver/driver.map
   templateUrl: './driver-home.page.html',
   styleUrl: './driver-home.page.scss'
 })
-export class DriverHomePage implements OnInit {
+export class DriverHomePage {
 
-  private readonly driverService = inject(DriverService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly DriverDashboardState = DriverDashboardState;
 
-  // Controls first render
-  readonly loading = signal(true);
-
-  // Single source of truth for dashboard UI
+  // Resolver guarantees this is ready before render
   readonly state = signal<DriverDashboardState>(
-    DriverDashboardState.INIT
+    this.route.snapshot.data['state']
   );
-
-  ngOnInit(): void {
-    this.loadDriverState();
-  }
-
-  private loadDriverState(): void {
-    this.driverService.getMyDriverProfile()
-      .pipe(
-        catchError(err => {
-
-          // 404 → user never applied
-          if (err.status === 404) {
-            this.state.set(DriverDashboardState.NOT_APPLIED);
-            this.loading.set(false);
-            return of(null);
-          }
-
-          // fallback safety
-          this.state.set(DriverDashboardState.NOT_APPLIED);
-          this.loading.set(false);
-          return of(null);
-        })
-      )
-      .subscribe(profile => {
-        if (profile) {
-          const mappedState =
-            mapDriverStatusToDashboardState(profile.status);
-
-          this.state.set(mappedState);
-        }
-
-        this.loading.set(false);
-      });
-  }
 
   // ---------- UI events ----------
 

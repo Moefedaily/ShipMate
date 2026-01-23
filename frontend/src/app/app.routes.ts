@@ -5,6 +5,7 @@ import { LandingPage } from './features/landing/landing.page';
 import { authGuard } from './core/guards/auth.guard';
 import { senderGuard } from './core/guards/sender.guard';
 import { driverGuard } from './core/guards/driver.guard';
+import { driverDashboardResolver } from './core/driver/driver-dashboard.resolver';
 
 export const routes: Routes = [
 
@@ -73,6 +74,9 @@ export const routes: Routes = [
       {
         path: 'driver',
         canActivate: [driverGuard],
+        resolve: {
+          state: driverDashboardResolver
+        },
         loadComponent: () =>
           import('./features/dashboard/driver/driver-home.page')
             .then(m => m.DriverHomePage)
