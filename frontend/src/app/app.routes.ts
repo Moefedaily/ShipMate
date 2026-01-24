@@ -82,6 +82,13 @@ export const routes: Routes = [
             .then(m => m.DriverHomePage)
       },
       {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/profile/profile.page')
+            .then(m => m.ProfilePage)
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'sender' // safe default

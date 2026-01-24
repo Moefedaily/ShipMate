@@ -31,7 +31,6 @@ export class DashboardHeaderComponent {
 
   /* ---------- Outputs ---------- */
   @Output() roleChange = new EventEmitter<ActiveRole>();
-  @Output() logout = new EventEmitter<void>();
   @Output() menuAction = new EventEmitter<string>();
 
   /* ---------- Helpers ---------- */

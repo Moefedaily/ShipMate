@@ -17,7 +17,7 @@ export enum DriverStatus {
 export interface DriverProfileResponse {
   id: string;
   status: DriverStatus;
-  vehicleType: string;
+  vehicleType: VehicleType;
   maxWeightCapacity: number;
   approvedAt: string | null;
 }

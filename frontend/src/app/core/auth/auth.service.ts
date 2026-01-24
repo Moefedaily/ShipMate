@@ -135,4 +135,8 @@ export class AuthService {
     );
   }
 
+  updateCachedUser(user: AuthUser): void {
+  this.authState.setUserInternal(user);
+}
+
 }
