@@ -18,4 +18,19 @@ public class NoOpMailService implements MailService {
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         log.info("[TEST] Password reset email skipped. to={}, token={}", toEmail, resetToken);
     }
+
+    @Override
+    public void sendDriverApprovedEmail(String toEmail) {
+        log.info("[TEST] Driver approved email skipped. to={}", toEmail);
+    }
+
+    @Override
+    public void sendDriverRejectedEmail(String toEmail) {
+        log.info("[TEST] Driver rejected email skipped. to={}", toEmail);
+    }
+
+    @Override
+    public void sendDriverSuspendedEmail(String toEmail) {
+        log.info("[TEST] Driver suspended email skipped. to={}", toEmail);
+    }
 }

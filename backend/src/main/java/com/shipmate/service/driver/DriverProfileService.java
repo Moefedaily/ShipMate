@@ -14,6 +14,7 @@ import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.mail.MailService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class DriverProfileService {
     private final DriverProfileRepository driverProfileRepository;
     private final DriverProfileMapper mapper;
     private final UserRepository userRepository;
+    private final MailService mailService;
 
     public DriverProfileResponse apply(UUID userId, DriverApplyRequest request) {
 
@@ -70,6 +72,9 @@ public class DriverProfileService {
         profile.setStatus(DriverStatus.APPROVED);
         profile.setApprovedAt(Instant.now());
 
+         mailService.sendDriverApprovedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
     }
 
@@ -83,6 +88,9 @@ public class DriverProfileService {
         profile.setStatus(DriverStatus.REJECTED);
         profile.setApprovedAt(Instant.now());
 
+         mailService.sendDriverRejectedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
     }
 
@@ -100,6 +108,9 @@ public class DriverProfileService {
 
         profile.setStatus(DriverStatus.SUSPENDED);
 
+        mailService.sendDriverSuspendedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
     }
 

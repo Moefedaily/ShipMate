@@ -1,0 +1,183 @@
+<div class="profile-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Profile</h1>
+      <p class="subtitle">Manage your personal information and account status.</p>
+    </div>
+  </div>
+
+  <!-- GLOBAL ERROR -->
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- PERSONAL INFO -->
+  <section class="card profile-card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="icon-bubble" aria-hidden="true">👤</div>
+        <div>
+          <h2>Personal information</h2>
+          <p>Update only your name. Email and account status are read-only.</p>
+        </div>
+      </div>
+
+      <span
+        class="status-pill"
+        [class.status-pill--success]="verified()"
+        [class.status-pill--warning]="!verified()"
+      >
+        @if (verified()) { Verified } @else { Not verified }
+      </span>
+    </div>
+
+    <form class="profile-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="firstName">First name</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            autocomplete="given-name"
+            [class.input--invalid]="isFirstNameInvalid()"
+          />
+          @if (isFirstNameInvalid()) {
+            <small class="error">Min. 2 characters.</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="lastName">Last name</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            autocomplete="family-name"
+            [class.input--invalid]="isLastNameInvalid()"
+          />
+          @if (isLastNameInvalid()) {
+            <small class="error">Min. 2 characters.</small>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="phone">Phone number</label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            autocomplete="tel"
+            placeholder="+1 (555) 000-0000"
+          />
+        </div>
+      </div>
+
+      <!-- READONLY INFO -->
+      <div class="readonly-grid">
+
+        <div class="readonly-item">
+          <span class="readonly-label">Email</span>
+          <span class="readonly-value">{{ email() }}</span>
+        </div>
+
+        <div class="readonly-item">
+          <span class="readonly-label">Account</span>
+          <span class="readonly-value">
+            @if (active()) { Active } @else { Disabled }
+          </span>
+        </div>
+
+        <div class="readonly-item">
+          <span class="readonly-label">Type</span>
+          <span class="readonly-value">
+            @if (userType() === 'SENDER') { Sender }
+            @else if (userType() === 'DRIVER') { Driver }
+            @else { Sender & Driver }
+          </span>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="submitting() || form.invalid || !hasChanges()"
+        >
+          {{ submitting() ? 'Saving…' : 'Save changes' }}
+        </button>
+
+        @if (!hasChanges()) {
+          <span class="hint">No changes to save.</span>
+        }
+      </div>
+
+    </form>
+  </section>
+
+  <!-- DRIVER INFO (CONDITIONAL) -->
+  @if (showDriverSection()) {
+    <section class="card profile-card">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="icon-bubble icon-bubble--driver" aria-hidden="true">🚚</div>
+          <div>
+            <h2>Driver information</h2>
+            <p>Your driver profile is managed by the admin review process.</p>
+          </div>
+        </div>
+
+        <span
+          class="status-pill"
+          [class.status-pill--success]="driverStatus() === 'APPROVED'"
+          [class.status-pill--warning]="driverStatus() === 'PENDING'"
+          [class.status-pill--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'"
+        >
+          {{ driverStatus() }}
+        </span>
+      </div>
+
+      <div class="readonly-grid">
+        <div class="readonly-item">
+          <span class="readonly-label">Vehicle type</span>
+          <span class="readonly-value">{{ driverVehicleTypeLabel() }}</span>
+        </div>
+
+        <div class="readonly-item">
+          <span class="readonly-label">Max capacity</span>
+          <span class="readonly-value">{{ driverMaxWeight() }} kg</span>
+        </div>
+
+        <div class="readonly-item">
+          <span class="readonly-label">Approved at</span>
+          <span class="readonly-value">
+            @if (driverApprovedAt()) { {{ driverApprovedAt() }} } @else { — }
+          </span>
+        </div>
+      </div>
+
+      <!-- status message -->
+      <div class="driver-note" [class.driver-note--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'">
+        @if (driverStatus() === 'PENDING') {
+          Your application is under review. You will be notified once it's approved.
+        } @else if (driverStatus() === 'APPROVED') {
+          Your driver profile is approved. You can access driver deliveries in the dashboard.
+        } @else if (driverStatus() === 'REJECTED') {
+          Your application was not approved. If you believe this is an error, contact support.
+        } @else {
+          Your driver access is suspended. Contact support for more details.
+        }
+      </div>
+
+    </section>
+  }
+
+</div>

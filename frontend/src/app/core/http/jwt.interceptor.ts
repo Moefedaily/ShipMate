@@ -93,7 +93,6 @@ function handle401Error( request: HttpRequest<any>, next: HttpHandlerFn, authSer
 
         if (!token) {
           authService.logout();
-          toast.error('Session expired. Please login again.');
           return throwError(() => new Error('Session expired'));
         }
 

@@ -5,6 +5,7 @@ import { LandingPage } from './features/landing/landing.page';
 import { authGuard } from './core/guards/auth.guard';
 import { senderGuard } from './core/guards/sender.guard';
 import { driverGuard } from './core/guards/driver.guard';
+import { driverDashboardResolver } from './core/driver/driver-dashboard.resolver';
 
 export const routes: Routes = [
 
@@ -46,7 +47,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/pages/verify-email/verify-email.page')
             .then(m => m.VerifyEmailPage)
+      },
+      {
+        path: 'check-email',
+        loadComponent: () =>
+          import('./features/auth/pages/check-email/check-email.page')
+            .then(m => m.CheckEmailPage)
       }
+
     ]
   },
 
@@ -66,9 +74,19 @@ export const routes: Routes = [
       {
         path: 'driver',
         canActivate: [driverGuard],
+        resolve: {
+          state: driverDashboardResolver
+        },
         loadComponent: () =>
           import('./features/dashboard/driver/driver-home.page')
             .then(m => m.DriverHomePage)
+      },
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/profile/profile.page')
+            .then(m => m.ProfilePage)
       },
       {
         path: '',

@@ -29,7 +29,7 @@ export class AuthState {
   );
 
   // =====================
-  // Mutations (AuthService ONLY)
+  // Mutations
   // =====================
   setSession(user: AuthUser, accessToken: string): void {
     this._user.set(user);
@@ -44,4 +44,10 @@ export class AuthState {
     this._user.set(null);
     this._accessToken.set(null);
   }
+
+  // INTERNAL — used by AuthService
+  setUserInternal(user: AuthUser): void {
+    this._user.set(user);
+  }
+
 }

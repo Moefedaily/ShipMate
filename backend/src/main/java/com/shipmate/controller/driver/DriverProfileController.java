@@ -25,7 +25,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@PreAuthorize("@driverSecurity.isDriver(authentication)")
 @RequestMapping("/api/drivers")
 @RequiredArgsConstructor
 @Tag(name = "Driver Profile", description = "Driver profile management APIs")
@@ -45,10 +44,14 @@ public class DriverProfileController {
         @ApiResponse(responseCode = "400", description = "Invalid input or user already has a driver profile"),
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/apply")
-    public ResponseEntity<DriverProfileResponse> apply( @AuthenticationPrincipal(expression = "username") String userId, @Valid @RequestBody DriverApplyRequest request) {
-
-        DriverProfileResponse response = driverProfileService.apply(UUID.fromString(userId), request);
+    public ResponseEntity<DriverProfileResponse> apply(
+            @AuthenticationPrincipal(expression = "username") String userId,
+            @Valid @RequestBody DriverApplyRequest request
+    ) {
+        DriverProfileResponse response =
+                driverProfileService.apply(UUID.fromString(userId), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -63,10 +66,14 @@ public class DriverProfileController {
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "404", description = "Driver profile not found")
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<DriverProfileResponse> getMyProfile(
-    @AuthenticationPrincipal(expression = "username") String userId) {
-        return ResponseEntity.ok(driverProfileService.getMyProfile(UUID.fromString(userId)));
+            @AuthenticationPrincipal(expression = "username") String userId
+    ) {
+        return ResponseEntity.ok(
+                driverProfileService.getMyProfile(UUID.fromString(userId))
+        );
     }
 
     // ===================== UPDATE MY LOCATION =====================
@@ -79,7 +86,8 @@ public class DriverProfileController {
         @ApiResponse(responseCode = "200", description = "Location updated successfully"),
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-     @PostMapping("/me/location")
+    @PreAuthorize("@driverSecurity.isApprovedDriver(authentication)")
+    @PostMapping("/me/location")
     public void updateMyLocation(
             @AuthenticationPrincipal(expression = "username") String userId,
             @RequestBody UpdateDriverLocationRequest request

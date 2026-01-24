@@ -5,6 +5,9 @@ export interface AuthUser {
   id: string;
   email: string;
   role: Role;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
   userType: UserType;
   verified: boolean;
   active: boolean;

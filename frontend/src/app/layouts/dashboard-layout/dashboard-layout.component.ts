@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -13,6 +13,7 @@ import {
 } from '../../shared/components/dashboard-header/dashboard-header.component';
 
 import { AuthState } from '../../core/auth/auth.state';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   standalone: true,
@@ -30,19 +31,23 @@ export class DashboardLayoutComponent implements OnInit {
 
   private readonly router = inject(Router);
   private readonly authState = inject(AuthState);
-
-  readonly userName = signal<string | undefined>(undefined);
+  private readonly authService = inject(AuthService);
   readonly userType = signal<UserType | undefined>(undefined);
   readonly activeRole = signal<ActiveRole>('SENDER');
+
+  readonly userName = computed(() => {
+    const user = this.authState.user();
+    if (!user) return undefined;
+    return `${user.firstName} ${user.lastName}`;
+  });
+
 
   ngOnInit(): void {
     const user = this.authState.user();
     if (!user) return;
 
-    this.userName.set(user.email);
     this.userType.set(user.userType);
 
-    // Sync derive role from URL
     this.syncRoleWithUrl();
 
     this.router.events
@@ -63,4 +68,24 @@ export class DashboardLayoutComponent implements OnInit {
   onRoleChange(role: ActiveRole): void {
     this.router.navigate(['/dashboard', role.toLowerCase()]);
   }
+
+  onMenuAction(action: string): void {
+    switch (action) {
+      case 'profile':
+        this.router.navigateByUrl('/dashboard/profile');
+        break;
+
+      case 'settings':
+        break;
+    }
+  }
+
+  onLogout(): void {
+    this.authService.logout().subscribe({
+      complete: () => {
+        this.router.navigateByUrl('/login');
+      }
+    });
+  }
+
 }

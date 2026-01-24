@@ -1,0 +1,66 @@
+@use '../../../../../../styles/variables/colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+
+.driver-empty-state {
+  max-width: 520px;
+  margin: 3rem auto;
+  padding: 3rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.icon-wrapper {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+
+  border-radius: 50%;
+  background-color: $color-primary-subtle;
+  color: $color-primary;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 32px;
+  }
+}
+
+h2 {
+  font-weight: $font-weight-semibold;
+}
+
+p {
+  color: $text-secondary;
+  line-height: $line-height-loose;
+}
+
+.benefits {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+
+  display: grid;
+  gap: 0.5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: $text-secondary;
+
+    mat-icon {
+      font-size: 18px;
+      color: $color-primary;
+    }
+  }
+}
+
+button {
+  margin-top: 1rem;
+}

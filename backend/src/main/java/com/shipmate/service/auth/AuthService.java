@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (!user.isVerified()) {
+            throw new DisabledException("Email not verified");
+        }
 
         String accessToken = jwtUtil.generateAccessToken(
                 user.getId(),

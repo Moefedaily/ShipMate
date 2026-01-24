@@ -22,7 +22,6 @@ public interface UserProfileMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "phone", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "userType", ignore = true)
     @Mapping(target = "verified", ignore = true)
