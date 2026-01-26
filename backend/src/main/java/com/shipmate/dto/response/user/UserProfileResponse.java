@@ -27,4 +27,5 @@ public class UserProfileResponse {
     private UserType userType;
     private boolean verified;
     private boolean active;
+    private String avatarUrl;
 }
