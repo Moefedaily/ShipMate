@@ -77,6 +77,10 @@ export class DashboardLayoutComponent implements OnInit {
 
       case 'settings':
         break;
+
+      case 'logout':
+        this.onLogout();
+        break;
     }
   }
 
