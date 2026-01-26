@@ -11,6 +11,7 @@ export interface AuthUser {
   userType: UserType;
   verified: boolean;
   active: boolean;
+  avatarUrl?: string | null;
 }
 
 export interface JwtPayload {

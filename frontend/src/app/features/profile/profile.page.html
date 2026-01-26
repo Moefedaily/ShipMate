@@ -15,6 +15,17 @@
     </div>
   }
 
+ <!-- AVATAR -->
+<section class="card profile-card avatar-card">
+  <app-avatar
+    [src]="avatarUrl()"
+    size="md"
+    [editable]="true"
+    (upload)="onAvatarUpload($event)"
+    (remove)="removeAvatar()"
+  />
+</section>
+
   <!-- PERSONAL INFO -->
   <section class="card profile-card">
     <div class="card-head">

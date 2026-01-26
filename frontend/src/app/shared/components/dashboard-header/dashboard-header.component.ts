@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { AuthState } from '../../../core/auth/auth.state';
+import { AvatarComponent } from '../avatar/avatar.component';
 
 export type UserType = 'SENDER' | 'DRIVER' | 'BOTH';
 export type ActiveRole = 'SENDER' | 'DRIVER';
@@ -16,16 +18,23 @@ export type ActiveRole = 'SENDER' | 'DRIVER';
     MatIconModule,
     MatMenuModule,
     MatButtonModule,
-    MatDividerModule
+    MatDividerModule,
+    AvatarComponent
   ],
   templateUrl: './dashboard-header.component.html',
   styleUrl: './dashboard-header.component.scss'
 })
 export class DashboardHeaderComponent {
 
-  /* ---------- Inputs ---------- */
-  @Input() userName?: string;
-  @Input() userAvatarUrl?: string;
+  private readonly authState = inject(AuthState);
+
+    readonly user = computed(() => this.authState.user());
+
+    readonly userName = computed(() => {
+      const u = this.user();
+      return u ? `${u.firstName} ${u.lastName}` : '';
+    });
+
   @Input() userType?: UserType;
   @Input() activeRole?: ActiveRole;
 

@@ -13,11 +13,15 @@ import {
 } from '../../core/driver/driver.models';
 
 import { UserService } from '../../core/user/user.service';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { LoaderService } from '../../core/ui/loader/loader.service';
+import { ToastService } from '../../core/ui/toast/toast.service';
+
 
 @Component({
   standalone: true,
   selector: 'app-profile-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,AvatarComponent],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss'
 })
@@ -28,6 +32,10 @@ export class ProfilePage implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly driverService = inject(DriverService);
+  private readonly loader = inject(LoaderService);
+  private readonly toast = inject(ToastService);
+
+  readonly avatarUrl = computed(() => this.user()?.avatarUrl ?? null);
 
   /* ---------------- UI State ---------------- */
 
@@ -152,34 +160,77 @@ export class ProfilePage implements OnInit {
 
   /* ---------------- Actions ---------------- */
 
-    save(): void {
-    if (
-        this.form.invalid ||
-        this.submitting() ||
-        !this.hasChanges()
-    ) {
-        this.form.markAllAsTouched();
-        return;
+  save(): void {
+    if (this.form.invalid || !this.hasChanges()) {
+      this.form.markAllAsTouched();
+      return;
     }
 
-    this.submitting.set(true);
+    this.loader.show();
     this.errorMessage.set(null);
 
-    const payload = this.form.getRawValue();
-
-    this.userService.updateMyProfile(payload).subscribe({
-        next: updatedUser => {
+    this.userService.updateMyProfile(this.form.getRawValue()).subscribe({
+      next: updatedUser => {
         this.authService.updateCachedUser(updatedUser);
+        this.toast.success('Profile updated successfully');
         this.form.markAsPristine();
         this.form.markAsUntouched();
-        this.submitting.set(false);
-        },
-        error: err => {
-        this.submitting.set(false);
-        this.errorMessage.set(
-            err.error?.message || 'Unable to update profile.'
+        this.loader.hide();
+      },
+      error: err => {
+        this.toast.error(
+          err.error?.message || 'Unable to update profile'
         );
-        }
+        this.loader.hide();
+      }
     });
-    }
+  }
+
+  onAvatarUpload(file: File): void {
+    this.loader.show();
+    this.errorMessage.set(null);
+
+    this.userService.uploadAvatar(file).subscribe({
+      next: user => {
+        this.authService.updateCachedUser(user);
+        this.toast.success('Profile photo updated');
+        this.loader.hide();
+      },
+      error: err => {
+        this.toast.error(
+          err.error?.message || 'Failed to upload profile photo'
+        );
+        this.loader.hide();
+      }
+    });
+  }
+
+
+  removeAvatar(): void {
+    const confirmed = confirm(
+      'Remove your profile photo? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    this.loader.show();
+
+    this.userService.deleteAvatar().subscribe({
+      next: () => {
+        this.authService.updateCachedUser({
+          ...this.user()!,
+          avatarUrl: null
+        });
+        this.toast.success('Profile photo removed');
+        this.loader.hide();
+      },
+      error: err => {
+        this.toast.error(
+          err.error?.message || 'Failed to remove profile photo'
+        );
+        this.loader.hide();
+      }
+    });
+  }
+
 }

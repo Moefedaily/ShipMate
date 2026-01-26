@@ -29,4 +29,21 @@ export class UserService {
       request
     );
   }
+
+  uploadAvatar(file: File): Observable<UserProfile> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<UserProfile>(
+      `${this.api}/users/me/avatar`,
+      formData
+    );
+  }
+
+  deleteAvatar(): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/users/me/avatar`
+    );
+  }
+
 }
