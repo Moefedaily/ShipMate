@@ -17,6 +17,7 @@ public interface UserProfileMapper {
     @Mapping(target = "role", source = "role")
     @Mapping(target = "verified", source = "verified")
     @Mapping(target = "active", source = "active")
+    @Mapping(target = "avatarUrl", source = "avatarUrl")
     UserProfileResponse toResponse(User user);
     
     @Mapping(target = "id", ignore = true)

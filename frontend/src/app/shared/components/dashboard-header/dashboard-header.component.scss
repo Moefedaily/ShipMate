@@ -250,6 +250,20 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
+.avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid $border-default;
+}
+
+.avatar-upload {
+  font-size: $text-size-label;
+  color: $color-primary;
+  cursor: pointer;
+}
+
 /* =====================================================
    MENU
    ===================================================== */

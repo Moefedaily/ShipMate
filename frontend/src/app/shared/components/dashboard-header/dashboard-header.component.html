@@ -47,7 +47,7 @@
 
     <button class="profile-btn" [matMenuTriggerFor]="menu">
       <div class="profile-text">
-        <span class="profile-name">{{ userName }}</span>
+        <span class="profile-name">{{ userName()}}</span>
         <span class="profile-role">
           @if (userType === 'SENDER') { Sender account }
           @else if (userType === 'DRIVER') { Driver account }
@@ -55,15 +55,22 @@
         </span>
       </div>
 
-      <img class="avatar" src="assets/avatar-man.png" alt="avatar" />
+      <app-avatar
+        [src]="user()?.avatarUrl"
+        size="sm"
+      />
+
       <mat-icon>expand_more</mat-icon>
     </button>
 
     <mat-menu #menu="matMenu" class="profile-menu">
       <div class="menu-user">
-        <img src="assets/avatar-man.png" alt="avatar" />
+        <app-avatar
+          [src]="user()?.avatarUrl"
+          size="sm"
+        />
         <div>
-          <strong>{{ userName }}</strong>
+          <strong>{{ userName() }}</strong>
           <small>
             @if (userType === 'SENDER') { Sender account }
             @else if (userType === 'DRIVER') { Driver account }

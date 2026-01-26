@@ -20,6 +20,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/shipments")
 @RequiredArgsConstructor
@@ -126,4 +130,34 @@ public class ShipmentController {
         shipmentService.delete(shipmentId, UUID.fromString(userId));
         return ResponseEntity.noContent().build();
     }
+
+    // ===================== ADD SHIPMENT PHOTOS =====================
+    @Operation(
+        summary = "Add shipment photos",
+        description = "Uploads one or more photos for a shipment owned by the authenticated user."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Photos uploaded successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid shipment state or input"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not shipment owner")
+    })
+    @PostMapping(
+        value = "/{shipmentId}/photos",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ShipmentResponse> addShipmentPhotos(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId,
+            @RequestPart("files") List<MultipartFile> files) {
+
+        return ResponseEntity.ok(
+            shipmentService.addPhotos(
+                shipmentId,
+                UUID.fromString(userId),
+                files
+            )
+        );
+    }
+
 }

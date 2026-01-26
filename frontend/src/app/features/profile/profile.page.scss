@@ -254,3 +254,16 @@
   background-color: $color-danger-subtle;
   color: $color-danger;
 }
+
+/* ---------- Avatar ---------- */
+
+.avatar-card {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-card app-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

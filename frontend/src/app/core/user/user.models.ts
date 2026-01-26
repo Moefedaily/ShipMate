@@ -11,6 +11,7 @@ export interface UserProfile {
   userType: UserType;
   verified: boolean;
   active: boolean;
+  avatarUrl?: string | null;
 }
 
 
