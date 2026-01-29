@@ -1,4 +1,4 @@
-import { Role, UserType } from '../auth/auth.models';
+import { Role, UserType } from "../../auth/auth.models";
 
 
 export interface UserProfile {

@@ -1,12 +1,8 @@
 import { Component, inject, signal, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { DriverService } from '../../../../../core/driver/driver.service';
-import {
-  DriverApplyRequest,
-  VEHICLE_TYPE_LABELS,
-  VehicleType
-} from '../../../../../core/driver/driver.models';
+import { DriverService } from '../../../../../core/services/driver/driver.service';
+import { DriverApplyRequest, VEHICLE_TYPE_LABELS, VehicleType } from '../../../../../core/services/driver/driver.models';
 
 @Component({
   standalone: true,

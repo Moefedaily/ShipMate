@@ -5,19 +5,15 @@ import { LandingPage } from './features/landing/landing.page';
 import { authGuard } from './core/guards/auth.guard';
 import { senderGuard } from './core/guards/sender.guard';
 import { driverGuard } from './core/guards/driver.guard';
-import { driverDashboardResolver } from './core/driver/driver-dashboard.resolver';
+import { driverDashboardResolver } from './core/services/driver/driver-dashboard.resolver';
 
 export const routes: Routes = [
 
-  /* ================= PUBLIC ================= */
   {
     path: '',
     component: PublicLayoutComponent,
     children: [
-      {
-        path: '',
-        component: LandingPage
-      },
+      { path: '', component: LandingPage },
       {
         path: 'login',
         loadComponent: () =>
@@ -72,18 +68,30 @@ export const routes: Routes = [
             .then(m => m.SenderHomePage)
       },
       {
+        path: 'shipments/new',
+        canActivate: [senderGuard],
+        loadComponent: () =>
+          import('./features/shipments/new/shipment-create.page')
+            .then(m => m.ShipmentCreatePage)
+      },
+      {
         path: 'driver',
         canActivate: [driverGuard],
-        resolve: {
-          state: driverDashboardResolver
-        },
+        resolve: { state: driverDashboardResolver },
+        runGuardsAndResolvers: 'always',
         loadComponent: () =>
           import('./features/dashboard/driver/driver-home.page')
             .then(m => m.DriverHomePage)
       },
       {
+        path: 'driver/matching',
+        canActivate: [driverGuard],
+        loadComponent: () =>
+          import('./features/dashboard/driver/matching/driver-matching.page')
+            .then(m => m.DriverMatchingPage)
+      },
+      {
         path: 'profile',
-        canActivate: [authGuard],
         loadComponent: () =>
           import('./features/profile/profile.page')
             .then(m => m.ProfilePage)
@@ -91,7 +99,7 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'sender' // safe default
+        redirectTo: 'sender'
       }
     ]
   }

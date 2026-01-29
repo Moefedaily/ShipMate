@@ -1,79 +1,56 @@
 <!-- CURRENT DELIVERY -->
-<div class="current-delivery-section">
+@if (activeBooking()) {
+
+<section class="current-delivery-section">
   <div class="section-header">
     <h2>Current Delivery</h2>
-    <span class="live-pill">Live Updates Active</span>
+    <span class="live-pill">Live</span>
   </div>
 
   <section class="card current-delivery">
-    <div class="delivery-map">
-      <img src="assets/images/map.png" alt="Map preview" />
-
-      <span class="eta-pill">
-        <mat-icon>schedule</mat-icon>
-        ETA: 12 mins
-      </span>
-    </div>
 
     <div class="delivery-panel">
+
       <div class="delivery-top">
         <span class="status-pill">
           <span class="dot"></span>
-          In Transit
+          {{ activeBooking()!.status }}
         </span>
 
-        <div class="delivery-top-right">
-          <span class="order-id">Order #8821-B</span>
-        </div>
+        <span class="order-id">
+          Booking #{{ activeBooking()!.id | slice:0:8 }}
+        </span>
       </div>
 
-      <h3 class="delivery-title">Deliver Vintage Guitar to Sarah</h3>
+      <h3 class="delivery-title">
+        {{ activeBooking()!.shipments[0]?.pickupAddress }}
+        →
+        {{ activeBooking()!.shipments[0]?.deliveryAddress }}
+      </h3>
 
       <div class="delivery-top-right-earning">
         <div class="earning-block">
           <span class="earning-label">Earning</span>
-          <span class="earning-value">$34.50</span>
-        </div>
-      </div>
-
-      <div class="address-row">
-        <div class="address-card">
-          <div class="address-label">
-            <mat-icon>store</mat-icon>
-            <span>FROM</span>
-          </div>
-          <strong>Downtown Music Store</strong>
-        </div>
-
-        <div class="address-card">
-          <div class="address-label">
-            <mat-icon>location_on</mat-icon>
-            <span>TO</span>
-          </div>
-          <strong>42 Westside Lane</strong>
-        </div>
-      </div>
-
-      <div class="delivery-footer">
-        <div class="meta-row">
-          <span class="meta-chip">
-            <mat-icon>fitness_center</mat-icon>
-            Heavy Load
-          </span>
-          <span class="meta-chip">
-            <mat-icon>verified</mat-icon>
-            Handle with care
+          <span class="earning-value">
+            {{ activeBooking()!.driverEarnings | currency }}
           </span>
         </div>
-
-        <button class="btn btn--primary confirm-btn">
-          Confirm Delivery
-          <mat-icon>check_circle</mat-icon>
-        </button>
       </div>
+
+      <button
+        class="btn btn--primary btn-full"
+        routerLink="/dashboard/driver/booking/{{ activeBooking()!.id }}"
+      >
+        View delivery
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+
     </div>
+
   </section>
-</div>
+</section>
+
+}
 
 
 <!-- AVAILABLE DELIVERIES -->
@@ -81,117 +58,68 @@
   <div class="section-header">
     <h2>Available Deliveries</h2>
 
-    <a class="link">
-      View Map <mat-icon>open_in_new</mat-icon>
+    <a class="link" routerLink="/dashboard/driver/matching">
+      Find deliveries <mat-icon>open_in_new</mat-icon>
     </a>
   </div>
 
-  <div class="delivery-grid">
-    <!-- CARD 1 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/boxes.jpg" alt="Moving Boxes" />
+  @if (matches().length === 0) {
+    <div class="empty-state card">
+      <mat-icon>map_off</mat-icon>
+      <p>No deliveries nearby at the moment</p>
+    </div>
+  } @else {
+    <div class="delivery-grid">
+      @for (m of matches(); track m.shipment.id) {
 
-        <span class="card-icon">
-          <mat-icon>inventory_2</mat-icon>
-        </span>
+        <article class="card delivery-card">
 
-        <span class="distance-pill">
-          4.2 km
-        </span>
-      </div>
+          <div class="card-media">
+            <span class="card-icon">
+              <mat-icon>inventory_2</mat-icon>
+            </span>
 
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Moving Boxes</h4>
-          <span class="price">$18.50</span>
-        </div>
+            <span class="distance-pill">
+              {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
+            </span>
+          </div>
 
-        <p class="route">
-          Downtown <mat-icon>arrow_forward</mat-icon> Westside
-        </p>
+          <div class="card-body">
+            <div class="card-title-row">
+              <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
+              <span class="price">
+                {{ m.shipment.basePrice | currency }}
+              </span>
+            </div>
 
-        <div class="tag-row">
-          <span class="tag">Medium Load</span>
-          <span class="tag tag--danger">Fragile</span>
-        </div>
+            <p class="route">
+              {{ m.shipment.pickupAddress }}
+              <mat-icon>arrow_forward</mat-icon>
+              {{ m.shipment.deliveryAddress }}
+            </p>
 
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
+            <div class="tag-row">
+              <span class="tag">
+                {{ m.shipment.packageWeight }} kg
+              </span>
 
-    <!-- CARD 2 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/groceries.jpg" alt="Grocery Bag" />
+              <span class="tag tag--info">
+                {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
+              </span>
+            </div>
 
-        <span class="card-icon">
-          <mat-icon>shopping_bag</mat-icon>
-        </span>
+            <a
+              class="btn btn--secondary btn-full"
+              routerLink="/dashboard/driver/matching"
+            >
+              View details
+            </a>
+          </div>
 
-        <span class="distance-pill">
-          8.5 km
-        </span>
-      </div>
-
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Grocery Bag</h4>
-          <span class="price">$24.00</span>
-        </div>
-
-        <p class="route">
-          Uptown <mat-icon>arrow_forward</mat-icon> Suburbs
-        </p>
-
-        <div class="tag-row">
-          <span class="tag">Light Load</span>
-          <span class="tag tag--info">Perishable</span>
-        </div>
-
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
-
-    <!-- CARD 3 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/electronics.jpg" alt="Electronics" />
-
-        <span class="card-icon">
-          <mat-icon>devices</mat-icon>
-        </span>
-
-        <span class="distance-pill">
-          2.1 km
-        </span>
-      </div>
-
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Electronics</h4>
-          <span class="price">$12.50</span>
-        </div>
-
-        <p class="route">
-          City Center <mat-icon>arrow_forward</mat-icon> North Hills
-        </p>
-
-        <div class="tag-row">
-          <span class="tag">Small Item</span>
-          <span class="tag tag--neutral">Sign Req.</span>
-        </div>
-
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
-  </div>
+        </article>
+      }
+    </div>
+  }
 </section>
 
 

@@ -1,0 +1,42 @@
+<div class="location-required">
+
+  <mat-icon>my_location</mat-icon>
+
+  <h2>Set your location to start delivering</h2>
+
+  <p>
+    We use your location to show nearby deliveries and calculate distances.
+    You can change it anytime.
+  </p>
+
+  <!-- Device location -->
+  <button
+    class="btn btn-primary"
+    [disabled]="loading()"
+    (click)="useDeviceLocation()"
+  >
+    <mat-icon>gps_fixed</mat-icon>
+    Use my current location
+  </button>
+
+  <div class="divider">or</div>
+
+  <!-- Manual address -->
+  <app-address-autocomplete
+    label="Enter your city or address"
+    (selectAddress)="onAddressSelected($event)"
+  />
+
+  <button
+    class="btn btn-outline btn-full"
+    [disabled]="!selectedAddress() || loading()"
+    (click)="confirmManualLocation()"
+  >
+    Continue
+  </button>
+
+  @if (error()) {
+    <p class="error-text">{{ error() }}</p>
+  }
+
+</div>

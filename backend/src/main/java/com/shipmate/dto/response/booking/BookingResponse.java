@@ -1,5 +1,6 @@
 package com.shipmate.dto.response.booking;
 
+import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.model.booking.BookingStatus;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class BookingResponse {
 
     private BigDecimal driverEarnings;
 
-    private List<UUID> shipmentIds;
+    private List<ShipmentResponse> shipments;
 
     private Instant createdAt;
 }

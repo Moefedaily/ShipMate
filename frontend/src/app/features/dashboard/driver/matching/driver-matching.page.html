@@ -1,0 +1,125 @@
+<div class="driver-matching-page">
+
+  <!-- HEADER -->
+  <div class="section-header">
+    <div>
+      <h2>Available Deliveries</h2>
+      <span class="muted">Ranked by distance & compatibility</span>
+    </div>
+
+    <div class="selected-pill">
+      <mat-icon>near_me</mat-icon>
+      @if (selected()) {
+        {{ selected()!.metrics.distanceToPickupKm | number:'1.1-1' }} km to pickup
+      } @else {
+        No selection
+      }
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="matching-layout">
+
+    <!-- LEFT : MAP -->
+    <section class="card matching-map">
+      <app-leaflet-map
+        [pickup]="pickupPoint()"
+        [delivery]="deliveryPoint()"
+      />
+    </section>
+
+    <!-- RIGHT : LIST -->
+    <section class="matching-list">
+
+      @if (matches().length === 0) {
+        <div class="empty-state card">
+          <mat-icon>map_off</mat-icon>
+          <div>
+            <h4>No matching shipments found</h4>
+            <p>Try again later or update your driver location.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="delivery-grid">
+          @for (m of matches(); track trackById($index, m)) {
+
+            <article
+              class="card delivery-card"
+              [class.active]="selected()?.shipment?.id === m.shipment.id"
+              (click)="selectMatch(m)"
+            >
+
+              <!-- MEDIA (no image yet, keep clean) -->
+              <div class="card-media">
+                <span class="card-icon">
+                  <mat-icon>inventory_2</mat-icon>
+                </span>
+
+                <span class="distance-pill">
+                  {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
+                </span>
+
+                <span class="score-pill">
+                  Score {{ m.metrics.score }}
+                </span>
+              </div>
+
+              <!-- BODY -->
+              <div class="card-body">
+
+                <div class="card-title-row">
+                  <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
+
+                  <span class="price">
+                    {{ m.shipment.basePrice | currency }}
+                  </span>
+                </div>
+
+                <p class="route">
+                  {{ m.shipment.pickupAddress }}
+                  <mat-icon>arrow_forward</mat-icon>
+                  {{ m.shipment.deliveryAddress }}
+                </p>
+
+                <!-- TAGS -->
+                <div class="tag-row">
+                  <span class="tag">
+                    {{ m.shipment.packageWeight }} kg
+                  </span>
+
+                  <span class="tag tag--info">
+                    {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
+                  </span>
+
+                  @if (m.metrics.estimatedDetourKm !== null) {
+                    <span class="tag tag--neutral">
+                      Detour {{ m.metrics.estimatedDetourKm | number:'1.0-0' }} km
+                    </span>
+                  }
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn--secondary btn-full"
+                  (click)="accept(m, $event)"
+                >
+                  Accept
+                </button>
+
+              </div>
+            </article>
+          }
+        </div>
+      }
+
+    </section>
+  </div>
+  @if (showLocationModal()) {
+  <app-location-update-modal
+    (updated)="onLocationUpdated()"
+    (cancelled)="onLocationCancelled()"
+  />
+}
+
+</div>
+

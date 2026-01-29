@@ -1,6 +1,5 @@
-import { DriverDashboardState } from
-  '../../features/dashboard/driver/state/driver-dashboard.state';
 
+import { DriverDashboardState } from '../../../features/dashboard/driver/state/driver-dashboard.state';
 import { DriverStatus } from './driver.models';
 
 export function mapDriverStatusToDashboardState(

@@ -1,3 +1,9 @@
+@if (state() === DriverDashboardState.LOCATION_REQUIRED) {
+  <app-driver-location-setup (completed)="onLocationCompleted()"
+  />
+}
+
+
 @if (state() === DriverDashboardState.NOT_APPLIED) {
   <app-driver-not-applied-state
     (applyClick)="onApply()"

@@ -1,0 +1,58 @@
+<div
+  class="modal-backdrop"
+  (keydown.escape)="cancel()"
+  tabindex="-1"
+>
+  <div
+    #modalCard
+    class="modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="locationModalTitle"
+  >
+
+    <h2 id="locationModalTitle">
+      Update your location to continue
+    </h2>
+
+    <p>
+      We need your current location to confirm this delivery is still feasible.
+    </p>
+
+    <button
+      class="btn btn--primary btn-full"
+      [disabled]="loading()"
+      (click)="useDeviceLocation()"
+      cdkFocusInitial
+    >
+      Use my current location
+    </button>
+
+    <div class="divider">or</div>
+
+    <app-address-autocomplete
+      label="Enter your city or address"
+      (selectAddress)="onAddressSelected($event)"
+    />
+
+    <button
+      class="btn btn--secondary btn-full"
+      [disabled]="!selectedAddress() || loading()"
+      (click)="confirmManual()"
+    >
+      Continue
+    </button>
+
+    @if (error()) {
+      <p class="error-text">{{ error() }}</p>
+    }
+
+    <button
+      class="btn btn--ghost btn-full cancel"
+      (click)="cancel()"
+    >
+      Cancel
+    </button>
+
+  </div>
+</div>
