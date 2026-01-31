@@ -1,20 +1,16 @@
 <div class="shipment-create-page">
 
-  <!-- HERO -->
   <div class="dashboard-hero">
     <h1>Create shipment</h1>
     <p>Provide pickup & delivery details to get matched with drivers.</p>
   </div>
 
-  <!-- CARD -->
   <section class="card shipment-create-card">
 
     <div class="content">
 
-      <!-- LEFT / FORM -->
       <form [formGroup]="form" class="form">
 
-        <!-- Addresses -->
         <div class="form-block">
             <app-address-autocomplete
                 label="Pickup address"
@@ -37,7 +33,6 @@
             }
         </div>
 
-        <!-- Package -->
         <div class="form-block">
           <label>Description</label>
           <textarea formControlName="packageDescription"
@@ -77,7 +72,6 @@
           <input type="number" formControlName="basePrice" />
         </div>
 
-        <!-- Photos -->
         <div class="form-block">
           <label>Photos</label>
 
@@ -100,7 +94,6 @@
           }
         </div>
 
-        <!-- ACTION -->
         <button
           type="button"
           class="btn btn--primary"
@@ -112,12 +105,12 @@
 
       </form>
 
-      <!-- RIGHT / MAP -->
       <div class="map">
         <app-leaflet-map
-          [pickup]="pickup() ? { lat: pickup()!.lat, lng: pickup()!.lng, label: pickup()!.address } : null"
-          [delivery]="delivery() ? { lat: delivery()!.lat, lng: delivery()!.lng, label: delivery()!.address } : null"
-        />
+            mode="preview"
+            [pickup]="pickup() ? { lat: pickup()!.lat, lng: pickup()!.lng, label: pickup()!.address } : null"
+            [delivery]="delivery() ? { lat: delivery()!.lat, lng: delivery()!.lng, label: delivery()!.address } : null"
+          />
       </div>
 
     </div>

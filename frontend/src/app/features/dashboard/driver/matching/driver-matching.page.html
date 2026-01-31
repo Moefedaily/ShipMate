@@ -1,125 +1,132 @@
-<div class="driver-matching-page">
+<!-- MAIN CONTENT -->
+<div class="matching-content">
+  
+  <!-- MAP PREVIEW SECTION -->
+  <section class="card matching-map-preview">
+    <app-leaflet-map
+      mode="preview"
+      [pickup]="pickupPoint()"
+      [delivery]="deliveryPoint()"
+    />
+  </section>
 
-  <!-- HEADER -->
-  <div class="section-header">
-    <div>
-      <h2>Available Deliveries</h2>
-      <span class="muted">Ranked by distance & compatibility</span>
-    </div>
-
-    <div class="selected-pill">
-      <mat-icon>near_me</mat-icon>
-      @if (selected()) {
-        {{ selected()!.metrics.distanceToPickupKm | number:'1.1-1' }} km to pickup
-      } @else {
-        No selection
-      }
-    </div>
-  </div>
-
-  <!-- MAIN LAYOUT -->
-  <div class="matching-layout">
-
-    <!-- LEFT : MAP -->
-    <section class="card matching-map">
-      <app-leaflet-map
-        [pickup]="pickupPoint()"
-        [delivery]="deliveryPoint()"
-      />
-    </section>
-
-    <!-- RIGHT : LIST -->
-    <section class="matching-list">
-
-      @if (matches().length === 0) {
-        <div class="empty-state card">
-          <mat-icon>map_off</mat-icon>
-          <div>
-            <h4>No matching shipments found</h4>
-            <p>Try again later or update your driver location.</p>
-          </div>
+  <!-- CAROUSEL SECTION -->
+  <section class="matching-carousel">
+    
+    <!-- Empty State -->
+    @if (matches().length === 0) {
+      <div class="empty-state card">
+        <mat-icon>map_off</mat-icon>
+        <div>
+          <h4>No matching shipments found</h4>
+          <p>Try again later or update your driver location to see available deliveries.</p>
         </div>
-      } @else {
-        <div class="delivery-grid">
-          @for (m of matches(); track trackById($index, m)) {
+      </div>
+    } 
+    
+    <!-- Carousel with Cards -->
+    @else {
+      <div class="carousel-track">
+        @for (m of matches(); track trackById($index, m)) {
+          <article
+            class="card delivery-card"
+            [class.active]="selected()?.shipment?.id === m.shipment.id"
+            (click)="selectMatch(m)"
+            role="button"
+            [attr.aria-label]="'Shipment from ' + m.shipment.pickupAddress + ' to ' + m.shipment.deliveryAddress"
+            tabindex="0"
+            (keydown.enter)="selectMatch(m)"
+            (keydown.space)="selectMatch(m); $event.preventDefault()"
+          >
+            
+            <!-- Card Header: Distance & Price -->
+            <div class="card-top">
+              <span class="distance-pill">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">near_me</mat-icon>
+                {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
+              </span>
+              <span class="price">
+                {{ m.shipment.basePrice | currency }}
+              </span>
+            </div>
 
-            <article
-              class="card delivery-card"
-              [class.active]="selected()?.shipment?.id === m.shipment.id"
-              (click)="selectMatch(m)"
+            <!-- Package Title -->
+            <h4 class="card-title">
+              {{ m.shipment.packageDescription || 'Shipment' }}
+            </h4>
+
+            <!-- Route Information -->
+            <p class="route">
+              <span>{{ m.shipment.pickupAddress }}</span>
+              <mat-icon>arrow_forward</mat-icon>
+              <span>{{ m.shipment.deliveryAddress }}</span>
+            </p>
+
+            <!-- Metadata Tags -->
+            <div class="tag-row">
+              <span class="tag">
+                <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 4px;">scale</mat-icon>
+                {{ m.shipment.packageWeight }} kg
+              </span>
+              <span class="tag tag--info">
+                <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 4px;">route</mat-icon>
+                {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km
+              </span>
+              @if (m.metrics.estimatedDetourKm !== null) {
+                <span class="tag tag--neutral">
+                  <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 4px;">timeline</mat-icon>
+                  +{{ m.metrics.estimatedDetourKm | number:'1.0-0' }} km detour
+                </span>
+              }
+            </div>
+
+            <!-- Action Button -->
+            <button
+              type="button"
+              class="btn btn--secondary btn-full"
+              [disabled]="isAcceptDisabled(m)"
+              (click)="accept(m, $event)"
+              [attr.aria-label]="
+                acceptingShipmentId() === m.shipment.id 
+                  ? 'Accepting shipment' 
+                  : isBuildingTrip() 
+                    ? 'Add to trip' 
+                    : 'Accept shipment'
+              "
             >
+              @if (acceptingShipmentId() === m.shipment.id) {
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px; margin-right: 6px;">hourglass_empty</mat-icon>
+                Accepting…
+              } @else if (isBuildingTrip()) {
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px; margin-right: 6px;">add_circle_outline</mat-icon>
+                Add to trip
+              } @else {
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px; margin-right: 6px;">check_circle</mat-icon>
+                Accept
+              }
+            </button>
 
-              <!-- MEDIA (no image yet, keep clean) -->
-              <div class="card-media">
-                <span class="card-icon">
-                  <mat-icon>inventory_2</mat-icon>
-                </span>
-
-                <span class="distance-pill">
-                  {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
-                </span>
-
-                <span class="score-pill">
-                  Score {{ m.metrics.score }}
-                </span>
+            <!-- Disabled Reason Note -->
+            @if (isAcceptDisabled(m)) {
+              <div class="note">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">info</mat-icon>
+                {{ acceptDisabledReason() }}
               </div>
+            }
+            
+          </article>
+        }
+      </div>
+    }
+    
+  </section>
 
-              <!-- BODY -->
-              <div class="card-body">
-
-                <div class="card-title-row">
-                  <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
-
-                  <span class="price">
-                    {{ m.shipment.basePrice | currency }}
-                  </span>
-                </div>
-
-                <p class="route">
-                  {{ m.shipment.pickupAddress }}
-                  <mat-icon>arrow_forward</mat-icon>
-                  {{ m.shipment.deliveryAddress }}
-                </p>
-
-                <!-- TAGS -->
-                <div class="tag-row">
-                  <span class="tag">
-                    {{ m.shipment.packageWeight }} kg
-                  </span>
-
-                  <span class="tag tag--info">
-                    {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
-                  </span>
-
-                  @if (m.metrics.estimatedDetourKm !== null) {
-                    <span class="tag tag--neutral">
-                      Detour {{ m.metrics.estimatedDetourKm | number:'1.0-0' }} km
-                    </span>
-                  }
-                </div>
-
-                <button
-                  type="button"
-                  class="btn btn--secondary btn-full"
-                  (click)="accept(m, $event)"
-                >
-                  Accept
-                </button>
-
-              </div>
-            </article>
-          }
-        </div>
-      }
-
-    </section>
-  </div>
+  <!-- Location Update Modal -->
   @if (showLocationModal()) {
-  <app-location-update-modal
-    (updated)="onLocationUpdated()"
-    (cancelled)="onLocationCancelled()"
-  />
-}
-
+    <app-location-update-modal
+      (updated)="onLocationUpdated()"
+      (cancelled)="onLocationCancelled()"
+    />
+  }
+  
 </div>
-

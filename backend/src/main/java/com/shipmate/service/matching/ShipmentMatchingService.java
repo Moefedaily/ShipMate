@@ -29,6 +29,13 @@ import com.shipmate.util.DistanceCalculator;
 @Transactional(readOnly = true)
 public class ShipmentMatchingService {
 
+    /* ===================== CONFIG ===================== */
+
+    private static final double MAX_PICKUP_DETOUR_KM = 8.0;
+    private static final double MAX_ALLOWED_DETOUR_KM = 15.0;
+
+    /* ===================== DEPENDENCIES ===================== */
+
     private final ShipmentRepository shipmentRepository;
     private final BookingRepository bookingRepository;
     private final DriverProfileRepository driverProfileRepository;
@@ -45,6 +52,8 @@ public class ShipmentMatchingService {
         this.driverProfileRepository = driverProfileRepository;
         this.matchResultMapper = matchResultMapper;
     }
+
+    /* ===================== MATCHING ===================== */
 
     public List<MatchResultResponse> matchShipments(
             UUID driverId,
@@ -91,6 +100,8 @@ public class ShipmentMatchingService {
 
         for (Shipment shipment : page.getContent()) {
 
+            /* ================= BASIC GUARDS ================= */
+
             if (shipment.getBooking() != null) {
                 continue;
             }
@@ -98,6 +109,8 @@ public class ShipmentMatchingService {
             if (!isWeightCompatible(shipment, remainingCapacity)) {
                 continue;
             }
+
+            /* ================= DISTANCE FROM DRIVER ================= */
 
             double distanceToPickup = DistanceCalculator.kilometers(
                     effectiveLat,
@@ -110,16 +123,48 @@ public class ShipmentMatchingService {
                 continue;
             }
 
+            /* ================= BOOKING CONTEXT GUARDS ================= */
+
+            Double detourKm = null;
+
+            if (booking != null) {
+
+                Shipment anchor = booking.getShipments().isEmpty()
+                        ? null
+                        : booking.getShipments().get(0);
+
+                if (anchor != null) {
+
+                    // Hard pickup zone constraint
+                    double pickupDetour = DistanceCalculator.kilometers(
+                            anchor.getPickupLatitude().doubleValue(),
+                            anchor.getPickupLongitude().doubleValue(),
+                            shipment.getPickupLatitude().doubleValue(),
+                            shipment.getPickupLongitude().doubleValue()
+                    );
+
+                    if (pickupDetour > MAX_PICKUP_DETOUR_KM) {
+                        continue;
+                    }
+
+                    // Detour estimation
+                    detourKm = pickupDetour;
+
+                    // Hard detour constraint
+                    if (detourKm > MAX_ALLOWED_DETOUR_KM) {
+                        continue;
+                    }
+                }
+            }
+
+            /* ================= METRICS ================= */
+
             double pickupToDelivery = DistanceCalculator.kilometers(
                     shipment.getPickupLatitude().doubleValue(),
                     shipment.getPickupLongitude().doubleValue(),
                     shipment.getDeliveryLatitude().doubleValue(),
                     shipment.getDeliveryLongitude().doubleValue()
             );
-
-            Double detourKm = booking != null
-                    ? estimateDetour(booking, shipment)
-                    : null;
 
             int score = computeScore(
                     distanceToPickup,
@@ -161,7 +206,7 @@ public class ShipmentMatchingService {
                 .toList();
     }
 
-    // ------------------------------------------------------
+    /* ===================== HELPERS ===================== */
 
     private Booking resolveBookingIfPresent(UUID bookingId, UUID driverId) {
         if (bookingId == null) {
@@ -176,9 +221,7 @@ public class ShipmentMatchingService {
             throw new IllegalArgumentException("Driver does not own this booking");
         }
 
-        if (booking.getStatus() == BookingStatus.IN_PROGRESS
-                || booking.getStatus() == BookingStatus.COMPLETED
-                || booking.getStatus() == BookingStatus.CANCELLED) {
+        if (booking.getStatus() != BookingStatus.PENDING) {
             throw new IllegalStateException("Booking is not eligible for matching");
         }
 
@@ -201,21 +244,6 @@ public class ShipmentMatchingService {
 
     private boolean isWeightCompatible(Shipment shipment, BigDecimal remainingCapacity) {
         return shipment.getPackageWeight().compareTo(remainingCapacity) <= 0;
-    }
-
-    private Double estimateDetour(Booking booking, Shipment shipment) {
-        if (booking.getShipments().isEmpty()) {
-            return null;
-        }
-
-        Shipment anchor = booking.getShipments().get(0);
-
-        return DistanceCalculator.kilometers(
-                anchor.getPickupLatitude().doubleValue(),
-                anchor.getPickupLongitude().doubleValue(),
-                shipment.getPickupLatitude().doubleValue(),
-                shipment.getPickupLongitude().doubleValue()
-        );
     }
 
     private int computeScore(

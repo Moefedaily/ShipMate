@@ -32,6 +32,9 @@ public class ShipmentResponse {
 
     private LocalDate requestedPickupDate;
     private LocalDate requestedDeliveryDate;
+    
+    private int pickupOrder;
+    private int deliveryOrder;
 
     private ShipmentStatus status;
 

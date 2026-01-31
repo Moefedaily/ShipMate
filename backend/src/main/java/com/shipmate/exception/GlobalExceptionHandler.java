@@ -117,6 +117,24 @@ public class GlobalExceptionHandler {
     }
 
 
+    // ===================== BOOKING CONSTRAINTS =====================
+
+        @ExceptionHandler(BookingConstraintException.class)
+        public ResponseEntity<ErrorResponse> handleBookingConstraint(
+                BookingConstraintException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .code(ex.getCode().name())
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+        }
+
     // ===================== FALLBACK =====================
 
     @ExceptionHandler(Exception.class)

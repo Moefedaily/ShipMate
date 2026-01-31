@@ -1,16 +1,17 @@
+import { ShipmentResponse } from "../shipment/shipment.models";
+
 export interface CreateBookingRequest {
   shipmentIds: string[];
 }
 
 export interface BookingResponse {
   id: string;
-  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS';
+  driverId: string;
+  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   totalPrice: number;
+  platformCommission: number;
   driverEarnings: number;
-  shipments: {
-    id: string;
-    pickupAddress: string;
-    deliveryAddress: string;
-  }[];
+  shipments: ShipmentResponse[];
+  createdAt: string;
 }
 
