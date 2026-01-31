@@ -20,6 +20,8 @@ export interface DriverProfileResponse {
   vehicleType: VehicleType;
   maxWeightCapacity: number;
   approvedAt: string | null;
+  lastLatitude: number | null;
+  lastLongitude: number | null;
 }
 
 export interface DriverApplyRequest {

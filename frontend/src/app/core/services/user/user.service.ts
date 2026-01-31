@@ -6,7 +6,7 @@ import {
   UserProfile,
   UpdateUserProfileRequest
 } from './user.models';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {

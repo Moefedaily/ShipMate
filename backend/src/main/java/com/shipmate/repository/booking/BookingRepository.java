@@ -1,6 +1,7 @@
 package com.shipmate.repository.booking;
 
 import com.shipmate.model.booking.Booking;
+import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.user.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,11 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
     @EntityGraph(attributePaths = "shipments")
     Optional<Booking> findWithShipmentsById(UUID id);
+
+    @EntityGraph(attributePaths = "shipments")
+    Optional<Booking> findFirstByDriverAndStatusInOrderByCreatedAtDesc(
+    User driver,
+    List<BookingStatus> statuses
+    );
+
 }

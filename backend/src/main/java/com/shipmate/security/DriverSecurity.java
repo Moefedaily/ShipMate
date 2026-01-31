@@ -20,11 +20,20 @@ public class DriverSecurity {
      * True if user has an APPROVED driver profile
      */
     public boolean isApprovedDriver(Authentication authentication) {
-        UUID userId = UUID.fromString(authentication.getName());
+        if (authentication == null || authentication.getName() == null) {
+            return false;
+        }
 
-        return driverProfileRepository
-                .findByUser_Id(userId)
-                .map(profile -> profile.getStatus() == DriverStatus.APPROVED)
-                .orElse(false);
+        try {
+            UUID userId = UUID.fromString(authentication.getName());
+
+            return driverProfileRepository
+                    .findByUser_Id(userId)
+                    .map(profile -> profile.getStatus() == DriverStatus.APPROVED)
+                    .orElse(false);
+
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 }

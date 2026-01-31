@@ -1,201 +1,271 @@
-<!-- CURRENT DELIVERY -->
-<div class="current-delivery-section">
+@if (activeBooking()) {
+
+<section class="current-delivery-section">
   <div class="section-header">
     <h2>Current Delivery</h2>
     <span class="live-pill">Live Updates Active</span>
   </div>
 
   <section class="card current-delivery">
-    <div class="delivery-map">
-      <img src="assets/images/map.png" alt="Map preview" />
 
+    <div class="delivery-map">
+      <app-leaflet-map mode="route" [stops]="driverStops()"></app-leaflet-map>
+      
+      <div class="map-legend">
+        <div class="legend-item">
+          <span class="legend-dot pickup"></span>
+          <span class="legend-text">Pickup</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot delivery"></span>
+          <span class="legend-text">Delivery</span>
+        </div>
+      </div>
+      
       <span class="eta-pill">
         <mat-icon>schedule</mat-icon>
-        ETA: 12 mins
+        12 mins
       </span>
     </div>
 
     <div class="delivery-panel">
+
       <div class="delivery-top">
         <span class="status-pill">
           <span class="dot"></span>
-          In Transit
+          {{ activeBooking()!.status }}
         </span>
 
-        <div class="delivery-top-right">
-          <span class="order-id">Order #8821-B</span>
-        </div>
+        <span class="order-id">
+          Booking #{{ activeBooking()!.id | slice:0:8 }}
+        </span>
       </div>
 
-      <h3 class="delivery-title">Deliver Vintage Guitar to Sarah</h3>
+      <h3 class="delivery-title">
+        @if (activeBooking()!.shipments.length <= 1) {
+          {{ activeBooking()!.shipments[0]?.pickupAddress }} →
+          {{ activeBooking()!.shipments[0]?.deliveryAddress }}
+        } @else {
+          {{ activeBooking()!.shipments.length }} deliveries in this trip
+        }
+      </h3>
 
       <div class="delivery-top-right-earning">
         <div class="earning-block">
           <span class="earning-label">Earning</span>
-          <span class="earning-value">$34.50</span>
+          <span class="earning-value">
+            {{ activeBooking()!.driverEarnings | currency }}
+          </span>
         </div>
       </div>
 
       <div class="address-row">
-        <div class="address-card">
-          <div class="address-label">
-            <mat-icon>store</mat-icon>
-            <span>FROM</span>
-          </div>
-          <strong>Downtown Music Store</strong>
-        </div>
+        @if (activeBooking()!.shipments.length <= 1) {
 
-        <div class="address-card">
-          <div class="address-label">
-            <mat-icon>location_on</mat-icon>
-            <span>TO</span>
+          <div class="address-card">
+            <div class="address-label">
+              <mat-icon>store</mat-icon>
+              FROM
+            </div>
+            <strong>{{ activeBooking()!.shipments[0]?.pickupAddress }}</strong>
           </div>
-          <strong>42 Westside Lane</strong>
-        </div>
+
+          <div class="address-card">
+            <div class="address-label">
+              <mat-icon>location_on</mat-icon>
+              TO
+            </div>
+            <strong>{{ activeBooking()!.shipments[0]?.deliveryAddress }}</strong>
+          </div>
+
+        } @else {
+
+          <div class="address-card">
+            <div class="address-label">
+              <mat-icon>route</mat-icon>
+              STOPS
+            </div>
+            <strong>{{ driverStops().length }} route points</strong>
+          </div>
+
+          <div class="address-card">
+            <div class="address-label">
+              <mat-icon>fitness_center</mat-icon>
+              LOAD
+            </div>
+            <strong>{{ totalLoadKg() | number:'1.0-2' }} kg</strong>
+          </div>
+
+        }
       </div>
+
+      @if (driverStops().length > 0) {
+        <div class="trip-timeline">
+          <div class="timeline-title">Trip Timeline</div>
+
+          <div class="timeline-list">
+            @for (s of driverStops(); track s.id; let i = $index) {
+
+              <div class="timeline-item"
+                   [class.pickup]="s.type === 'PICKUP'"
+                   [class.delivery]="s.type === 'DELIVERY'">
+
+                <div class="timeline-left">
+                  <div class="step-circle">{{ i + 1 }}</div>
+                  @if (i < driverStops().length - 1) {
+                    <div class="step-line"></div>
+                  }
+                </div>
+
+                <div class="timeline-body">
+                  <div class="timeline-head">
+                    <span class="step-type">
+                      {{ s.type === 'PICKUP' ? 'Pickup' : 'Delivery' }}
+                    </span>
+                  </div>
+                  
+                  <div class="step-address">{{ s.address }}</div>
+
+                  <div class="timeline-shipments">
+                    @for (sh of s.shipments; track sh.id) {
+                      <div class="shipment-row">
+                        <div class="shipment-dot"></div>
+
+                        <div class="shipment-text">
+                          <div class="shipment-name">
+                            {{ sh.label }}
+                            <span class="shipment-weight">({{ sh.weightKg }} kg)</span>
+                          </div>
+
+                          @if (s.type === 'PICKUP') {
+                            <div class="shipment-sub">
+                              Delivering to: {{ sh.deliveryAddress }}
+                            </div>
+                          } @else {
+                            <div class="shipment-sub">
+                              Picked up from: {{ sh.pickupAddress }}
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       <div class="delivery-footer">
         <div class="meta-row">
           <span class="meta-chip">
-            <mat-icon>fitness_center</mat-icon>
-            Heavy Load
-          </span>
-          <span class="meta-chip">
-            <mat-icon>verified</mat-icon>
-            Handle with care
+            <mat-icon>inventory_2</mat-icon>
+            {{ activeBooking()!.shipments.length }} shipment(s)
           </span>
         </div>
 
-        <button class="btn btn--primary confirm-btn">
-          Confirm Delivery
-          <mat-icon>check_circle</mat-icon>
+        <button
+          class="btn btn--primary confirm-btn"
+          (click)="goToBooking(activeBooking()!.id)"
+        >
+          View delivery
+          <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>
+
     </div>
   </section>
-</div>
+</section>
 
+}
 
-<!-- AVAILABLE DELIVERIES -->
-<section class="available-deliveries">
+<section class="available-deliveries" [class.is-locked]="isBookingLocked()">
+
   <div class="section-header">
     <h2>Available Deliveries</h2>
 
-    <a class="link">
-      View Map <mat-icon>open_in_new</mat-icon>
+    <a class="link" (click)="openMatching()">
+      Find deliveries <mat-icon>open_in_new</mat-icon>
     </a>
   </div>
 
-  <div class="delivery-grid">
-    <!-- CARD 1 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/boxes.jpg" alt="Moving Boxes" />
+  @if (isBookingLocked()) {
+    <div class="lock-note">
+      <mat-icon>lock</mat-icon>
+      @if (bookingStatus() === 'CONFIRMED') {
+        Trip confirmed — no changes allowed
+      } @else {
+        Finish your current delivery to accept more
+      }
+    </div>
+  }
 
-        <span class="card-icon">
-          <mat-icon>inventory_2</mat-icon>
-        </span>
+  @if (isBuildingTrip()) {
+    <div class="lock-note">
+      <mat-icon>add_circle</mat-icon>
+      You can add more deliveries to this trip before confirming
+    </div>
+  }
 
-        <span class="distance-pill">
-          4.2 km
-        </span>
-      </div>
+  @if (matches().length === 0) {
+    <div class="empty-state card">
+      <mat-icon>map_off</mat-icon>
+      <p>No deliveries nearby at the moment</p>
+    </div>
+  } @else {
+    <div class="delivery-grid">
+      @for (m of matches(); track m.shipment.id) {
+        <article class="card delivery-card">
+          <div class="card-media">
+            <span class="card-icon">
+              <mat-icon>inventory_2</mat-icon>
+            </span>
 
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Moving Boxes</h4>
-          <span class="price">$18.50</span>
-        </div>
+            <span class="distance-pill">
+              {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
+            </span>
+          </div>
 
-        <p class="route">
-          Downtown <mat-icon>arrow_forward</mat-icon> Westside
-        </p>
+          <div class="card-body">
+            <div class="card-title-row">
+              <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
+              <span class="price">
+                {{ m.shipment.basePrice | currency }}
+              </span>
+            </div>
 
-        <div class="tag-row">
-          <span class="tag">Medium Load</span>
-          <span class="tag tag--danger">Fragile</span>
-        </div>
+            <p class="route">
+              {{ m.shipment.pickupAddress }}
+              <mat-icon>arrow_forward</mat-icon>
+              {{ m.shipment.deliveryAddress }}
+            </p>
 
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
+            <div class="tag-row">
+              <span class="tag">
+                {{ m.shipment.packageWeight }} kg
+              </span>
 
-    <!-- CARD 2 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/groceries.jpg" alt="Grocery Bag" />
+              <span class="tag tag--info">
+                {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
+              </span>
+            </div>
 
-        <span class="card-icon">
-          <mat-icon>shopping_bag</mat-icon>
-        </span>
-
-        <span class="distance-pill">
-          8.5 km
-        </span>
-      </div>
-
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Grocery Bag</h4>
-          <span class="price">$24.00</span>
-        </div>
-
-        <p class="route">
-          Uptown <mat-icon>arrow_forward</mat-icon> Suburbs
-        </p>
-
-        <div class="tag-row">
-          <span class="tag">Light Load</span>
-          <span class="tag tag--info">Perishable</span>
-        </div>
-
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
-
-    <!-- CARD 3 -->
-    <article class="card delivery-card">
-      <div class="card-media">
-        <img src="assets/images/electronics.jpg" alt="Electronics" />
-
-        <span class="card-icon">
-          <mat-icon>devices</mat-icon>
-        </span>
-
-        <span class="distance-pill">
-          2.1 km
-        </span>
-      </div>
-
-      <div class="card-body">
-        <div class="card-title-row">
-          <h4>Electronics</h4>
-          <span class="price">$12.50</span>
-        </div>
-
-        <p class="route">
-          City Center <mat-icon>arrow_forward</mat-icon> North Hills
-        </p>
-
-        <div class="tag-row">
-          <span class="tag">Small Item</span>
-          <span class="tag tag--neutral">Sign Req.</span>
-        </div>
-
-        <button class="btn btn--secondary btn-full">
-          Accept
-        </button>
-      </div>
-    </article>
-  </div>
+            <button
+              class="btn btn--secondary btn-full"
+              [disabled]="isBookingLocked()"
+              (click)="openMatching()"
+            >
+              View details
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  }
 </section>
 
-
-<!-- EARNINGS SUMMARY -->
 <section class="card earnings-summary">
   <div class="earnings-left">
     <div class="earnings-icon">
@@ -221,3 +291,10 @@
     </div>
   </div>
 </section>
+
+@if (showLocationModal()) {
+  <app-location-update-modal
+    (updated)="onLocationModalUpdated()"
+    (cancelled)="onLocationModalCancelled()"
+  ></app-location-update-modal>
+}

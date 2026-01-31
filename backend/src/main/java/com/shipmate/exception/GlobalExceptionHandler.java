@@ -10,6 +10,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.shipmate.dto.globalPresenter.ErrorResponse;
 
@@ -100,6 +101,40 @@ public class GlobalExceptionHandler {
         }
 
 
+    @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<ErrorResponse> handleResponseStatus(
+                ResponseStatusException ex
+        ) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(ex.getStatusCode().value())
+                .message(ex.getReason())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(error);
+    }
+
+
+    // ===================== BOOKING CONSTRAINTS =====================
+
+        @ExceptionHandler(BookingConstraintException.class)
+        public ResponseEntity<ErrorResponse> handleBookingConstraint(
+                BookingConstraintException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .code(ex.getCode().name())
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+        }
+
     // ===================== FALLBACK =====================
 
     @ExceptionHandler(Exception.class)
@@ -125,4 +160,22 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(error);
     }
+    // ===================== DRIVER LOCATION =====================
+
+    @ExceptionHandler(DriverLocationException.class)
+    public ResponseEntity<ErrorResponse> handleDriverLocationException(
+            DriverLocationException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .code(ex.getCode().name())
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
 }

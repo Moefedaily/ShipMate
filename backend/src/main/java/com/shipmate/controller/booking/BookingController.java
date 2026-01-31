@@ -150,4 +150,15 @@ public class BookingController {
 
         return ResponseEntity.ok(bookingMapper.toResponse(booking));
     }
+
+    @GetMapping("/me/active")
+    public ResponseEntity<BookingResponse> getMyActiveBooking(
+            @AuthenticationPrincipal(expression = "username") String userId
+    ) {
+        Booking booking = bookingService.getMyActiveBooking(UUID.fromString(userId));
+        return ResponseEntity.ok(
+            booking != null ? bookingMapper.toResponse(booking) : null
+        );
+    }
+
 }

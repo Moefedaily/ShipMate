@@ -1,0 +1,441 @@
+@use '../../../../../styles/variables/colors' as *;
+@use '../../../../../styles/variables/typography' as *;
+
+.driver-matching-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: $text-size-subheading;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .muted {
+    font-size: $text-size-caption;
+    color: $text-muted;
+  }
+}
+
+.selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 24px;
+  background: rgba($color-primary, 0.1);
+  border: 1px solid rgba($color-primary, 0.25);
+  color: $color-primary;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-medium;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba($color-primary, 0.15);
+    border-color: rgba($color-primary, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+
+.matching-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// MAP PREVIEW
+
+.matching-map-preview {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  height: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+//CAROUSEL
+
+.matching-carousel {
+  position: relative;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-left: 1.5rem;
+  
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 999px;
+    margin: 0 1.5rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($color-primary, 0.3);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+    
+    &:hover {
+      background: rgba($color-primary, 0.5);
+    }
+  }
+}
+
+// DELIVERY CARD
+
+.delivery-card {
+  position: relative;
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+  
+  padding: 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+  
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  
+  background: $bg-card;
+  border: 1.5px solid $border-default;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba($color-primary, 0.25);
+  }
+  
+  &.active {
+    border-color: $color-primary;
+    background: linear-gradient(180deg, rgba($color-primary, 0.03) 0%, $bg-card 100%);
+    
+    .distance-pill {
+      background: $color-primary;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+    }
+  }
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.distance-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 24px;
+  
+  background: #374151;
+  opacity: 0.6;
+  color: #fff;
+  
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.9;
+  }
+  
+  .delivery-card:hover & {
+    background: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  letter-spacing: -0.02em;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0.5rem 0 0.25rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.route {
+  font-size: $text-size-caption;
+  color: $text-secondary;
+  line-height: 1.5;
+  
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+}
+
+.tag-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    margin-right: 4px;
+    opacity: 0.7;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.tag--info {
+  background: rgba($color-primary, 0.12);
+  border-color: rgba($color-primary, 0.3);
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  
+  mat-icon {
+    opacity: 1;
+  }
+}
+
+.tag--neutral {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: $text-secondary;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: auto;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  mat-icon {
+    margin: 0;
+  }
+  
+  &:not(:disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+.note {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $text-size-caption;
+  color: $text-muted;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+  text-align: center;
+  
+  mat-icon {
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+}
+
+// EMPTY STATE
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+  border: 1.5px dashed $border-default;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $text-muted;
+    opacity: 0.5;
+  }
+  
+  h4 {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
+  
+  p {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    margin: 0;
+    max-width: 300px;
+    line-height: 1.5;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .driver-matching-page {
+    padding: 1rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .matching-map-preview {
+    height: 280px;
+    border-radius: 16px;
+  }
+  
+  .matching-carousel {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+  
+  .carousel-track {
+    scroll-padding-left: 1rem;
+    gap: 1rem;
+    
+    &::-webkit-scrollbar-track {
+      margin: 0 1rem;
+    }
+  }
+  
+  .delivery-card {
+    flex: 0 0 min(320px, 85vw);
+    padding: 1.25rem;
+    border-radius: 16px;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+  
+  .price {
+    font-size: 1.125rem;
+  }
+  
+  .empty-state {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+}
+
+// ANIMATIONS
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delivery-card {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+// FOCUS STATES (Accessibility)
+
+.delivery-card:focus-visible {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}
+
+.btn-full:focus-visible {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}

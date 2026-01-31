@@ -55,6 +55,12 @@ export const jwtInterceptor: HttpInterceptorFn = ( req: HttpRequest<any>, next: 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
 
+      if (
+        error.status === 404 &&
+        req.url.includes('/drivers/me')
+      ) {
+        return throwError(() => error);
+      }
       // Refresh only when allowed
       if (
         error.status === 401 &&

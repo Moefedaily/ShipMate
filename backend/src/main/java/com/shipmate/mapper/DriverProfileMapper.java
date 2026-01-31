@@ -28,6 +28,9 @@ public interface DriverProfileMapper {
     @Mapping(target = "maxWeightCapacity", source = "maxWeightCapacity")
     @Mapping(target = "vehicleDescription", source = "vehicleDescription")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "lastLatitude", source = "lastLatitude")
+    @Mapping(target = "lastLongitude", source = "lastLongitude")
+    @Mapping(target = "lastLocationUpdatedAt", source = "lastLocationUpdatedAt")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "approvedAt", source = "approvedAt")
     DriverProfileResponse toResponse(DriverProfile entity);

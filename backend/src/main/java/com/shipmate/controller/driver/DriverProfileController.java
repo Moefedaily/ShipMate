@@ -3,8 +3,6 @@ package com.shipmate.controller.driver;
 import com.shipmate.dto.request.driver.DriverApplyRequest;
 import com.shipmate.dto.request.driver.UpdateDriverLocationRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;
-import com.shipmate.model.DriverProfile.DriverProfile;
-import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.service.driver.DriverProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -31,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class DriverProfileController {
 
     private final DriverProfileService driverProfileService;
-    private final DriverProfileRepository driverProfileRepository;
 
     // ===================== APPLY AS DRIVER =====================
 
@@ -92,15 +88,7 @@ public class DriverProfileController {
             @AuthenticationPrincipal(expression = "username") String userId,
             @RequestBody UpdateDriverLocationRequest request
     ) {
-        DriverProfile profile = driverProfileRepository
-                .findByUser_Id(UUID.fromString(userId))
-                .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
-
-        profile.setLastLatitude(request.getLatitude());
-        profile.setLastLongitude(request.getLongitude());
-        profile.setLastLocationUpdatedAt(Instant.now());
-
-        driverProfileRepository.save(profile);
-    }
+             driverProfileService.updateLocation(UUID.fromString(userId), request);
+        }
 
 }

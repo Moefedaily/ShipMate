@@ -6,16 +6,12 @@ import { catchError, of } from 'rxjs';
 import { AuthState } from '../../core/auth/auth.state';
 import { AuthService } from '../../core/auth/auth.service';
 
-import { DriverService } from '../../core/driver/driver.service';
-import {
-  DriverProfileResponse,
-  VEHICLE_TYPE_LABELS
-} from '../../core/driver/driver.models';
-
-import { UserService } from '../../core/user/user.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
+import { UserService } from '../../core/services/user/user.service';
+import { DriverService } from '../../core/services/driver/driver.service';
+import { DriverProfileResponse, VEHICLE_TYPE_LABELS } from '../../core/services/driver/driver.models';
 
 
 @Component({
