@@ -1,0 +1,321 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+/* =====================================================
+   BASE HEADER
+   ===================================================== */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  background-color: $bg-card;
+  border-bottom: 1px solid $border-default;
+}
+
+.header-inner {
+  height: 76px;
+  padding: 0 1.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* =====================================================
+   LEFT
+   ===================================================== */
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  font-size: 1.1rem;
+  font-weight: $font-weight-bold;
+  letter-spacing: -0.02em;
+  color: $text-primary;
+
+  mat-icon {
+    color: $color-primary;
+  }
+}
+
+/* =====================================================
+   CENTER
+   ===================================================== */
+
+.header-center {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+/* Role toggle */
+.role-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  padding: 0.25rem;
+  border-radius: 999px;
+
+  background-color: $bg-surface;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.role-btn {
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:not(.active):hover {
+    background-color: rgba($color-primary, 0.08);
+    color: $text-primary;
+  }
+
+  &:active {
+    background-color: rgba($color-primary, 0.14);
+  }
+
+  &.active {
+    background-color: $color-primary;
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(255, 122, 0, 0.22);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+/* =====================================================
+   RIGHT
+   ===================================================== */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* icon group */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Vertical divider */
+.header-divider {
+  width: 1px;
+  height: 30px;
+  background-color: $border-default;
+  opacity: 0.9;
+}
+
+/* ---------- ICON BUTTONS (notif + messages) ---------- */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  color: $text-secondary;
+
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  mat-icon {
+    font-size: 20px;
+  }
+
+  &:hover {
+    background-color: rgba($color-primary, 0.08);
+    color: $color-primary;
+    border-color: rgba($color-primary, 0.14);
+  }
+
+  &:active {
+    background-color: rgba($color-primary, 0.14);
+    border-color: rgba($color-primary, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- PROFILE ---------- */
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:hover {
+    background-color: rgba($color-primary, 0.08);
+    border-color: rgba($color-primary, 0.14);
+  }
+
+  &:active {
+    background-color: rgba($color-primary, 0.14);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.35);
+    outline-offset: 2px;
+  }
+
+  mat-icon {
+    color: $text-muted;
+    transition: color 0.18s ease, transform 0.18s ease;
+  }
+
+  &:hover mat-icon {
+    color: $text-secondary;
+    transform: translateY(1px);
+  }
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+
+.profile-name {
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  letter-spacing: $letter-spacing-tight;
+}
+
+.profile-role {
+  font-size: $text-size-caption;
+  color: $text-muted;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid $border-default;
+}
+
+.avatar-upload {
+  font-size: $text-size-label;
+  color: $color-primary;
+  cursor: pointer;
+}
+
+/* =====================================================
+   MENU
+   ===================================================== */
+
+
+.profile-menu {
+  min-width: 260px;
+}
+
+.menu-user {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  strong {
+    display: block;
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: $text-size-caption;
+    color: $text-muted;
+  }
+}
+
+/* logout */
+.logout {
+  color: $color-danger;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .profile-text {
+    display: none;
+  }
+
+  .header-divider {
+    display: none;
+  }
+}

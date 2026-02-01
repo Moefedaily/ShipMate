@@ -1,0 +1,50 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- LOADING -->
+    @if (isVerifying()) {
+      <div class="state state--loading" role="status" aria-live="polite" aria-busy="true">
+        <div class="state-icon state-icon--loading" aria-hidden="true"></div>
+        <p class="auth-subtitle">Please wait while we confirm your account.</p>
+      </div>
+    }
+
+    <!-- SUCCESS -->
+    @if (isSuccess()) {
+      <div class="state state--success" role="status" aria-live="polite">
+        <div class="state-icon state-icon--success" aria-hidden="true">✓</div>
+        <h2>Email verified</h2>
+        <p class="auth-subtitle">Your account is now active. You can sign in to get started.</p>
+
+        <button type="button" class="btn btn--primary auth-submit" (click)="goToLogin()">
+          Go to login
+        </button>
+      </div>
+    }
+
+    <!-- ERROR -->
+    @if (isError()) {
+      <div class="state state--error" role="alert" aria-live="polite">
+        <div class="state-icon state-icon--error" aria-hidden="true">✕</div>
+        <h1>Verification failed</h1>
+        <p class="auth-subtitle">
+          {{ errorMessage() || 'This verification link is invalid or has expired.' }}
+        </p>
+
+        <div class="button-row">
+          <button type="button" class="btn btn--primary" (click)="goToLogin()">
+            Go to login
+          </button>
+          <a routerLink="/register" class="btn btn--secondary">
+            Register again
+          </a>
+        </div>
+
+        <p class="hint">
+          If the problem persists, contact support.
+        </p>
+      </div>
+    }
+
+  </div>
+</div>

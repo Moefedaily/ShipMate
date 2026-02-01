@@ -1,0 +1,330 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+/* =====================================================
+   HERO
+   ===================================================== */
+
+.dashboard-hero {
+  margin-bottom: 2.5rem;
+
+  h1 {
+    font-size: $text-size-heading;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+  }
+}
+
+/* =====================================================
+   CREATE SHIPMENT
+   ===================================================== */
+
+.card.create-shipment {
+  display: flex;
+  flex-direction: row; 
+  align-items: center; 
+  justify-content: space-between;
+  text-align: left;           
+  gap: 2rem;                 
+
+  padding: 1.75rem 2rem;
+  margin-bottom: 3rem;
+
+  border-radius: 16px;
+  background-color: $bg-card;
+
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+}
+.card.create-shipment > * {
+  flex: initial; 
+}
+.create-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    font-size: $text-size-subheading;
+    font-weight: $font-weight-semibold;
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: $text-size-label;
+    color: $text-muted;
+    line-height: 1.45;
+  }
+}
+
+.icon-circle {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  background-color: $color-primary-subtle;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 22px;
+    color: $color-primary;
+  }
+}
+
+/* button*/
+.create-shipment .btn {
+  flex-shrink: 0;
+  width: auto !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.65rem 1.25rem;
+}
+
+/* Mobile:*/
+@media (max-width: 768px) {
+  .card.create-shipment {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .create-shipment .btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+}
+
+/* =====================================================
+   ACTIVE SHIPMENTS
+   ===================================================== */
+
+.shipments {
+  margin-bottom: 3rem;
+}
+
+.shipments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 1.25rem;
+
+  h2 {
+    font-size: $text-size-subheading;
+    font-weight: $font-weight-semibold;
+  }
+
+  .link {
+    font-size: $text-size-label;
+    color: $color-primary;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.shipments-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  h2 {
+    font-size: $text-size-subheading;
+    font-weight: $font-weight-semibold;
+    margin: 0;
+  }
+
+  mat-icon {
+    font-size: 22px;
+    color: $color-primary;
+  }
+}
+
+/* Right link */
+.shipments-header .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  cursor: pointer;
+
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  mat-icon {
+    font-size: 18px;
+    height: 15px;
+  }
+
+  &:hover {
+    opacity: 0.85;
+    transform: translateX(2px);
+  }
+}
+
+.shipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+/* Card */
+.shipment-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+
+  border-radius: 14px;
+  background-color: $bg-card;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+  }
+
+  img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+}
+
+.shipment-body {
+  padding: 1.1rem 1.25rem;
+
+  h4 {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 0.15rem;
+  }
+
+  small {
+    font-size: $text-size-caption;
+    color: $text-muted;
+  }
+}
+
+/* Route */
+.route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 0.85rem 0;
+  padding: 0.4rem 0.6rem;
+
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+
+  background-color: $bg-surface;
+  border-radius: 8px;
+
+  mat-icon {
+    font-size: 16px;
+    color: $text-muted;
+  }
+}
+
+/* Footer */
+.shipment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.driver {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+  }
+
+  span {
+    font-size: $text-size-caption;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.muted {
+  font-size: $text-size-caption;
+  color: $text-muted;
+}
+
+/* =====================================================
+   SHIPPING TIPS
+   ===================================================== */
+
+.shipping-tips {
+  margin-top: 3.5rem;
+
+  h2 {
+    font-size: $text-size-subheading;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 1.25rem;
+  }
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+
+  background-color: $bg-card;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
+
+  mat-icon {
+    font-size: 22px;
+    color: $color-primary;
+    margin-top: 0.1rem;
+  }
+
+  h4 {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 0.15rem;
+  }
+
+  p {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    line-height: 1.45;
+  }
+}

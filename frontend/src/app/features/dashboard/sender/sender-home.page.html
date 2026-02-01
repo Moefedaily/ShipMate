@@ -1,0 +1,143 @@
+<!-- WELCOME -->
+<section class="dashboard-hero">
+  <h1>Welcome back, Alex</h1>
+  <p>Here's what's happening with your shipments today.</p>
+</section>
+
+<!-- CREATE SHIPMENT -->
+<section class="card create-shipment">
+  <div class="create-left">
+    <div class="icon-circle">
+      <mat-icon>add</mat-icon>
+    </div>
+
+    <div>
+      <h3>Create a new shipment</h3>
+      <p>
+        Get a quote and find a trusted traveler to deliver your package securely.
+      </p>
+    </div>
+  </div>
+
+  <button class="btn btn--primary" routerLink="/dashboard/shipments/new">
+    <mat-icon>add</mat-icon>
+    Create Shipment
+  </button>
+</section>
+
+<section class="shipments">
+  <div class="shipments-header">
+    <div class="shipments-title">
+      <mat-icon>inventory_2</mat-icon>
+      <h2>Active Shipments</h2>
+    </div>
+
+    <a class="link">
+      View all history
+      <mat-icon>chevron_right</mat-icon>
+    </a>
+  </div>
+
+
+  <div class="shipment-grid">
+
+    <!-- CARD -->
+    <div class="card shipment-card">
+      <img src="assets/images/guitar.jpg" alt="Vintage Guitar" />
+
+      <span class="badge badge--info">In Transit</span>
+
+      <div class="shipment-body">
+        <h4>Vintage Guitar</h4>
+        <small>ID: #SHP-8291</small>
+
+        <div class="route">
+          <span>SF</span>
+          <mat-icon>arrow_forward</mat-icon>
+          <span>LA</span>
+        </div>
+
+        <div class="shipment-footer">
+          <div class="driver">
+            <img src="assets/avatar-man.png" />
+            <span>Mike T.</span>
+          </div>
+          <button class="btn btn--ghost">Track</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card shipment-card">
+      <img src="assets/images/documents.jpg" alt="Legal Documents" />
+
+      <span class="badge badge--success">Accepted</span>
+
+      <div class="shipment-body">
+        <h4>Legal Documents</h4>
+        <small>ID: #SHP-9921</small>
+
+        <div class="route">
+          <span>NYC</span>
+          <mat-icon>arrow_forward</mat-icon>
+          <span>BOS</span>
+        </div>
+
+        <div class="shipment-footer">
+          <div class="driver">
+            <img src="assets/avatar-girl.png" />
+            <span>Sarah J.</span>
+          </div>
+          <button class="btn btn--secondary">Details</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card shipment-card">
+      <img src="assets/images/box.jpg" alt="Furniture Box" />
+
+      <span class="badge badge--warning">Finding Driver</span>
+
+      <div class="shipment-body">
+        <h4>Furniture Box</h4>
+        <small>ID: #SHP-3301</small>
+
+        <div class="route">
+          <span>AUS</span>
+          <mat-icon>arrow_forward</mat-icon>
+          <span>DAL</span>
+        </div>
+
+        <div class="shipment-footer">
+          <small class="muted">Matching…</small>
+          <button class="btn btn--ghost">Edit</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="shipping-tips">
+  <h2>Shipping Tips</h2>
+
+  <div class="tips-grid">
+    <div class="card tip">
+      <mat-icon>info</mat-icon>
+      <div>
+        <h4>Tips for faster delivery</h4>
+        <p>Providing flexible pickup windows helps travelers accept requests faster.</p>
+      </div>
+    </div>
+
+    <div class="card tip">
+      <mat-icon>photo_camera</mat-icon>
+      <div>
+        <h4>Add clear photos</h4>
+        <p>Detailed photos help drivers assess space requirements accurately.</p>
+      </div>
+    </div>
+  </div>
+</section>

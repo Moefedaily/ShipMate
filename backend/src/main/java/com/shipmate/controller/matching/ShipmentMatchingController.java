@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/matching")
-@PreAuthorize("@driverSecurity.isDriver(authentication)")
+@PreAuthorize("@driverSecurity.isApprovedDriver(authentication)")
 @RequiredArgsConstructor
 public class ShipmentMatchingController {
 

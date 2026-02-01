@@ -1,0 +1,120 @@
+<div class="shipment-create-page">
+
+  <div class="dashboard-hero">
+    <h1>Create shipment</h1>
+    <p>Provide pickup & delivery details to get matched with drivers.</p>
+  </div>
+
+  <section class="card shipment-create-card">
+
+    <div class="content">
+
+      <form [formGroup]="form" class="form">
+
+        <div class="form-block">
+            <app-address-autocomplete
+                label="Pickup address"
+                placeholder="Where should we pick up?"
+                (selectAddress)="onPickupSelected($event)"
+            />
+            @if (!pickup()) {
+                <small class="hint">Please select an address from the list</small>
+            }
+            </div>
+
+            <div class="form-block">
+            <app-address-autocomplete
+                label="Delivery address"
+                placeholder="Where should we deliver?"
+                (selectAddress)="onDeliverySelected($event)"
+            />
+            @if (!delivery()) {
+                <small class="hint">Please select an address from the list</small>
+            }
+        </div>
+
+        <div class="form-block">
+          <label>Description</label>
+          <textarea formControlName="packageDescription"
+            placeholder="Optional package description"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Weight (kg)</label>
+            <input type="number" formControlName="packageWeight" />
+          </div>
+
+          <div>
+            <label>Declared value</label>
+            <input type="number" formControlName="packageValue" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Pickup date</label>
+            <input type="date" formControlName="requestedPickupDate" />
+          </div>
+
+          <div>
+            <label>Delivery date</label>
+            <input type="date" formControlName="requestedDeliveryDate" />
+          </div>
+        </div>
+
+        @if (form.controls.requestedPickupDate.value && form.controls.requestedDeliveryDate.value && !dateOrderValid()) {
+        <p class="form-error">Delivery date must be after pickup date</p>
+        }
+
+        <div class="form-block">
+          <label>Base price</label>
+          <input type="number" formControlName="basePrice" />
+        </div>
+
+        <div class="form-block">
+          <label>Photos</label>
+
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            (change)="onFileInputChange($event)"
+          />
+
+          @if (photoPreviews().length > 0) {
+            <div class="photo-grid">
+              @for (src of photoPreviews(); track $index; let i = $index) {
+                <div class="photo">
+                    <img [src]="src" />
+                    <button type="button" (click)="removePhoto(i)">×</button>
+                </div>
+                }
+            </div>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!canSubmit() || submitting()"
+          (click)="submit()"
+        >
+          {{ submitting() ? 'Creating…' : 'Create shipment' }}
+        </button>
+
+      </form>
+
+      <div class="map">
+        <app-leaflet-map
+            mode="preview"
+            [pickup]="pickup() ? { lat: pickup()!.lat, lng: pickup()!.lng, label: pickup()!.address } : null"
+            [delivery]="delivery() ? { lat: delivery()!.lat, lng: delivery()!.lng, label: delivery()!.address } : null"
+          />
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

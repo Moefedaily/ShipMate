@@ -4,9 +4,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.shipmate.dto.request.driver.DriverApplyRequest;
+import com.shipmate.dto.request.driver.UpdateDriverLocationRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;
 import com.shipmate.mapper.DriverProfileMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
@@ -14,6 +17,7 @@ import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.mail.MailService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class DriverProfileService {
     private final DriverProfileRepository driverProfileRepository;
     private final DriverProfileMapper mapper;
     private final UserRepository userRepository;
+    private final MailService mailService;
 
     public DriverProfileResponse apply(UUID userId, DriverApplyRequest request) {
 
@@ -47,7 +52,7 @@ public class DriverProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         DriverProfile profile = driverProfileRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("Driver profile not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Driver profile not found"));
         return mapper.toResponse(profile);
     }
 
@@ -70,6 +75,9 @@ public class DriverProfileService {
         profile.setStatus(DriverStatus.APPROVED);
         profile.setApprovedAt(Instant.now());
 
+         mailService.sendDriverApprovedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
     }
 
@@ -83,6 +91,9 @@ public class DriverProfileService {
         profile.setStatus(DriverStatus.REJECTED);
         profile.setApprovedAt(Instant.now());
 
+         mailService.sendDriverRejectedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
     }
 
@@ -100,7 +111,24 @@ public class DriverProfileService {
 
         profile.setStatus(DriverStatus.SUSPENDED);
 
+        mailService.sendDriverSuspendedEmail(
+            profile.getUser().getEmail()
+        );
         return mapper.toResponse(profile);
+    }
+
+    public void updateLocation(UUID userId, UpdateDriverLocationRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        DriverProfile profile = driverProfileRepository.findByUser(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver profile not found"));
+        
+        profile.setLastLatitude(request.getLatitude());
+        profile.setLastLongitude(request.getLongitude());
+        profile.setLastLocationUpdatedAt(Instant.now());
+        
+        driverProfileRepository.save(profile);
     }
 
 }

@@ -1,0 +1,52 @@
+<section class="card apply-card">
+  <h2>Apply to become a driver</h2>
+
+  @if (errorMessage()) {
+    <div class="error-banner">{{ errorMessage() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <div class="form-field">
+      <label>License number</label>
+      <input formControlName="licenseNumber" />
+    </div>
+
+    <div class="form-field">
+      <label for="vehicleType">Vehicle type</label>
+      <select id="vehicleType" formControlName="vehicleType">
+        <option
+          *ngFor="let type of vehicleTypes"
+          [value]="type"
+        >
+          {{ vehicleTypeLabels[type] }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Max weight capacity (kg)</label>
+      <input type="number" formControlName="maxWeightCapacity" />
+    </div>
+
+    <div class="form-field">
+      <label>Vehicle description</label>
+      <textarea formControlName="vehicleDescription"></textarea>
+    </div>
+
+    <button
+      class="btn btn--primary"
+      type="submit"
+      [disabled]="submitting() || form.disabled"
+    >
+      {{
+        form.disabled
+          ? 'Application submitted'
+          : submitting()
+            ? 'Submitting…'
+            : 'Submit application'
+      }}
+    </button>
+
+  </form>
+</section>

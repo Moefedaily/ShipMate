@@ -26,6 +26,9 @@ public class DriverProfileResponse {
     private BigDecimal maxWeightCapacity;
     private String vehicleDescription;
     private DriverStatus status;
+    private BigDecimal lastLatitude;
+    private BigDecimal lastLongitude;
+    private Instant lastLocationUpdatedAt;
     private Instant createdAt;
     private Instant approvedAt;
 }

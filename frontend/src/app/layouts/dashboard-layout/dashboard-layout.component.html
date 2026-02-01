@@ -1,0 +1,16 @@
+<div class="dashboard-layout">
+
+ <app-dashboard-header
+    [userType]="userType()"
+    [activeRole]="activeRole()"
+    (roleChange)="onRoleChange($event)"
+    (menuAction)="onMenuAction($event)"
+  >
+  </app-dashboard-header>
+
+  <main class="dashboard-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer></app-footer>
+</div>

@@ -1,0 +1,105 @@
+@use '../variables/colors' as *;
+@use '../variables/typography' as *;
+
+/* ---------- Base Card ---------- */
+
+.card {
+  background-color: $bg-card;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid $border-default;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* ---------- Card Hover ---------- */
+
+.card--interactive:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ---------- Card Header ---------- */
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.card__title {
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+/* ---------- Card Content ---------- */
+
+.card__content {
+  font-size: $text-size-body;
+  color: $text-secondary;
+  line-height: $line-height-normal;
+}
+
+/* ---------- Card Footer ---------- */
+
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+/* ---------- Media Card ---------- */
+
+.card--media {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card__media {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background-color: $bg-surface;
+}
+
+.card--media .card__content {
+  padding: 1.25rem;
+}
+
+/* ---------- Compact Card ---------- */
+
+.card--compact {
+  padding: 1rem;
+  gap: 0.5rem;
+  box-shadow: none;
+}
+
+/* ---------- Status Highlighted Card ---------- */
+
+.card--status-success {
+  border-left: 4px solid $color-success;
+}
+
+.card--status-warning {
+  border-left: 4px solid $color-warning;
+}
+
+.card--status-info {
+  border-left: 4px solid $color-info;
+}
+
+.card--status-danger {
+  border-left: 4px solid $color-danger;
+}
