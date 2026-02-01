@@ -1,6 +1,7 @@
 package com.shipmate.unit.service.shipment;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -69,7 +70,7 @@ class ShipmentServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(shipmentMapper.toEntity(request)).thenReturn(shipment);
-        when(shipmentRepository.save(shipment)).thenReturn(savedShipment);
+        when(shipmentRepository.saveAndFlush(shipment)).thenReturn(savedShipment);
         when(shipmentMapper.toResponse(savedShipment)).thenReturn(new ShipmentResponse());
 
         ShipmentResponse response = shipmentService.create(userId, request);
@@ -77,7 +78,7 @@ class ShipmentServiceTest {
         assertThat(response).isNotNull();
         verify(userRepository).findById(userId);
         verify(shipmentMapper).toEntity(request);
-        verify(shipmentRepository).save(shipment);
+        verify(shipmentRepository).saveAndFlush(shipment);
         verify(shipmentMapper).toResponse(savedShipment);
     }
 

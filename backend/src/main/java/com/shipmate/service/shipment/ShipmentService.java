@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -65,7 +66,7 @@ public class ShipmentService {
         shipment.setExtraInsuranceFee(BigDecimal.ZERO);
 
         log.debug("shipment: {}", shipment);
-        Shipment saved = shipmentRepository.save(shipment);
+        Shipment saved = shipmentRepository.saveAndFlush(shipment);
         return shipmentMapper.toResponse(saved);
     }
 
@@ -92,6 +93,17 @@ public class ShipmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
         return shipmentMapper.toResponse(shipment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Shipment> getAllShipments() {
+        return shipmentRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Shipment getShipmentById(UUID id) {
+        return shipmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
     }
 
     /* =========================
