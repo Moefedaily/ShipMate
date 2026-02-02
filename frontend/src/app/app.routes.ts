@@ -91,6 +91,13 @@ export const routes: Routes = [
             .then(m => m.DriverMatchingPage)
       },
       {
+        path: 'bookings/:id',
+        canActivate: [driverGuard],
+        loadComponent: () =>
+          import('./features/bookings/booking.page')
+            .then(m => m.BookingPage)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.page')

@@ -53,4 +53,10 @@ export class BookingService {
     );
   }
 
+  getById(id: string): Observable<BookingResponse> {
+    return this.http.get<BookingResponse>(
+      `${this.api}/bookings/${id}`
+    );
+  }
+
 }

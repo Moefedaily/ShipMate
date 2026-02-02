@@ -1,9 +1,18 @@
 package com.shipmate.unit.service.booking;
 
+import com.shipmate.dto.request.booking.CreateBookingRequest;
+import com.shipmate.exception.BookingConstraintErrorCode;
+import com.shipmate.exception.BookingConstraintException;
+import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
+import com.shipmate.model.shipment.Shipment;
+import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
+import com.shipmate.model.user.VehicleType;
 import com.shipmate.repository.booking.BookingRepository;
+import com.shipmate.repository.driver.DriverProfileRepository;
+import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.booking.BookingService;
 
@@ -18,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+
 import org.springframework.security.access.AccessDeniedException;
 
 
@@ -26,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Slf4j
@@ -40,6 +52,13 @@ class BookingServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ShipmentRepository shipmentRepository;
+
+    @Mock
+    private DriverProfileRepository driverProfileRepository;
+
 
     private UUID bookingId;
     private UUID driverId;
@@ -86,8 +105,8 @@ class BookingServiceTest {
 
         assertThatThrownBy(() ->
                 bookingService.confirm(bookingId, driverId))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("pending");
+                .isInstanceOf(BookingConstraintException.class)
+                .hasMessageContaining("Booking is already confirmed or in progress");
     }
 
     // ===================== CANCEL =====================
@@ -227,5 +246,223 @@ class BookingServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Booking not found");
     }
+
+    
+    @Test
+    void createBooking_shouldFail_whenShipmentLimitExceeded_forCar() {
+
+        booking.setShipments(List.of(
+                Shipment.builder()
+                        .status(ShipmentStatus.CREATED)
+                        .pickupLatitude(BigDecimal.ZERO)
+                        .pickupLongitude(BigDecimal.ZERO)
+                        .deliveryLatitude(BigDecimal.ONE)
+                        .deliveryLongitude(BigDecimal.ONE)
+                        .basePrice(BigDecimal.TEN)
+                        .build(),
+                Shipment.builder()
+                        .status(ShipmentStatus.CREATED)
+                        .pickupLatitude(BigDecimal.ZERO)
+                        .pickupLongitude(BigDecimal.ZERO)
+                        .deliveryLatitude(BigDecimal.ONE)
+                        .deliveryLongitude(BigDecimal.ONE)
+                        .basePrice(BigDecimal.TEN)
+                        .build(),
+                Shipment.builder()
+                        .status(ShipmentStatus.CREATED)
+                        .pickupLatitude(BigDecimal.ZERO)
+                        .pickupLongitude(BigDecimal.ZERO)
+                        .deliveryLatitude(BigDecimal.ONE)
+                        .deliveryLongitude(BigDecimal.ONE)
+                        .basePrice(BigDecimal.TEN)
+                        .build()
+        ));
+
+        Shipment incoming = Shipment.builder()
+                .status(ShipmentStatus.CREATED)
+                .pickupLatitude(BigDecimal.ZERO)
+                .pickupLongitude(BigDecimal.ZERO)
+                .deliveryLatitude(BigDecimal.ONE)
+                .deliveryLongitude(BigDecimal.ONE)
+                .basePrice(BigDecimal.TEN)
+                .build();
+
+        DriverProfile profile = DriverProfile.builder()
+                .vehicleType(VehicleType.CAR)
+                .lastLatitude(BigDecimal.ZERO)
+                .lastLongitude(BigDecimal.ZERO)
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        when(shipmentRepository.findAllById(any()))
+                .thenReturn(List.of(incoming));
+
+        when(userRepository.findById(driverId))
+                .thenReturn(Optional.of(driver));
+
+        when(driverProfileRepository.findByUser_Id(driverId))
+                .thenReturn(Optional.of(profile));
+
+        when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
+                .thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() ->
+                bookingService.createBooking(
+                        driverId,
+                        new CreateBookingRequest(List.of(UUID.randomUUID()))
+                ))
+            .isInstanceOf(BookingConstraintException.class)
+            .extracting("code")
+            .isEqualTo(BookingConstraintErrorCode.SHIPMENT_LIMIT_EXCEEDED);
+    }
+
+    @Test
+    void createBooking_shouldFail_whenPickupRadiusExceeded() {
+
+        booking.setShipments(List.of(
+                Shipment.builder()
+                        .status(ShipmentStatus.CREATED)
+                        .pickupLatitude(BigDecimal.ZERO)
+                        .pickupLongitude(BigDecimal.ZERO)
+                        .deliveryLatitude(BigDecimal.ONE)
+                        .deliveryLongitude(BigDecimal.ONE)
+                        .basePrice(BigDecimal.TEN)
+                        .build()
+        ));
+
+        Shipment incoming = Shipment.builder()
+                .status(ShipmentStatus.CREATED)
+                .pickupLatitude(BigDecimal.valueOf(0.05))   // far away
+                .pickupLongitude(BigDecimal.valueOf(0.05))
+                .deliveryLatitude(BigDecimal.ONE)
+                .deliveryLongitude(BigDecimal.ONE)
+                .basePrice(BigDecimal.TEN)
+                .build();
+
+        DriverProfile profile = DriverProfile.builder()
+                .vehicleType(VehicleType.MOTORCYCLE)
+                .lastLatitude(BigDecimal.ZERO)
+                .lastLongitude(BigDecimal.ZERO)
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        when(shipmentRepository.findAllById(any()))
+                .thenReturn(List.of(incoming));
+
+        when(userRepository.findById(driverId))
+                .thenReturn(Optional.of(driver));
+
+        when(driverProfileRepository.findByUser_Id(driverId))
+                .thenReturn(Optional.of(profile));
+
+        when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
+                .thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() ->
+                bookingService.createBooking(
+                        driverId,
+                        new CreateBookingRequest(List.of(UUID.randomUUID()))
+                ))
+            .isInstanceOf(BookingConstraintException.class)
+            .extracting("code")
+            .isEqualTo(BookingConstraintErrorCode.TRIP_DISTANCE_CAP_EXCEEDED);
+    }
+
+
+    @Test
+    void createBooking_shouldFail_whenTripDistanceCapExceeded() {
+
+        booking.setShipments(List.of(
+                Shipment.builder()
+                        .status(ShipmentStatus.CREATED)
+                        .pickupLatitude(BigDecimal.ZERO)
+                        .pickupLongitude(BigDecimal.ZERO)
+                        .deliveryLatitude(BigDecimal.valueOf(30))
+                        .deliveryLongitude(BigDecimal.valueOf(30))
+                        .basePrice(BigDecimal.TEN)
+                        .build()
+        ));
+
+        Shipment incoming = Shipment.builder()
+                .status(ShipmentStatus.CREATED)
+                .pickupLatitude(BigDecimal.ZERO)
+                .pickupLongitude(BigDecimal.ZERO)
+                .deliveryLatitude(BigDecimal.valueOf(40))
+                .deliveryLongitude(BigDecimal.valueOf(40))
+                .basePrice(BigDecimal.TEN)
+                .build();
+
+        DriverProfile profile = DriverProfile.builder()
+                .vehicleType(VehicleType.CAR)
+                .lastLatitude(BigDecimal.ZERO)
+                .lastLongitude(BigDecimal.ZERO)
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        when(shipmentRepository.findAllById(any()))
+                .thenReturn(List.of(incoming));
+
+        when(userRepository.findById(driverId))
+                .thenReturn(Optional.of(driver));
+
+        when(driverProfileRepository.findByUser_Id(driverId))
+                .thenReturn(Optional.of(profile));
+
+        when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
+                .thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() ->
+                bookingService.createBooking(
+                        driverId,
+                        new CreateBookingRequest(List.of(UUID.randomUUID()))
+                ))
+            .isInstanceOf(BookingConstraintException.class)
+            .extracting("code")
+            .isEqualTo(BookingConstraintErrorCode.TRIP_DISTANCE_CAP_EXCEEDED);
+    }
+
+    @Test
+    void createBooking_shouldFail_whenBookingIsNotPending() {
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        Shipment incoming = Shipment.builder()
+                .status(ShipmentStatus.CREATED)
+                .pickupLatitude(BigDecimal.ZERO)
+                .pickupLongitude(BigDecimal.ZERO)
+                .deliveryLatitude(BigDecimal.ONE)
+                .deliveryLongitude(BigDecimal.ONE)
+                .basePrice(BigDecimal.TEN)
+                .build();
+
+        DriverProfile profile = DriverProfile.builder()
+                .vehicleType(VehicleType.CAR)
+                .lastLatitude(BigDecimal.ZERO)
+                .lastLongitude(BigDecimal.ZERO)
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        when(shipmentRepository.findAllById(any()))
+                .thenReturn(List.of(incoming));
+
+        when(userRepository.findById(driverId))
+                .thenReturn(Optional.of(driver));
+
+        when(driverProfileRepository.findByUser_Id(driverId))
+                .thenReturn(Optional.of(profile));
+
+        when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
+                .thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() ->
+                bookingService.createBooking(
+                        driverId,
+                        new CreateBookingRequest(List.of(UUID.randomUUID()))
+                ))
+            .isInstanceOf(BookingConstraintException.class)
+            .extracting("code")
+            .isEqualTo(BookingConstraintErrorCode.BOOKING_LOCKED);
+    }
+
 
 }

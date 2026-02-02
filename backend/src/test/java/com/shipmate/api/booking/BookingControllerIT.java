@@ -3,12 +3,16 @@ package com.shipmate.api.booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipmate.config.AbstractIntegrationTest;
 import com.shipmate.dto.request.booking.CreateBookingRequest;
+import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
+import com.shipmate.model.user.VehicleType;
+import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
 
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +30,7 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
 class BookingControllerIT extends AbstractIntegrationTest {
 
     @Autowired
@@ -32,6 +38,9 @@ class BookingControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DriverProfileRepository driverProfileRepository;
 
     @Autowired
     private ShipmentRepository shipmentRepository;
@@ -46,6 +55,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
     @Test
     void createBooking_shouldSucceed_whenAuthenticatedDriver() throws Exception {
         String token = createAndLoginDriver();
+        updateDriverLocation(token);
         UUID shipmentId = createAvailableShipment();
 
         CreateBookingRequest request =
@@ -139,10 +149,36 @@ class BookingControllerIT extends AbstractIntegrationTest {
                         .build()
         );
 
+        driverProfileRepository.saveAndFlush(
+                DriverProfile.builder()
+                        .user(driver)
+                        .licenseNumber("LIC-" + UUID.randomUUID())
+                        .vehicleType(VehicleType.CAR)
+                        .maxWeightCapacity(BigDecimal.valueOf(500))
+                        .vehicleDescription("Test vehicle")
+                        .status(DriverStatus.APPROVED)
+                        .build()
+        );
+
+
         return obtainAccessToken(driver.getEmail(), PASSWORD);
     }
 
+    private void updateDriverLocation(String token) throws Exception {
+        mockMvc.perform(post("/api/drivers/me/location")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                            "latitude": 48.8566,
+                            "longitude": 2.3522
+                            }
+                            """))
+                .andExpect(status().isOk());
+    }
+
     private UUID createBookingForToken(String token) throws Exception {
+        updateDriverLocation(token);
         UUID shipmentId = createAvailableShipment();
 
         CreateBookingRequest request =
@@ -152,6 +188,7 @@ class BookingControllerIT extends AbstractIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -193,4 +230,5 @@ class BookingControllerIT extends AbstractIntegrationTest {
 
         return shipmentRepository.saveAndFlush(shipment).getId();
     }
+    
 }
