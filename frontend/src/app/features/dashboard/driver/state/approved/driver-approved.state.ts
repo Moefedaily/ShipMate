@@ -154,7 +154,7 @@ export class DriverApprovedState implements OnInit {
   /* ================= ACTIONS ================= */
 
   goToBooking(id: string): void {
-    this.router.navigate(['/dashboard/driver/booking', id]);
+    this.router.navigate(['/dashboard/bookings', id]);
   }
 
   openMatching(): void {
