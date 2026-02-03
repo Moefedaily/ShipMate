@@ -48,22 +48,26 @@ export class DashboardLayoutComponent implements OnInit {
 
     this.userType.set(user.userType);
 
-    this.syncRoleWithUrl();
+    this.syncRoleWithRoute();
 
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => this.syncRoleWithUrl());
+      .subscribe(() => this.syncRoleWithRoute());
   }
 
-  private syncRoleWithUrl(): void {
-    const url = this.router.url;
 
-    if (url.includes('/dashboard/driver')) {
-      this.activeRole.set('DRIVER');
-    } else {
-      this.activeRole.set('SENDER');
+  private syncRoleWithRoute(): void {
+    let route = this.router.routerState.root.firstChild;
+
+    while (route?.firstChild) {
+      route = route.firstChild;
     }
+
+    const role = route?.snapshot.data['dashboardRole'] as ActiveRole | undefined;
+
+    this.activeRole.set(role ?? 'SENDER');
   }
+
 
   onRoleChange(role: ActiveRole): void {
     this.router.navigate(['/dashboard', role.toLowerCase()]);

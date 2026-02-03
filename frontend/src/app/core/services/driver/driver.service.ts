@@ -11,10 +11,7 @@ export class DriverService {
   private readonly http = inject(HttpClient);
   private readonly api = environment.apiBaseUrl;
 
-  /**
-   * Returns the driver profile of the authenticated user.
-   * 404 = not applied
-   */
+
   getMyDriverProfile(): Observable<DriverProfileResponse> {
   return this.http.get<DriverProfileResponse>(
     `${this.api}/drivers/me`

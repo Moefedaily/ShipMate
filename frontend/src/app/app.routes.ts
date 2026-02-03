@@ -63,6 +63,7 @@ export const routes: Routes = [
       {
         path: 'sender',
         canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
         loadComponent: () =>
           import('./features/dashboard/sender/sender-home.page')
             .then(m => m.SenderHomePage)
@@ -70,14 +71,31 @@ export const routes: Routes = [
       {
         path: 'shipments/new',
         canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
         loadComponent: () =>
           import('./features/shipments/new/shipment-create.page')
             .then(m => m.ShipmentCreatePage)
       },
       {
+        path: 'shipments/:id',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/shipments/detail/shipment-detail.page')
+            .then(m => m.ShipmentDetailPage)
+      },
+      {
+        path: 'shipments/:id/edit',
+        canActivate: [senderGuard],
+        loadComponent: () =>
+          import('./features/shipments/edit/shipment-edit.page')
+            .then(m => m.ShipmentEditPage)
+      },
+      {
         path: 'driver',
         canActivate: [driverGuard],
         resolve: { state: driverDashboardResolver },
+        data: { dashboardRole: 'DRIVER' },
         runGuardsAndResolvers: 'always',
         loadComponent: () =>
           import('./features/dashboard/driver/driver-home.page')
@@ -86,6 +104,7 @@ export const routes: Routes = [
       {
         path: 'driver/matching',
         canActivate: [driverGuard],
+        data: { dashboardRole: 'DRIVER' },
         loadComponent: () =>
           import('./features/dashboard/driver/matching/driver-matching.page')
             .then(m => m.DriverMatchingPage)
@@ -93,6 +112,7 @@ export const routes: Routes = [
       {
         path: 'bookings/:id',
         canActivate: [driverGuard],
+        data: { dashboardRole: 'DRIVER' },
         loadComponent: () =>
           import('./features/bookings/booking.page')
             .then(m => m.BookingPage)

@@ -7,18 +7,21 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
 import { LeafletMapComponent } from '../../../shared/components/map/leaflet-map.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AddressAutocompleteComponent, AddressResult } from '../../../shared/components/address-autocomplete/address-autocomplete.component';
+import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
 
 
 
 @Component({
   standalone: true,
   selector: 'app-shipment-create-page',
-  imports: [CommonModule, ReactiveFormsModule,LeafletMapComponent,AddressAutocompleteComponent],
+  imports: [CommonModule, ReactiveFormsModule,LeafletMapComponent,AddressAutocompleteComponent,MatIconModule],
   templateUrl: './shipment-create.page.html',
   styleUrl: './shipment-create.page.scss'
 })
 export class ShipmentCreatePage {
 
+  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly shipmentService = inject(ShipmentService);
   private readonly loader = inject(LoaderService);
@@ -45,7 +48,7 @@ export class ShipmentCreatePage {
     basePrice: [0, [Validators.required, Validators.min(0)]]
     });
 
-    /* ---------------- Form validity (MUST be first) ---------------- */
+    /* ---------------- Form validity ---------------- */
 
     readonly formValueTick = toSignal(
     this.form.valueChanges,
@@ -58,7 +61,6 @@ export class ShipmentCreatePage {
     private parseDateOnly(value: string | null | undefined): number | null {
     if (!value) return null;
 
-    // Expected from <input type="date"> is "YYYY-MM-DD"
     const parts = value.split('-');
     if (parts.length !== 3) return null;
 
@@ -80,13 +82,11 @@ export class ShipmentCreatePage {
     const p = this.parseDateOnly(pRaw);
     const d = this.parseDateOnly(dRaw);
 
-    // Only validate when both exist
     if (p === null || d === null) return false;
 
     return d >= p; 
     });
 
-    /* ---------------- Derived ---------------- */
 
    readonly canSubmit = computed(() => {
     this.formValueTick();
@@ -100,7 +100,6 @@ export class ShipmentCreatePage {
     });
 
 
-  /* ---------------- Previews ---------------- */
   readonly photoPreviews = computed(() =>
     this.photos().map(file => URL.createObjectURL(file))
     );
@@ -119,7 +118,9 @@ export class ShipmentCreatePage {
     }
 
 
-  /* ---------------- Actions ---------------- */
+  goBack(): void {
+    this.router.navigate(['/dashboard/sender']);
+  }
 
   onPickupSelected(addr: AddressResult): void {
    this.pickup.set({...addr});
@@ -171,8 +172,10 @@ export class ShipmentCreatePage {
             this.loader.hide();
             this.submitting.set(false);
             this.toast.success('Shipment created successfully');
-        };
-
+          setTimeout(() => {
+              this.router.navigate(['/dashboard/sender']);
+            }, 300);
+          };
         if (this.photos().length > 0) {
             this.shipmentService.uploadPhotos(shipment.id, this.photos())
             .subscribe({

@@ -1,7 +1,23 @@
-import { Component, EventEmitter, Input, Output, signal, OnDestroy } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil } from 'rxjs';
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  of,
+  takeUntil
+} from 'rxjs';
 
 export interface AddressResult {
   address: string;
@@ -16,13 +32,16 @@ export interface AddressResult {
   templateUrl: './address-autocomplete.component.html',
   styleUrl: './address-autocomplete.component.scss'
 })
-export class AddressAutocompleteComponent implements OnDestroy {
+export class AddressAutocompleteComponent
+  implements OnDestroy, OnChanges {
 
   /* ---------- Inputs ---------- */
 
   @Input() label = '';
   @Input() placeholder = 'Enter address';
   @Input() disabled = false;
+
+  @Input() initialValue: string | null = null;
 
   /* ---------- Outputs ---------- */
 
@@ -56,7 +75,7 @@ export class AddressAutocompleteComponent implements OnDestroy {
             'https://nominatim.openstreetmap.org/search',
             {
               headers: {
-                'Accept': 'application/json',
+                Accept: 'application/json',
                 'User-Agent': 'ShipMate/1.0 (contact@shipmate.app)'
               },
               params: {
@@ -88,12 +107,21 @@ export class AddressAutocompleteComponent implements OnDestroy {
       });
   }
 
+  /* ---------- Handle initial value ---------- */
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialValue'] && this.initialValue) {
+      this.query.set(this.initialValue);
+    }
+  }
+
   /* ---------- Events ---------- */
 
   handleInput(event: Event): void {
-   const value = (event.target as HTMLInputElement).value;
-   this.onInput(value);
+    const value = (event.target as HTMLInputElement).value;
+    this.onInput(value);
   }
+
   onInput(value: string): void {
     this.query.set(value);
     this.search$.next(value);

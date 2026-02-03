@@ -3,6 +3,7 @@ package com.shipmate.service.shipment;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
+import com.shipmate.mapper.ShipmentAssembler;
 import com.shipmate.mapper.ShipmentMapper;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
@@ -39,6 +40,7 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final UserRepository userRepository;
     private final ShipmentMapper shipmentMapper;
+    private final ShipmentAssembler shipmentAssembler;
     private final Cloudinary cloudinary;
     @Value("${app.file.max-size:10485760}")
     private long maxFileSize;
@@ -66,7 +68,7 @@ public class ShipmentService {
 
         log.debug("shipment: {}", shipment);
         Shipment saved = shipmentRepository.saveAndFlush(shipment);
-        return shipmentMapper.toResponse(saved);
+        return shipmentAssembler.toResponse(saved);
     }
 
     /* =========================
@@ -80,7 +82,7 @@ public class ShipmentService {
 
         return shipmentRepository
                 .findBySender(sender, pageable)
-                .map(shipmentMapper::toResponse);
+                .map(shipmentAssembler::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -91,7 +93,7 @@ public class ShipmentService {
         Shipment shipment = shipmentRepository.findByIdAndSender(shipmentId, sender)
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
-        return shipmentMapper.toResponse(shipment);
+        return shipmentAssembler.toResponse(shipment);
     }
 
     @Transactional(readOnly = true)
@@ -122,7 +124,7 @@ public class ShipmentService {
 
         shipmentMapper.updateEntity(shipment, request);
 
-        return shipmentMapper.toResponse(shipment);
+        return shipmentAssembler.toResponse(shipment);
     }
 
     /* =========================
@@ -186,7 +188,7 @@ public class ShipmentService {
         }
 
         Shipment saved = shipmentRepository.save(shipment);
-        return shipmentMapper.toResponse(saved);
+        return shipmentAssembler.toResponse(saved);
         }
 
     private void validateImage(MultipartFile file) {

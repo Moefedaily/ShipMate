@@ -7,7 +7,7 @@ import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.model.shipment.Shipment;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper( componentModel = "spring")
 public interface ShipmentMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -37,5 +37,6 @@ public interface ShipmentMapper {
     void updateEntity(@MappingTarget Shipment shipment, UpdateShipmentRequest request);
 
     @Mapping(source = "sender.id", target = "senderId")
+    @Mapping(target = "driver", ignore = true)
     ShipmentResponse toResponse(Shipment shipment);
 }

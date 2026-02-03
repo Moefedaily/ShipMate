@@ -62,6 +62,7 @@ export class BookingPage implements OnInit {
       )
       .subscribe(booking => {
         this.booking.set(booking);
+        console.log(booking);
         this.loading.set(false);
       });
   }

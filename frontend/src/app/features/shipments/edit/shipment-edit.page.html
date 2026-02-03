@@ -1,0 +1,131 @@
+<div class="shipment-create-page">
+
+  <!-- ================= HEADER ================= -->
+  <div class="dashboard-hero create-header">
+    <div class="header-left">
+      <button
+        type="button"
+        class="btn btn--ghost back-btn"
+        (click)="goBack()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+
+      <div>
+        <h1>Edit shipment</h1>
+        <p>Update shipment details before it gets picked up.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CARD ================= -->
+  <section class="card shipment-create-card">
+
+    <div class="content">
+
+      <form [formGroup]="form" class="form">
+        <div class="form-block">
+        <app-address-autocomplete
+            label="Pickup address"
+            placeholder="Pickup location"
+            [initialValue]="pickup()?.address ?? null"
+            (selectAddress)="onPickupSelected($event)"
+        />
+        @if (!pickup()) {
+            <small class="hint">Please select a pickup address</small>
+        }
+        </div>
+
+        <div class="form-block">
+        <app-address-autocomplete
+            label="Delivery address"
+            placeholder="Delivery location"
+            [initialValue]="delivery()?.address ?? null"
+            (selectAddress)="onDeliverySelected($event)"
+        />
+        @if (!delivery()) {
+            <small class="hint">Please select a delivery address</small>
+        }
+        </div>
+
+        <div class="form-block">
+          <label>Description</label>
+          <textarea
+            formControlName="packageDescription"
+            placeholder="Optional package description"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Weight (kg)</label>
+            <input
+              type="number"
+              formControlName="packageWeight"
+              min="0.01"
+              step="0.01"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Pickup date</label>
+            <input
+              type="date"
+              formControlName="requestedPickupDate"
+            />
+          </div>
+
+          <div>
+            <label>Delivery date</label>
+            <input
+              type="date"
+              formControlName="requestedDeliveryDate"
+            />
+          </div>
+        </div>
+
+        @if (
+          form.controls.requestedPickupDate.value &&
+          form.controls.requestedDeliveryDate.value &&
+          form.controls.requestedDeliveryDate.value <
+          form.controls.requestedPickupDate.value
+        ) {
+          <p class="form-error">
+            Delivery date must be after pickup date
+          </p>
+        }
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!canSubmit()"
+          (click)="submit()"
+        >
+          {{ submitting() ? 'Updating…' : 'Update shipment' }}
+        </button>
+
+      </form>
+
+      <div class="map">
+        <app-leaflet-map
+          mode="preview"
+          [pickup]="pickup() ? {
+            lat: pickup()!.lat,
+            lng: pickup()!.lng,
+            label: pickup()!.address
+          } : null"
+          [delivery]="delivery() ? {
+            lat: delivery()!.lat,
+            lng: delivery()!.lng,
+            label: delivery()!.address
+          } : null"
+        />
+      </div>
+
+    </div>
+  </section>
+
+</div>

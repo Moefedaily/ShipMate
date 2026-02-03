@@ -1,6 +1,7 @@
 package com.shipmate.dto.response.shipment;
 
 
+import com.shipmate.dto.response.driver.AssignedDriverResponse;
 import com.shipmate.model.shipment.ShipmentStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -32,11 +34,14 @@ public class ShipmentResponse {
 
     private LocalDate requestedPickupDate;
     private LocalDate requestedDeliveryDate;
-    
-    private int pickupOrder;
-    private int deliveryOrder;
+
+    private Integer pickupOrder;
+    private Integer deliveryOrder;
+
+    private List<String> photos;
 
     private ShipmentStatus status;
+    private AssignedDriverResponse driver;
 
     private BigDecimal basePrice;
 

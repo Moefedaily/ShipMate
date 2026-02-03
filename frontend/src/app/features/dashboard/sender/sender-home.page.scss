@@ -2,113 +2,275 @@
 @use '../../../../styles/variables/typography' as *;
 
 /* =====================================================
-   HERO
+   HERO SECTION - Enhanced
    ===================================================== */
 
 .dashboard-hero {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 
   h1 {
-    font-size: $text-size-heading;
+    font-size: 2rem;
     font-weight: $font-weight-bold;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   p {
     font-size: $text-size-label;
     color: $text-muted;
+    line-height: 1.5;
+    max-width: 600px;
   }
 }
 
 /* =====================================================
-   CREATE SHIPMENT
+   CREATE SHIPMENT CARD - Premium Design
    ===================================================== */
 
 .card.create-shipment {
+  position: relative;
   display: flex;
-  flex-direction: row; 
-  align-items: center; 
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  text-align: left;           
-  gap: 2rem;                 
+  gap: 2rem;
 
-  padding: 1.75rem 2rem;
-  margin-bottom: 3rem;
+  padding: 2rem 2.25rem;
+  margin-bottom: 2.5rem;
 
-  border-radius: 16px;
-  background-color: $bg-card;
-
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.04) 0%, $bg-card 100%);
+  
+  overflow: hidden;
+  
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba($color-primary, 0.25);
+  }
 }
+
 .card.create-shipment > * {
-  flex: initial; 
+  flex: initial;
 }
+
 .create-left {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   flex: 1;
   min-width: 0;
 
   h3 {
-    font-size: $text-size-subheading;
-    font-weight: $font-weight-semibold;
-    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+    font-weight: $font-weight-bold;
+    margin: 0 0 0.35rem;
+    color: $text-primary;
+    letter-spacing: -0.01em;
   }
 
   p {
     margin: 0;
     font-size: $text-size-label;
     color: $text-muted;
-    line-height: 1.45;
+    line-height: 1.5;
   }
 }
 
 .icon-circle {
-  width: 46px;
-  height: 46px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
 
-  border-radius: 50%;
-  background-color: $color-primary-subtle;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.15) 0%, rgba($color-primary, 0.1) 100%);
+  border: 2px solid rgba($color-primary, 0.25);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  transition: all 0.3s ease;
+
   mat-icon {
-    font-size: 22px;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: $color-primary;
+  }
+  
+  .create-shipment:hover & {
+    transform: rotate(90deg);
+    background: linear-gradient(135deg, rgba($color-primary, 0.2) 0%, rgba($color-primary, 0.15) 100%);
+  }
+}
+
+.meta-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.pill {
+  padding: 0.35rem 0.75rem;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  color: $text-secondary;
+}
+
+.pill--accent {
+  background: rgba($color-primary, 0.12);
+  border-color: rgba($color-primary, 0.3);
+  color: $color-primary;
+}
+
+.pill--neutral {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+
+/* ================= DRIVER STRIP (ELEGANT) ================= */
+
+.assigned-driver {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.85rem;
+
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba($color-primary, 0.06),
+    rgba($color-primary, 0.02)
+  );
+
+  border: 1px solid rgba($color-primary, 0.18);
+}
+
+.driver-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  background: rgba($color-primary, 0.14);
+  color: $color-primary;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.driver-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+
+  .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $text-muted;
+  }
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+}
+
+.driver-meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-secondary;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
     color: $color-primary;
   }
 }
 
-/* button*/
-.create-shipment .btn {
-  flex-shrink: 0;
-  width: auto !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+/* ================= SPIN ICON ================= */
 
-  padding: 0.65rem 1.25rem;
+.spin {
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
 }
 
-/* Mobile:*/
-@media (max-width: 768px) {
-  .card.create-shipment {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
-  .create-shipment .btn {
-    width: 100% !important;
-    justify-content: center;
+.route-icon.start {
+  color: $color-success;
+}
+
+.route-icon.end {
+  color: #3b82f6;
+}
+
+.arrow {
+  opacity: 0.5;
+}
+
+.create-shipment .btn {
+  flex-shrink: 0;
+  min-width: 180px;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.85rem 1.75rem;
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
   }
 }
 
 /* =====================================================
-   ACTIVE SHIPMENTS
+   ACTIVE SHIPMENTS SECTION
    ===================================================== */
 
 .shipments {
@@ -119,212 +281,445 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  margin-bottom: 1.25rem;
-
-  h2 {
-    font-size: $text-size-subheading;
-    font-weight: $font-weight-semibold;
-  }
-
-  .link {
-    font-size: $text-size-label;
-    color: $color-primary;
-    cursor: pointer;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+  margin-bottom: 1.5rem;
 }
 
 .shipments-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
 
   h2 {
     font-size: $text-size-subheading;
-    font-weight: $font-weight-semibold;
+    font-weight: $font-weight-bold;
     margin: 0;
+    color: $text-primary;
+    letter-spacing: -0.01em;
   }
 
   mat-icon {
-    font-size: 22px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
     color: $color-primary;
   }
 }
 
-/* Right link */
 .shipments-header .link {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
 
   font-size: $text-size-label;
-  font-weight: $font-weight-medium;
+  font-weight: $font-weight-semibold;
   color: $color-primary;
   cursor: pointer;
 
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: all 0.2s ease;
 
   mat-icon {
     font-size: 18px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
   }
 
   &:hover {
-    opacity: 0.85;
-    transform: translateX(2px);
+    opacity: 0.8;
+    transform: translateX(3px);
   }
 }
 
+/* =====================================================
+   SHIPMENT GRID - Responsive & Single Card Handling
+   ===================================================== */
+
 .shipment-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  
+  &.single {
+    grid-template-columns: minmax(320px, 380px);
+    
+    @media (min-width: 769px) {
+      .shipment-card {
+        max-width: 380px;
+      }
+    }
+  }
 }
 
-/* Card */
+/* =====================================================
+   SHIPMENT CARD - Enhanced Design
+   ===================================================== */
+
 .shipment-card {
   position: relative;
   overflow: hidden;
   padding: 0;
 
-  border-radius: 14px;
+  border-radius: 16px;
   background-color: $bg-card;
+  border: 1px solid $border-default;
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    border-color: rgba($color-primary, 0.2);
   }
 
   img {
     width: 100%;
-    height: 160px;
     object-fit: cover;
+    display: block;
+    background: $bg-surface;
   }
 
   .badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
+    top: 14px;
+    left: 14px;
+    
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
   }
 }
 
 .shipment-body {
-  padding: 1.1rem 1.25rem;
+  padding: 1.25rem 1.5rem 1.35rem;
 
   h4 {
-    font-size: $text-size-label;
-    font-weight: $font-weight-semibold;
-    margin-bottom: 0.15rem;
+    font-size: 1rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.25rem;
+    color: $text-primary;
+    letter-spacing: -0.01em;
   }
 
   small {
     font-size: $text-size-caption;
     color: $text-muted;
+    font-weight: $font-weight-medium;
   }
 }
 
-/* Route */
+/* =====================================================
+   ROUTE DISPLAY - Redesigned
+   ===================================================== */
+
 .route {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
 
-  margin: 0.85rem 0;
-  padding: 0.4rem 0.6rem;
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
 
-  font-size: $text-size-label;
-  font-weight: $font-weight-medium;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
 
-  background-color: $bg-surface;
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.03) 0%, $bg-surface 100%);
+  border: 1px solid rgba($color-primary, 0.1);
+  border-radius: 12px;
 
-  mat-icon {
+  .route-icon {
     font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $color-primary;
+    flex-shrink: 0;
+    
+    &:first-child {
+      color: $color-success;
+    }
+    
+    &:last-of-type {
+      color: #3b82f6;
+    }
+  }
+
+  mat-icon:not(.route-icon) {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
     color: $text-muted;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+  
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
   }
 }
 
-/* Footer */
+/* =====================================================
+   SHIPMENT FOOTER
+   ===================================================== */
+
 .shipment-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
+  gap: 1rem;
+  margin-top: 0.5rem;
 
-.driver {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-
-  img {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+  .muted {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    font-weight: $font-weight-semibold;
   }
 
-  span {
+  .btn {
+    padding: 0.5rem 1rem;
     font-size: $text-size-caption;
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-semibold;
+    border-radius: 10px;
+    
+    &:hover {
+      background: rgba($color-primary, 0.08);
+      color: $color-primary;
+    }
+  }
+}
+
+
+.empty-state {
+  grid-column: 1 / -1;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+  border: 2px dashed $border-default;
+  
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: $text-muted;
+    opacity: 0.4;
+  }
+  
+  p {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-muted;
+    margin: 0;
   }
 }
 
 .muted {
   font-size: $text-size-caption;
   color: $text-muted;
+  text-align: center;
+  padding: 2rem;
 }
 
-/* =====================================================
-   SHIPPING TIPS
-   ===================================================== */
 
 .shipping-tips {
   margin-top: 3.5rem;
 
   h2 {
     font-size: $text-size-subheading;
-    font-weight: $font-weight-semibold;
-    margin-bottom: 1.25rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 1.5rem;
+    color: $text-primary;
+    letter-spacing: -0.01em;
   }
 }
 
 .tips-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
 .tip {
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
+  gap: 1.15rem;
 
-  padding: 1.1rem 1.25rem;
-  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  border-radius: 16px;
 
-  background-color: $bg-card;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
+  background: $bg-card;  
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    border-color: rgba($color-primary, 0.2);
+  }
 
   mat-icon {
-    font-size: 22px;
+    font-size: 28px;
+    width: 45px;
+    height: 45px;
     color: $color-primary;
-    margin-top: 0.1rem;
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    
+    padding: 0.6rem;
+    border-radius: 12px;
+    background: rgba($color-primary, 0.1);
   }
 
   h4 {
     font-size: $text-size-label;
-    font-weight: $font-weight-semibold;
-    margin-bottom: 0.15rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.35rem;
+    color: $text-primary;
+    letter-spacing: -0.01em;
   }
 
   p {
     font-size: $text-size-caption;
     color: $text-muted;
-    line-height: 1.45;
+    line-height: 1.5;
+    margin: 0;
   }
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .dashboard-hero {
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .card.create-shipment {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .create-left {
+    gap: 1rem;
+    
+    h3 {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .icon-circle {
+    width: 48px;
+    height: 48px;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .create-shipment .btn {
+    width: 100% !important;
+    min-width: unset;
+  }
+  
+  .shipment-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    
+    &.single {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .shipment-card {
+    img {
+      height: 160px;
+    }
+  }
+  
+  .route {
+    flex-wrap: wrap;
+    font-size: 11px;
+    padding: 0.75rem 0.85rem;
+    
+    span {
+      white-space: normal;
+    }
+  }
+  
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-hero {
+    h1 {
+      font-size: 1.35rem;
+    }
+    
+    p {
+      font-size: $text-size-caption;
+    }
+  }
+  
+  .shipments-title {
+    h2 {
+      font-size: 1rem;
+    }
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  .shipments-header .link {
+    font-size: $text-size-caption;
+  }
+  
+  .shipment-body {
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* =====================================================
+   LOADING STATE (Optional)
+   ===================================================== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, $bg-surface 25%, rgba($bg-surface, 0.5) 50%, $bg-surface 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }

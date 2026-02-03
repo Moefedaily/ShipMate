@@ -17,6 +17,13 @@ export interface CreateShipmentRequest {
   basePrice: number;
 }
 
+export interface AssignedDriver {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  vehicleType: 'CAR' | 'VAN' | 'TRUCK';
+}
 export interface ShipmentResponse {
   id: string;
   senderId: string;
@@ -35,8 +42,20 @@ export interface ShipmentResponse {
   requestedDeliveryDate: string;
   basePrice: number;
   extraInsuranceFee: number;
-  status: 'CREATED' | 'PENDING' | 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  status: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
   photos: string[] | null;
   createdAt: string;
   updatedAt: string;
+  driver?: AssignedDriver | null;
+}
+
+export interface UpdateShipmentRequest {
+  pickupAddress: string;
+  deliveryAddress: string;
+
+  packageDescription?: string;
+  packageWeight: number;
+
+  requestedPickupDate: string;
+  requestedDeliveryDate: string;
 }
