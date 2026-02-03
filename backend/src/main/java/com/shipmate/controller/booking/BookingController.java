@@ -145,10 +145,9 @@ public class BookingController {
             @PathVariable UUID id,
             @AuthenticationPrincipal(expression = "username") String driverId) {
 
-        Booking booking =
-                bookingService.getMyBooking(id, UUID.fromString(driverId));
-
-        return ResponseEntity.ok(bookingMapper.toResponse(booking));
+        return ResponseEntity.ok(
+            bookingService.getMyBooking(id, UUID.fromString(driverId))
+        );
     }
 
     @GetMapping("/me/active")

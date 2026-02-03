@@ -1,8 +1,24 @@
 <div class="shipment-create-page">
 
-  <div class="dashboard-hero">
-    <h1>Create shipment</h1>
-    <p>Provide pickup & delivery details to get matched with drivers.</p>
+<div class="shipment-create-page">
+
+  <!-- HEADER -->
+  <div class="dashboard-hero create-header">
+    <div class="header-left">
+      <button
+        type="button"
+        class="btn btn--ghost back-btn"
+        (click)="goBack()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+
+      <div>
+        <h1>Create shipment</h1>
+        <p>Provide pickup & delivery details to get matched with drivers.</p>
+      </div>
+    </div>
   </div>
 
   <section class="card shipment-create-card">

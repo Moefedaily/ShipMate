@@ -42,6 +42,8 @@ export class LeafletMapComponent
   /** ROUTE inputs */
   @Input() stops: MapStop[] | null = null;
 
+  @Input() showLegend = true;
+
   private map?: L.Map;
   private markers: L.Marker[] = [];
   private routeLine?: L.Polyline;

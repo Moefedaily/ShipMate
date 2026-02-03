@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateShipmentRequest, ShipmentResponse } from './shipment.models';
+import { CreateShipmentRequest, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +24,22 @@ export class ShipmentService {
     return this.http.post<void>(
       `${this.api}/shipments/${shipmentId}/photos`,
       formData
+    );
+  }
+  getMyShipments() {
+    return this.http.get<{ content: ShipmentResponse[] }>(
+      `${this.api}/shipments/me`
+    );
+  }
+  getMyShipment(shipmentId: string) {
+    return this.http.get<ShipmentResponse>(
+      `${this.api}/shipments/${shipmentId}`
+    );
+  }
+  updateShipment( id: string, request: UpdateShipmentRequest ): Observable<ShipmentResponse> {
+    return this.http.put<ShipmentResponse>(
+      `${this.api}/shipments/${id}`,
+      request
     );
   }
 }

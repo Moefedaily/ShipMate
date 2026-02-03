@@ -1,6 +1,7 @@
 @use '../../../../styles/variables/colors' as *;
 @use '../../../../styles/variables/typography' as *;
 
+
 .shipment-create-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -20,19 +21,26 @@
 }
 
 .back-btn {
-  padding: 0.45rem 0.75rem;
-  font-size: $text-size-label;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    font-weight: $font-weight-semibold;
+    border-radius: 12px;
+    transition: all 0.2s ease;
 
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
 
-  mat-icon {
-    font-size: 18px;
+    &:hover {
+      background: $bg-surface;
+      transform: translateX(-3px);
+    }
   }
-}
 
-/* Card */
 .shipment-create-card {
   padding: 1.75rem 2rem;
   border-radius: 16px;
@@ -40,13 +48,14 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
 }
 
+
 .content {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 2rem;
 }
 
-/* Form */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -75,13 +84,21 @@ textarea {
   width: 100%;
   padding: 0.65rem 0.75rem;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid $border-default;
   font-size: $text-size-label;
+  background: $bg-surface;
+
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:focus {
     outline: none;
     border-color: $color-primary;
     box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+  }
+
+  &:disabled {
+    background: rgba(0, 0, 0, 0.04);
+    cursor: not-allowed;
   }
 }
 
@@ -90,60 +107,61 @@ textarea {
   min-height: 90px;
 }
 
+
 .form-error {
   font-size: $text-size-caption;
   color: $color-danger;
   margin-bottom: 1rem;
 }
 
-/* Photos */
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.photo {
-  position: relative;
-
-  img {
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-
-  button {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-  }
-}
-
-/* Map */
-.map {
-  height: 520px;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-/* Hints */
 .hint {
   font-size: $text-size-caption;
   color: $text-muted;
   margin-top: 0.25rem;
 }
 
-/* Mobile */
+
+.btn.btn--primary {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+  min-width: 180px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+
+.map {
+  height: 520px;
+  border-radius: 14px;
+  overflow: hidden;
+
+  border: 1px solid $border-default;
+}
+
+
+.edit-note {
+  font-size: $text-size-caption;
+  color: $text-muted;
+  margin-bottom: 1rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  mat-icon {
+    font-size: 16px;
+    color: $color-primary;
+  }
+}
+
+
 @media (max-width: 900px) {
   .content {
     grid-template-columns: 1fr;
@@ -151,5 +169,9 @@ textarea {
 
   .map {
     height: 360px;
+  }
+
+  .btn.btn--primary {
+    width: 100%;
   }
 }

@@ -1,16 +1,15 @@
-<!-- WELCOME -->
+<!-- ================= WELCOME HERO ================= -->
 <section class="dashboard-hero">
-  <h1>Welcome back, Alex</h1>
+  <h1>Welcome back, {{ userName() }}!</h1>
   <p>Here's what's happening with your shipments today.</p>
 </section>
 
-<!-- CREATE SHIPMENT -->
+<!-- ================= CREATE SHIPMENT CTA ================= -->
 <section class="card create-shipment">
   <div class="create-left">
     <div class="icon-circle">
       <mat-icon>add</mat-icon>
     </div>
-
     <div>
       <h3>Create a new shipment</h3>
       <p>
@@ -25,6 +24,7 @@
   </button>
 </section>
 
+<!-- ================= ACTIVE SHIPMENTS ================= -->
 <section class="shipments">
   <div class="shipments-header">
     <div class="shipments-title">
@@ -32,103 +32,152 @@
       <h2>Active Shipments</h2>
     </div>
 
-    <a class="link">
+    <a class="link" routerLink="/dashboard/shipments">
       View all history
       <mat-icon>chevron_right</mat-icon>
     </a>
   </div>
 
+  <div
+    class="shipment-grid"
+    [class.single]="activeShipments().length === 1"
+  >
 
-  <div class="shipment-grid">
+    <!-- Loading -->
+    @if (loading()) {
+      <p class="muted">
+        <mat-icon class="spin">refresh</mat-icon>
+        Loading shipments…
+      </p>
+    }
 
-    <!-- CARD -->
-    <div class="card shipment-card">
-      <img src="assets/images/guitar.jpg" alt="Vintage Guitar" />
+    <!-- Empty -->
+    @else if (activeShipments().length === 0) {
+      <div class="card empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No active shipments yet</p>
+      </div>
+    }
 
-      <span class="badge badge--info">In Transit</span>
+    <!-- Cards -->
+    @else {
+      @for (s of activeShipments(); track s.id) {
+        <article
+          class="card shipment-card"
+          [routerLink]="['/dashboard/shipments', s.id]"
+        >
 
-      <div class="shipment-body">
-        <h4>Vintage Guitar</h4>
-        <small>ID: #SHP-8291</small>
+          <!-- IMAGE -->
+          <img
+            [src]="s.photos && s.photos.length ? s.photos[0] : 'assets/images/box.jpg'"
+            [alt]="s.packageDescription || 'Shipment'"
+          />
+          <!-- STATUS -->
+          <span
+            class="badge"
+            [ngClass]="{
+              'badge--warning': s.status === 'CREATED',
+              'badge--info': s.status === 'ASSIGNED',
+              'badge--success': s.status === 'IN_TRANSIT',
+              'badge--neutral': s.status === 'DELIVERED',
+              'badge--danger': s.status === 'CANCELLED'
+            }"
+          >
+            {{ s.status }}
+          </span>
 
-        <div class="route">
-          <span>SF</span>
-          <mat-icon>arrow_forward</mat-icon>
-          <span>LA</span>
-        </div>
+          <div class="shipment-body">
 
-        <div class="shipment-footer">
-          <div class="driver">
-            <img src="assets/avatar-man.png" />
-            <span>Mike T.</span>
+            <h4>{{ s.packageDescription || 'Shipment' }}</h4>
+            <small>ID: {{ s.id | slice:0:8 }}</small>
+
+            <!-- ROUTE -->
+            <div class="route">
+              <mat-icon class="route-icon start">place</mat-icon>
+              <span>{{ s.pickupAddress }}</span>
+
+              <mat-icon class="arrow">arrow_forward</mat-icon>
+
+              <mat-icon class="route-icon end">flag</mat-icon>
+              <span>{{ s.deliveryAddress }}</span>
+            </div>
+
+            <!-- META -->
+            <div class="meta-row">
+              <span class="pill">{{ s.packageWeight }} kg</span>
+              <span class="pill pill--accent">
+                {{ s.basePrice | currency }}
+              </span>
+            </div>
+
+            <!-- DRIVER STRIP -->
+              @if (s.driver) {
+                <div class="assigned-driver">
+
+                  <div class="driver-avatar">
+                    <img
+                      *ngIf="s.driver.avatarUrl"
+                      [src]="s.driver.avatarUrl"
+                      alt="Driver avatar"
+                    />
+                    <mat-icon *ngIf="!s.driver.avatarUrl">person</mat-icon>
+                  </div>
+
+                  <div class="driver-info">
+                    <span class="label">Driver</span>
+                    <strong>{{ s.driver.firstName }}</strong>
+                  </div>
+
+                  <div class="driver-meta">
+                    <mat-icon>directions_car</mat-icon>
+                    <span>{{ s.driver.vehicleType }}</span>
+                  </div>
+
+                </div>
+              }
+            
+
+            <!-- FOOTER -->
+            <div class="shipment-footer">
+
+              @if (s.status === 'CREATED') {
+                <button
+                  class="btn btn--ghost"
+                  (click)="$event.stopPropagation()"
+                  [routerLink]="['/dashboard/shipments', s.id, 'edit']"
+                >
+                  Edit
+                </button>
+              }
+
+              <button
+                class="btn btn--ghost"
+                (click)="$event.stopPropagation()"
+                [routerLink]="['/dashboard/shipments', s.id]"
+              >
+                Details
+              </button>
+
+            </div>
+
           </div>
-          <button class="btn btn--ghost">Track</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARD -->
-    <div class="card shipment-card">
-      <img src="assets/images/documents.jpg" alt="Legal Documents" />
-
-      <span class="badge badge--success">Accepted</span>
-
-      <div class="shipment-body">
-        <h4>Legal Documents</h4>
-        <small>ID: #SHP-9921</small>
-
-        <div class="route">
-          <span>NYC</span>
-          <mat-icon>arrow_forward</mat-icon>
-          <span>BOS</span>
-        </div>
-
-        <div class="shipment-footer">
-          <div class="driver">
-            <img src="assets/avatar-girl.png" />
-            <span>Sarah J.</span>
-          </div>
-          <button class="btn btn--secondary">Details</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARD -->
-    <div class="card shipment-card">
-      <img src="assets/images/box.jpg" alt="Furniture Box" />
-
-      <span class="badge badge--warning">Finding Driver</span>
-
-      <div class="shipment-body">
-        <h4>Furniture Box</h4>
-        <small>ID: #SHP-3301</small>
-
-        <div class="route">
-          <span>AUS</span>
-          <mat-icon>arrow_forward</mat-icon>
-          <span>DAL</span>
-        </div>
-
-        <div class="shipment-footer">
-          <small class="muted">Matching…</small>
-          <button class="btn btn--ghost">Edit</button>
-        </div>
-      </div>
-    </div>
+        </article>
+      }
+    }
 
   </div>
 </section>
 
-<!-- TIPS -->
+<!-- ================= SHIPPING TIPS ================= -->
 <section class="shipping-tips">
   <h2>Shipping Tips</h2>
 
   <div class="tips-grid">
     <div class="card tip">
-      <mat-icon>info</mat-icon>
+      <mat-icon>schedule</mat-icon>
       <div>
-        <h4>Tips for faster delivery</h4>
-        <p>Providing flexible pickup windows helps travelers accept requests faster.</p>
+        <h4>Flexible pickup windows</h4>
+        <p>Providing flexible pickup times helps travelers accept your requests faster.</p>
       </div>
     </div>
 
@@ -139,5 +188,21 @@
         <p>Detailed photos help drivers assess space requirements accurately.</p>
       </div>
     </div>
+
+    <div class="card tip">
+      <mat-icon>inventory</mat-icon>
+      <div>
+        <h4>Accurate weight</h4>
+        <p>Specify correct weight to avoid delays and ensure proper vehicle selection.</p>
+      </div>
+    </div>
   </div>
 </section>
+
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

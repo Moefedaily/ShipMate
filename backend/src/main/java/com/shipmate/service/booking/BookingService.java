@@ -1,8 +1,11 @@
 package com.shipmate.service.booking;
 
 import com.shipmate.dto.request.booking.CreateBookingRequest;
+import com.shipmate.dto.response.booking.BookingResponse;
+import com.shipmate.dto.response.driver.AssignedDriverResponse;
 import com.shipmate.exception.BookingConstraintException;
 import com.shipmate.exception.DriverLocationException;
+import com.shipmate.mapper.BookingMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
@@ -37,6 +40,7 @@ public class BookingService {
     private final ShipmentRepository shipmentRepository;
     private final UserRepository userRepository;
     private final DriverProfileRepository driverProfileRepository;
+    private final BookingMapper bookingMapper;
 
     // CONFIG
 
@@ -332,7 +336,8 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public Booking getMyBooking(UUID bookingId, UUID driverId) {
+    public BookingResponse getMyBooking(UUID bookingId, UUID driverId) {
+
         Booking booking = bookingRepository.findWithShipmentsById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
@@ -340,8 +345,31 @@ public class BookingService {
             throw new AccessDeniedException("You are not allowed to access this booking");
         }
 
-        return booking;
+        BookingResponse response = bookingMapper.toResponse(booking);
+
+        AssignedDriverResponse driver = buildAssignedDriver(booking.getDriver());
+
+        response.getShipments().forEach(s -> s.setDriver(driver));
+
+        return response;
     }
+
+    private AssignedDriverResponse buildAssignedDriver(User driver) {
+
+        DriverProfile profile = driverProfileRepository
+                .findByUser_Id(driver.getId())
+                .orElse(null);
+
+        if (profile == null) return null;
+
+        return AssignedDriverResponse.builder()
+                .id(profile.getId())
+                .firstName(driver.getFirstName())
+                .avatarUrl(driver.getAvatarUrl())
+                .vehicleType(profile.getVehicleType())
+                .build();
+    }
+
 
     @Transactional(readOnly = true)
     public List<Booking> getAllBookings() {
