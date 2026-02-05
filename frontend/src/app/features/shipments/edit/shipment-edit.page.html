@@ -98,6 +98,24 @@
           </p>
         }
 
+    @if (pricingLoading()) {
+      <div class="price-preview loading">
+        <mat-icon>sync</mat-icon>
+        Recalculating price…
+      </div>
+    }
+
+    @if (!pricingLoading() && estimatedPrice() !== null) {
+      <div class="price-preview">
+        <mat-icon>info</mat-icon>
+        New estimated price:
+        <strong>{{ estimatedPrice() | currency }}</strong>
+        <span class="distance">
+          ({{ pricingDistanceKm() | number:'1.0-1' }} km)
+        </span>
+      </div>
+    }
+
         <button
           type="button"
           class="btn btn--primary"

@@ -9,6 +9,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AddressAutocompleteComponent, AddressResult } from '../../../shared/components/address-autocomplete/address-autocomplete.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+import { debounceTime } from 'rxjs';
 
 
 
@@ -27,6 +28,10 @@ export class ShipmentCreatePage {
   private readonly loader = inject(LoaderService);
   private readonly toast = inject(ToastService);
   readonly submitting = signal(false);
+  readonly estimatedPrice = signal<number | null>(null);
+  readonly pricingLoading = signal(false);
+  readonly pricingDistanceKm = signal<number | null>(null);
+
 
   /* ---------------- Map state ---------------- */
 
@@ -51,10 +56,14 @@ export class ShipmentCreatePage {
     /* ---------------- Form validity ---------------- */
 
     readonly formValueTick = toSignal(
-    this.form.valueChanges,
-    { initialValue: this.form.getRawValue() }
+      this.form.valueChanges.pipe(debounceTime(300)),
+      { initialValue: this.form.getRawValue() }
     );
 
+    readonly weight = toSignal(
+      this.form.controls.packageWeight.valueChanges.pipe(debounceTime(300)),
+      { initialValue: this.form.controls.packageWeight.value }
+    );
 
     /* ---------------- Date validation ---------------- */
 
@@ -105,17 +114,40 @@ export class ShipmentCreatePage {
     );
 
     constructor() {
-    effect(() => {
-    this.formValueTick();
-    console.log({
-        formValid: this.form.valid,
-        pickup: this.pickup(),
-        delivery: this.delivery(),
-        dateOrderValid: this.dateOrderValid(),
-        canSubmit: this.canSubmit()
-    });
-    });
+  effect(() => {
+    const pickup = this.pickup();
+    const delivery = this.delivery();
+    const weight = this.weight();
+
+    if (!pickup || !delivery || !weight || weight <= 0) {
+      this.estimatedPrice.set(null);
+      this.pricingDistanceKm.set(null);
+      return;
     }
+
+    this.pricingLoading.set(true);
+
+    this.shipmentService.estimate({
+        pickupLatitude: pickup.lat,
+        pickupLongitude: pickup.lng,
+        deliveryLatitude: delivery.lat,
+        deliveryLongitude: delivery.lng,
+        packageWeight: weight
+      }).subscribe({
+        next: res => {
+          this.estimatedPrice.set(res.estimatedBasePrice);
+          this.pricingDistanceKm.set(res.distanceKm);
+          this.pricingLoading.set(false);
+        },
+        error: () => {
+          this.estimatedPrice.set(null);
+          this.pricingDistanceKm.set(null);
+          this.pricingLoading.set(false);
+        }
+      });
+  });
+}
+
 
 
   goBack(): void {

@@ -29,9 +29,9 @@ export class SenderHomePage implements OnInit {
   readonly loading = signal(true);
 
   readonly activeShipments = computed(() =>
-    this.shipments().filter(s =>
-      !['DELIVERED', 'CANCELLED'].includes(s.status)
-    )
+    this.shipments()
+      .filter(s => !['DELIVERED', 'CANCELLED'].includes(s.status))
+      .slice(0, 3)
   );
 
   ngOnInit(): void {

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateShipmentRequest, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
+import { CreateShipmentRequest, PricingEstimateRequest, PricingEstimateResponse, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -42,4 +42,12 @@ export class ShipmentService {
       request
     );
   }
+
+  estimate(req: PricingEstimateRequest): Observable<PricingEstimateResponse> {
+    return this.http.post<PricingEstimateResponse>(
+      `${this.api}/pricing/estimate`,
+      req
+    );
+  }
 }
+

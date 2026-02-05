@@ -13,8 +13,6 @@ export interface CreateShipmentRequest {
 
   requestedPickupDate: string;
   requestedDeliveryDate: string;
-
-  basePrice: number;
 }
 
 export interface AssignedDriver {
@@ -58,4 +56,17 @@ export interface UpdateShipmentRequest {
 
   requestedPickupDate: string;
   requestedDeliveryDate: string;
+}
+
+export interface PricingEstimateRequest {
+  pickupLatitude: number;
+  pickupLongitude: number;
+  deliveryLatitude: number;
+  deliveryLongitude: number;
+  packageWeight: number;
+}
+
+export interface PricingEstimateResponse {
+  distanceKm: number;
+  estimatedBasePrice: number;
 }

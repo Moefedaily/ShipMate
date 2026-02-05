@@ -1,5 +1,6 @@
 package com.shipmate.service.shipment;
 
+import com.shipmate.dto.request.pricing.PricingRequest;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
@@ -10,6 +11,9 @@ import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.pricing.PricingService;
+import com.shipmate.util.GeoUtils;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +46,7 @@ public class ShipmentService {
     private final ShipmentMapper shipmentMapper;
     private final ShipmentAssembler shipmentAssembler;
     private final Cloudinary cloudinary;
+    private final PricingService pricingService;
     @Value("${app.file.max-size:10485760}")
     private long maxFileSize;
 
@@ -56,17 +61,28 @@ public class ShipmentService {
        CREATE
        ========================= */
 
-    public ShipmentResponse create(UUID senderId, CreateShipmentRequest request) {
+        public ShipmentResponse create(UUID senderId, CreateShipmentRequest request) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        log.debug("request: {}", request);
         Shipment shipment = shipmentMapper.toEntity(request);
         shipment.setSender(sender);
         shipment.setStatus(ShipmentStatus.CREATED);
         shipment.setExtraInsuranceFee(BigDecimal.ZERO);
 
-        log.debug("shipment: {}", shipment);
+        BigDecimal distanceKm = GeoUtils.haversineKm(
+                request.getPickupLatitude(),
+                request.getPickupLongitude(),
+                request.getDeliveryLatitude(),
+                request.getDeliveryLongitude()
+        );
+
+        BigDecimal basePrice = pricingService.computeBasePrice(
+                new PricingRequest(distanceKm, request.getPackageWeight())
+        );
+
+        shipment.setBasePrice(basePrice);
+
         Shipment saved = shipmentRepository.saveAndFlush(shipment);
         return shipmentAssembler.toResponse(saved);
     }
@@ -119,13 +135,26 @@ public class ShipmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
         if (shipment.getStatus() != ShipmentStatus.CREATED) {
-            throw new IllegalStateException("Shipment can no longer be modified");
+                throw new IllegalStateException("Shipment can no longer be modified");
         }
 
         shipmentMapper.updateEntity(shipment, request);
 
+        BigDecimal distanceKm = GeoUtils.haversineKm(
+                shipment.getPickupLatitude(),
+                shipment.getPickupLongitude(),
+                shipment.getDeliveryLatitude(),
+                shipment.getDeliveryLongitude()
+        );
+
+        BigDecimal basePrice = pricingService.computeBasePrice(
+                new PricingRequest(distanceKm, shipment.getPackageWeight())
+        );
+
+        shipment.setBasePrice(basePrice);
+
         return shipmentAssembler.toResponse(shipment);
-    }
+        }
 
     /* =========================
        DELETE

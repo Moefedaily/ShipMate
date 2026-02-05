@@ -18,7 +18,7 @@
 
   @if (results().length > 0) {
     <ul class="results">
-      @for (r of results(); track r.address) {
+      @for (r of results(); track $index) {
         <li (click)="select(r)">
           {{ r.address }}
         </li>
