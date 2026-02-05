@@ -1,0 +1,272 @@
+<div class="shipment-history-page">
+  
+  <!-- HEADER -->
+  <div class="dashboard-hero page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="btn btn--ghost back-btn" routerLink="/dashboard/sender">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+        <div>
+          <h1>Shipment History</h1>
+          <p>View and manage all your shipments</p>
+        </div>
+      </div>
+      
+      <button class="btn btn--primary" routerLink="/dashboard/shipments/new">
+        <mat-icon>add</mat-icon>
+        New Shipment
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTERS & STATS -->
+  <section class="filters-section">
+    
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Total Shipments</div>
+          <div class="stat-value">{{ shipments().length }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon active">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">In Transit</div>
+          <div class="stat-value">{{ inTransitCount() }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Delivered</div>
+          <div class="stat-value">{{ deliveredCount() }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value">{{ pendingCount() }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER TABS -->
+    <div class="filter-tabs">
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        <mat-icon>view_list</mat-icon>
+        All
+        <span class="tab-count">{{ shipments().length }}</span>
+      </button>
+
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'CREATED'"
+        (click)="setFilter('CREATED')"
+      >
+        <mat-icon>add_circle_outline</mat-icon>
+        Created
+        <span class="tab-count">{{ countByStatus('CREATED') }}</span>
+      </button>
+
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'ASSIGNED'"
+        (click)="setFilter('ASSIGNED')"
+      >
+        <mat-icon>assignment_ind</mat-icon>
+        Assigned
+        <span class="tab-count">{{ countByStatus('ASSIGNED') }}</span>
+      </button>
+
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'IN_TRANSIT'"
+        (click)="setFilter('IN_TRANSIT')"
+      >
+        <mat-icon>local_shipping</mat-icon>
+        In Transit
+        <span class="tab-count">{{ countByStatus('IN_TRANSIT') }}</span>
+      </button>
+
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'DELIVERED'"
+        (click)="setFilter('DELIVERED')"
+      >
+        <mat-icon>check_circle</mat-icon>
+        Delivered
+        <span class="tab-count">{{ countByStatus('DELIVERED') }}</span>
+      </button>
+
+      <button 
+        class="filter-tab"
+        [class.active]="activeFilter() === 'CANCELLED'"
+        (click)="setFilter('CANCELLED')"
+      >
+        <mat-icon>cancel</mat-icon>
+        Cancelled
+        <span class="tab-count">{{ countByStatus('CANCELLED') }}</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- SHIPMENTS LIST -->
+  <section class="shipments-section">
+    
+    <!-- LOADING STATE -->
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-icon class="spin">refresh</mat-icon>
+        <p>Loading your shipments...</p>
+      </div>
+    }
+
+    <!-- EMPTY STATE -->
+    @else if (filteredShipments().length === 0 && !loading()) {
+      <div class="card empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        @if (activeFilter() === 'all') {
+          <p>No shipments yet</p>
+          <button class="btn btn--primary" routerLink="/dashboard/shipments/new">
+            <mat-icon>add</mat-icon>
+            Create your first shipment
+          </button>
+        } @else {
+          <p>No {{ activeFilter().toLowerCase().replace('_', ' ') }} shipments</p>
+          <button class="btn btn--ghost" (click)="setFilter('all')">
+            View all shipments
+          </button>
+        }
+      </div>
+    }
+
+    <!-- SHIPMENTS GRID -->
+    @else {
+      <div class="shipments-grid">
+        @for (shipment of filteredShipments(); track shipment.id) {
+          <article class="card shipment-card" [routerLink]="['/dashboard/shipments', shipment.id]">
+            
+            <!-- HEADER -->
+            <div class="shipment-header">
+              <div class="shipment-info">
+                <h3>{{ shipment.packageDescription || 'Shipment' }}</h3>
+                <span class="shipment-id">ID: {{ shipment.id | slice:0:8 }}</span>
+              </div>
+              
+              <span 
+                class="status-badge"
+                [ngClass]="{
+                  'status-created': shipment.status === 'CREATED',
+                  'status-assigned': shipment.status === 'ASSIGNED',
+                  'status-in-transit': shipment.status === 'IN_TRANSIT',
+                  'status-delivered': shipment.status === 'DELIVERED',
+                  'status-cancelled': shipment.status === 'CANCELLED'
+                }"
+              >
+                <span class="dot"></span>
+                {{ shipment.status }}
+              </span>
+            </div>
+
+            <!-- ROUTE -->
+            <div class="route">
+              <div class="route-point">
+                <mat-icon class="route-icon start">place</mat-icon>
+                <div class="route-text">
+                  <span class="route-label">Pickup</span>
+                  <strong>{{ shipment.pickupAddress }}</strong>
+                </div>
+              </div>
+
+              <div class="route-divider">
+                <mat-icon>arrow_downward</mat-icon>
+              </div>
+
+              <div class="route-point">
+                <mat-icon class="route-icon end">flag</mat-icon>
+                <div class="route-text">
+                  <span class="route-label">Delivery</span>
+                  <strong>{{ shipment.deliveryAddress }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- META INFO -->
+            <div class="shipment-meta">
+              <div class="meta-item">
+                <mat-icon>fitness_center</mat-icon>
+                <span>{{ shipment.packageWeight }} kg</span>
+              </div>
+
+              <div class="meta-item">
+                <mat-icon>payments</mat-icon>
+                <span>{{ shipment.basePrice | currency }}</span>
+              </div>
+
+              @if (shipment.requestedPickupDate) {
+                <div class="meta-item">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>{{ shipment.requestedPickupDate | date:'MMM d' }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- DRIVER INFO (if assigned) -->
+            @if (shipment.driver) {
+              <div class="driver-strip">
+                <div class="driver-avatar">
+                  @if (shipment.driver.avatarUrl) {
+                    <img [src]="shipment.driver.avatarUrl" [alt]="shipment.driver.firstName" />
+                  } @else {
+                    <mat-icon>person</mat-icon>
+                  }
+                </div>
+                <div class="driver-info">
+                  <span class="driver-label">Driver</span>
+                  <strong>{{ shipment.driver.firstName }} {{ shipment.driver.lastName }}</strong>
+                </div>
+                <div class="driver-vehicle">
+                  <mat-icon>directions_car</mat-icon>
+                  <span>{{ shipment.driver.vehicleType }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- FOOTER -->
+            <div class="shipment-footer">
+              <span class="created-date">
+                <mat-icon>schedule</mat-icon>
+                Created {{ shipment.createdAt | date:'MMM d, y' }}
+              </span>
+
+              <mat-icon class="chevron">chevron_right</mat-icon>
+            </div>
+
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+</div>

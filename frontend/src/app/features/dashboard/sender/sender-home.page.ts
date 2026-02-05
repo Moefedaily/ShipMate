@@ -37,7 +37,6 @@ export class SenderHomePage implements OnInit {
   ngOnInit(): void {
     this.shipmentService.getMyShipments().subscribe({
       next: res => {
-        console.log(res);
         this.shipments.set(res.content);
         this.loading.set(false);
       },

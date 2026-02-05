@@ -1,0 +1,752 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+
+.shipment-history-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    font-weight: $font-weight-semibold;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background: $bg-surface;
+      transform: translateX(-3px);
+    }
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.35rem;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .btn--primary {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.75rem;
+    font-weight: $font-weight-semibold;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.filters-section {
+  margin-bottom: 2rem;
+}
+
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 16px;
+  background: $bg-card;
+  border: 1px solid $border-default;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-color: rgba($color-primary, 0.2);
+  }
+
+  .stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba($color-primary, 0.12) 0%, rgba($color-primary, 0.08) 100%);
+    border: 1px solid rgba($color-primary, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+      color: $color-primary;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, rgba(#3b82f6, 0.12) 0%, rgba(#3b82f6, 0.08) 100%);
+      border-color: rgba(#3b82f6, 0.2);
+
+      mat-icon {
+        color: #3b82f6;
+      }
+    }
+
+    &.success {
+      background: linear-gradient(135deg, rgba($color-success, 0.12) 0%, rgba($color-success, 0.08) 100%);
+      border-color: rgba($color-success, 0.2);
+
+      mat-icon {
+        color: $color-success;
+      }
+    }
+
+    &.pending {
+      background: linear-gradient(135deg, rgba($color-primary, 0.12) 0%, rgba($color-primary, 0.08) 100%);
+      border-color: rgba($color-primary, 0.2);
+
+      mat-icon {
+        color: #d97706;
+      }
+    }
+  }
+
+  .stat-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stat-label {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    font-weight: $font-weight-medium;
+    margin-bottom: 0.35rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+}
+
+
+.filter-tabs {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 16px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+}
+
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 0.45rem;
+    border-radius: 11px;
+    background: rgba(0, 0, 0, 0.06);
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    color: $text-secondary;
+  }
+
+  &:hover {
+    background: rgba($color-primary, 0.06);
+    color: $color-primary;
+
+    .tab-count {
+      background: rgba($color-primary, 0.15);
+      color: $color-primary;
+    }
+  }
+
+  &.active {
+    background: $color-primary;
+    color: #fff;
+
+    .tab-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+  }
+}
+
+
+.shipments-section {
+  min-height: 400px;
+}
+
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: $color-primary;
+  }
+
+  p {
+    font-size: $text-size-label;
+    font-weight: $font-weight-medium;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 4rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+  border: 2px dashed $border-default;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $text-muted;
+    opacity: 0.4;
+  }
+
+  p {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  .btn {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      opacity: 1;
+      color: inherit;
+    }
+  }
+}
+
+/* =====================================================
+   SHIPMENTS GRID
+   ===================================================== */
+
+.shipments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+/* =====================================================
+   SHIPMENT CARD - Enhanced Design
+   ===================================================== */
+
+.shipment-card {
+  padding: 1.75rem 2rem;
+  border-radius: 16px;
+  background: $bg-card;
+  border: 1px solid $border-default;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    border-color: rgba($color-primary, 0.25);
+  }
+}
+
+/* =====================================================
+   SHIPMENT HEADER
+   ===================================================== */
+
+.shipment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid $border-default;
+}
+
+.shipment-info {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    font-size: $text-size-label;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shipment-id {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    font-weight: $font-weight-medium;
+  }
+}
+
+/* =====================================================
+   STATUS BADGE
+   ===================================================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.status-created {
+    background: rgba($color-primary, 0.12);
+    border: 1px solid rgba($color-primary, 0.3);
+    color: #d97706;
+  }
+
+  &.status-assigned {
+    background: rgba(#3b82f6, 0.12);
+    border: 1px solid rgba(#3b82f6, 0.3);
+    color: #2563eb;
+  }
+
+  &.status-in-transit {
+    background: rgba($color-success, 0.12);
+    border: 1px solid rgba($color-success, 0.3);
+    color: $color-success;
+  }
+
+  &.status-delivered {
+    background: rgba(#6b7280, 0.12);
+    border: 1px solid rgba(#6b7280, 0.3);
+    color: #4b5563;
+  }
+
+  &.status-cancelled {
+    background: rgba($color-danger, 0.12);
+    border: 1px solid rgba($color-danger, 0.3);
+    color: $color-danger;
+  }
+}
+
+
+.route {
+  margin-bottom: 1.25rem;
+}
+
+.route-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+
+  .route-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+
+    &.start {
+      color: $color-success;
+    }
+
+    &.end {
+      color: #3b82f6;
+    }
+  }
+
+  .route-text {
+    flex: 1;
+    min-width: 0;
+
+    .route-label {
+      display: block;
+      font-size: 10px;
+      font-weight: $font-weight-bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $text-muted;
+      margin-bottom: 0.35rem;
+    }
+
+    strong {
+      display: block;
+      font-size: $text-size-caption;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.route-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.25rem 0;
+  padding-left: 0.25rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $color-primary;
+    opacity: 0.4;
+  }
+}
+
+
+.shipment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 20px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $color-primary;
+  }
+}
+
+
+.driver-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.06) 0%, rgba($color-primary, 0.02) 100%);
+  border: 1px solid rgba($color-primary, 0.15);
+
+  .driver-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba($color-primary, 0.12);
+    border: 2px solid rgba($color-primary, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $color-primary;
+    }
+  }
+
+  .driver-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+    min-width: 0;
+
+    .driver-label {
+      font-size: 10px;
+      font-weight: $font-weight-bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $text-muted;
+    }
+
+    strong {
+      font-size: $text-size-caption;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .driver-vehicle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 16px;
+    background: rgba($color-primary, 0.12);
+    border: 1px solid rgba($color-primary, 0.25);
+    font-size: 11px;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+
+.shipment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid $border-default;
+
+  .created-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: $text-size-caption;
+    color: $text-muted;
+    font-weight: $font-weight-medium;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .chevron {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $text-muted;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+  }
+
+  .shipment-card:hover & .chevron {
+    opacity: 1;
+    color: $color-primary;
+    transform: translateX(3px);
+  }
+}
+
+
+@media (max-width: 968px) {
+  .page-header {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .btn--primary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .shipments-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    .header-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-tabs {
+    padding: 0.5rem;
+  }
+
+  .filter-tab {
+    padding: 0.55rem 0.95rem;
+    font-size: $text-size-caption;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .shipment-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .driver-strip {
+    flex-wrap: wrap;
+
+    .driver-vehicle {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
