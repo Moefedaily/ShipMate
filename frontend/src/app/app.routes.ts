@@ -69,6 +69,14 @@ export const routes: Routes = [
             .then(m => m.SenderHomePage)
       },
       {
+        path: 'shipments',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/shipments/history/shipment-history.page')
+            .then(m => m.ShipmentHistoryPage)
+      },
+      {
         path: 'shipments/new',
         canActivate: [senderGuard],
         data: { dashboardRole: 'SENDER' },
