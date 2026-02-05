@@ -61,7 +61,6 @@ class ShipmentServiceTest {
         request.setPackageValue(BigDecimal.valueOf(100));
         request.setRequestedPickupDate(LocalDate.now());
         request.setRequestedDeliveryDate(LocalDate.now().plusDays(1));
-        request.setBasePrice(BigDecimal.valueOf(20));
 
         Shipment shipment = Shipment.builder().build();
         Shipment savedShipment = Shipment.builder()

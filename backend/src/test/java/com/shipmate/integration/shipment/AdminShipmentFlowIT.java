@@ -135,7 +135,6 @@ class AdminShipmentFlowIT extends AbstractIntegrationTest {
         req.setPackageValue(BigDecimal.valueOf(100));
         req.setRequestedPickupDate(LocalDate.now());
         req.setRequestedDeliveryDate(LocalDate.now().plusDays(1));
-        req.setBasePrice(BigDecimal.valueOf(20));
         return req;
     }
 }

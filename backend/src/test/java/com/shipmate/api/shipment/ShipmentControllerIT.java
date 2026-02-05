@@ -160,7 +160,6 @@ class ShipmentControllerIT extends AbstractIntegrationTest {
         request.setPackageValue(BigDecimal.valueOf(100));
         request.setRequestedPickupDate(LocalDate.now());
         request.setRequestedDeliveryDate(LocalDate.now().plusDays(1));
-        request.setBasePrice(BigDecimal.valueOf(20));
         return request;
     }
 
