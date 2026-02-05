@@ -129,6 +129,20 @@ textarea {
   }
 }
 
+.price-preview {
+  .price-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: $color-primary;
+  }
+
+  .price-loading,
+  .price-placeholder {
+    font-size: $text-size-label;
+    color: $text-muted;
+  }
+}
+
 /* Map */
 .map {
   height: 520px;

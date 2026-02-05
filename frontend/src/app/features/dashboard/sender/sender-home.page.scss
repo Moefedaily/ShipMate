@@ -1,9 +1,6 @@
 @use '../../../../styles/variables/colors' as *;
 @use '../../../../styles/variables/typography' as *;
 
-/* =====================================================
-   HERO SECTION - Enhanced
-   ===================================================== */
 
 .dashboard-hero {
   margin-bottom: 2rem;
@@ -25,9 +22,6 @@
   }
 }
 
-/* =====================================================
-   CREATE SHIPMENT CARD - Premium Design
-   ===================================================== */
 
 .card.create-shipment {
   position: relative;
@@ -136,13 +130,13 @@
 }
 
 
-/* ================= DRIVER STRIP (ELEGANT) ================= */
 
 .assigned-driver {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 
+  height: 52px;
   margin-top: 0.75rem;
   padding: 0.6rem 0.85rem;
 
@@ -221,7 +215,6 @@
   }
 }
 
-/* ================= SPIN ICON ================= */
 
 .spin {
   animation: spin 1s linear infinite;
@@ -269,9 +262,6 @@
   }
 }
 
-/* =====================================================
-   ACTIVE SHIPMENTS SECTION
-   ===================================================== */
 
 .shipments {
   margin-bottom: 3rem;
@@ -329,14 +319,15 @@
   }
 }
 
-/* =====================================================
-   SHIPMENT GRID - Responsive & Single Card Handling
-   ===================================================== */
 
 .shipment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+  
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
   
   &.single {
     grid-template-columns: minmax(320px, 380px);
@@ -349,14 +340,15 @@
   }
 }
 
-/* =====================================================
-   SHIPMENT CARD - Enhanced Design
-   ===================================================== */
 
 .shipment-card {
   position: relative;
   overflow: hidden;
   padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
 
   border-radius: 16px;
   background-color: $bg-card;
@@ -372,15 +364,18 @@
 
   img {
     width: 100%;
+    height: 180px;
     object-fit: cover;
     display: block;
     background: $bg-surface;
+    flex-shrink: 0;
   }
 
   .badge {
     position: absolute;
     top: 14px;
     left: 14px;
+    z-index: 10;
     
     font-size: 10px;
     font-weight: $font-weight-bold;
@@ -395,6 +390,10 @@
 }
 
 .shipment-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  
   padding: 1.25rem 1.5rem 1.35rem;
 
   h4 {
@@ -412,15 +411,12 @@
   }
 }
 
-/* =====================================================
-   ROUTE DISPLAY - Redesigned
-   ===================================================== */
 
 .route {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
+  min-height: 52px;
   margin: 1rem 0;
   padding: 0.85rem 1rem;
 
@@ -466,16 +462,20 @@
   }
 }
 
-/* =====================================================
-   SHIPMENT FOOTER
-   ===================================================== */
+
+.driver-section {
+  min-height: 52px;
+  margin-top: 0.75rem;
+}
+
 
 .shipment-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
 
   .muted {
     font-size: $text-size-caption;
@@ -653,6 +653,8 @@
   }
   
   .shipment-card {
+    min-height: 480px;
+    
     img {
       height: 160px;
     }
@@ -662,6 +664,7 @@
     flex-wrap: wrap;
     font-size: 11px;
     padding: 0.75rem 0.85rem;
+    min-height: 48px;
     
     span {
       white-space: normal;
@@ -705,9 +708,6 @@
   }
 }
 
-/* =====================================================
-   LOADING STATE (Optional)
-   ===================================================== */
 
 @keyframes shimmer {
   0% {

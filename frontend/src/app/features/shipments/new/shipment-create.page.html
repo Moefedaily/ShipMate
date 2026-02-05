@@ -83,10 +83,22 @@
         <p class="form-error">Delivery date must be after pickup date</p>
         }
 
-        <div class="form-block">
-          <label>Base price</label>
-          <input type="number" formControlName="basePrice" />
-        </div>
+      <div class="form-block price-preview">
+        <label>Estimated price</label>
+
+        @if (pricingLoading()) {
+          <div class="price-loading">Calculating…</div>
+        } @else if (estimatedPrice() !== null) {
+          <div class="price-value">
+            {{ estimatedPrice() | currency }}
+            <small class="hint">Distance: {{ pricingDistanceKm() | number:'1.0-1' }} km</small>
+          </div>
+        } @else {
+          <div class="price-placeholder">
+            Select pickup, delivery and weight
+          </div>
+        }
+      </div>
 
         <div class="form-block">
           <label>Photos</label>

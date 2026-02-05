@@ -5,7 +5,6 @@ public final class DistanceCalculator {
     private static final double EARTH_RADIUS_KM = 6371.0;
 
     private DistanceCalculator() {
-        // Utility class
     }
 
     public static double kilometers(

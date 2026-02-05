@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -46,15 +46,9 @@ export class ShipmentEditPage implements OnInit {
   readonly pickup = signal<AddressResult | null>(null);
   readonly delivery = signal<AddressResult | null>(null);
 
-
-  readonly original = signal<{
-    pickupAddress: string;
-    deliveryAddress: string;
-    packageDescription: string;
-    packageWeight: number;
-    requestedPickupDate: string;
-    requestedDeliveryDate: string;
-  } | null>(null);
+  readonly estimatedPrice = signal<number | null>(null);
+  readonly pricingDistanceKm = signal<number | null>(null);
+  readonly pricingLoading = signal(false);
 
 
   readonly form = this.fb.nonNullable.group({
@@ -64,7 +58,6 @@ export class ShipmentEditPage implements OnInit {
     requestedDeliveryDate: ['', Validators.required]
   });
 
-
   readonly formTick = toSignal(
     this.form.valueChanges,
     { initialValue: this.form.getRawValue() }
@@ -73,13 +66,11 @@ export class ShipmentEditPage implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-
     if (!id) {
       this.toast.error('Invalid shipment');
       this.router.navigate(['/dashboard/sender']);
       return;
     }
-
     this.loadShipment(id);
   }
 
@@ -96,15 +87,6 @@ export class ShipmentEditPage implements OnInit {
         }
 
         this.shipment.set(shipment);
-
-        this.original.set({
-          pickupAddress: shipment.pickupAddress,
-          deliveryAddress: shipment.deliveryAddress,
-          packageDescription: shipment.packageDescription ?? '',
-          packageWeight: shipment.packageWeight,
-          requestedPickupDate: shipment.requestedPickupDate,
-          requestedDeliveryDate: shipment.requestedDeliveryDate
-        });
 
         this.form.patchValue({
           packageDescription: shipment.packageDescription ?? '',
@@ -144,42 +126,87 @@ export class ShipmentEditPage implements OnInit {
     this.delivery.set(addr);
   }
 
-  // CHANGE DETECTION 
 
-  readonly hasChanges = computed(() => {
-    const original = this.original();
-    if (!original) return false;
+  readonly pricingInputsChanged = computed(() => {
+    const shipment = this.shipment();
+    const pickup = this.pickup();
+    const delivery = this.delivery();
+    const form = this.formTick();
 
-    this.formTick();
+    if (!shipment || !pickup || !delivery) return false;
 
-    if (
-      original.packageDescription !== (this.form.value.packageDescription ?? '') ||
-      original.packageWeight !== this.form.value.packageWeight ||
-      original.requestedPickupDate !== this.form.value.requestedPickupDate ||
-      original.requestedDeliveryDate !== this.form.value.requestedDeliveryDate
-    ) {
-      return true;
-    }
-
-    if (
-      this.pickup()?.address !== original.pickupAddress ||
-      this.delivery()?.address !== original.deliveryAddress
-    ) {
-      return true;
-    }
-
-    return false;
+    return (
+      pickup.lat !== shipment.pickupLatitude ||
+      pickup.lng !== shipment.pickupLongitude ||
+      delivery.lat !== shipment.deliveryLatitude ||
+      delivery.lng !== shipment.deliveryLongitude ||
+      form.packageWeight !== shipment.packageWeight
+    );
   });
+
+ constructor() {
+  effect(() => {
+    const shipment = this.shipment();
+    const pickup = this.pickup();
+    const delivery = this.delivery();
+    const form = this.formTick();
+
+    if (
+      !shipment ||
+      !pickup ||
+      !delivery ||
+      !this.form.controls.packageWeight.valid
+    ) {
+      this.estimatedPrice.set(null);
+      this.pricingDistanceKm.set(null);
+      return;
+    }
+
+    if (!this.pricingInputsChanged()) {
+      this.estimatedPrice.set(null);
+      this.pricingDistanceKm.set(null);
+      return;
+    }
+
+    const weight = form.packageWeight ?? 0;
+
+    if (weight <= 0) {
+      this.estimatedPrice.set(null);
+      this.pricingDistanceKm.set(null);
+      return;
+    }
+
+    this.pricingLoading.set(true);
+
+    this.shipmentService.estimate({
+      pickupLatitude: pickup.lat,
+      pickupLongitude: pickup.lng,
+      deliveryLatitude: delivery.lat,
+      deliveryLongitude: delivery.lng,
+      packageWeight: weight
+    }).subscribe({
+      next: res => {
+        this.estimatedPrice.set(res.estimatedBasePrice);
+        this.pricingDistanceKm.set(res.distanceKm);
+        this.pricingLoading.set(false);
+      },
+      error: () => {
+        this.estimatedPrice.set(null);
+        this.pricingDistanceKm.set(null);
+        this.pricingLoading.set(false);
+      }
+    });
+  });
+}
 
 
   readonly canSubmit = computed(() => {
     this.formTick();
-
     return (
       this.form.valid &&
       !!this.pickup() &&
       !!this.delivery() &&
-      this.hasChanges() &&
+      this.pricingInputsChanged() &&
       !this.submitting()
     );
   });
@@ -193,17 +220,14 @@ export class ShipmentEditPage implements OnInit {
     this.submitting.set(true);
     this.loader.show();
 
-    this.shipmentService.updateShipment(
-      shipment.id,
-      {
-        pickupAddress: this.pickup()!.address,
-        deliveryAddress: this.delivery()!.address,
-        packageDescription: this.form.value.packageDescription ?? undefined,
-        packageWeight: this.form.value.packageWeight!,
-        requestedPickupDate: this.form.value.requestedPickupDate!,
-        requestedDeliveryDate: this.form.value.requestedDeliveryDate!
-      }
-    ).subscribe({
+    this.shipmentService.updateShipment(shipment.id, {
+      pickupAddress: this.pickup()!.address,
+      deliveryAddress: this.delivery()!.address,
+      packageDescription: this.form.value.packageDescription ?? undefined,
+      packageWeight: this.form.value.packageWeight!,
+      requestedPickupDate: this.form.value.requestedPickupDate!,
+      requestedDeliveryDate: this.form.value.requestedDeliveryDate!
+    }).subscribe({
       next: updated => {
         this.toast.success('Shipment updated');
         this.router.navigate(['/dashboard/shipments', updated.id]);
@@ -217,14 +241,8 @@ export class ShipmentEditPage implements OnInit {
     });
   }
 
-  /* ================= NAV ================= */
-
   goBack(): void {
     const id = this.shipment()?.id;
-    if (id) {
-      this.router.navigate(['/dashboard/shipments', id]);
-    } else {
-      this.router.navigate(['/dashboard/sender']);
-    }
+    this.router.navigate(id ? ['/dashboard/shipments', id] : ['/dashboard/sender']);
   }
 }
