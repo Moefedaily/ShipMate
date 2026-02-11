@@ -2,7 +2,7 @@ package com.shipmate.controller.booking;
 
 import com.shipmate.dto.request.booking.CreateBookingRequest;
 import com.shipmate.dto.response.booking.BookingResponse;
-import com.shipmate.mapper.BookingMapper;
+import com.shipmate.mapper.booking.BookingMapper;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.service.booking.BookingService;
 

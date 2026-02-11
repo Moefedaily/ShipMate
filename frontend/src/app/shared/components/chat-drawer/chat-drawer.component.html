@@ -1,0 +1,73 @@
+@if (open) {
+  <div class="chat-drawer-backdrop" (click)="requestClose()"></div>
+
+  <aside class="chat-drawer">
+
+    <div class="chat-list">
+
+      <header class="chat-list-header">
+        <h3>Messages</h3>
+      </header>
+
+      @if (loading()) {
+        <div class="chat-loading">Loading…</div>
+      }
+
+      @if (errorMessage()) {
+        <div class="chat-error">{{ errorMessage() }}</div>
+      }
+
+      @if (hasConversations()) {
+        <div
+          class="chat-item"
+          *ngFor="let c of conversations(); trackBy: trackByBooking"
+          [class.active]="c.bookingId === selectedConversation()?.bookingId"
+          (click)="selectConversation(c)"
+        >
+          <div class="chat-item-main">
+            <strong>{{ c.otherUserName || 'Conversation' }}</strong>
+            <p>{{ c.lastMessagePreview || 'No messages yet' }}</p>
+          </div>
+
+          <div class="chat-item-meta">
+            @if (c.unreadCount > 0) {
+              <span class="badge">{{ c.unreadCount }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!loading() && !hasConversations()) {
+        <div class="chat-empty">
+          No conversations yet
+        </div>
+      }
+    </div>
+
+    <div class="chat-panel">
+
+      @if (!selectedConversation()) {
+        <div class="chat-placeholder">
+          Select a Conversation
+            <button class="icon-btn" (click)="requestClose()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+      }
+
+      @if (selectedConversation()) {
+        <app-chat
+          [bookingId]="selectedConversation()!.bookingId"
+          [readonly]="isChatReadonly()"
+        />
+
+        @if (isChatReadonly()) {
+          <div class="chat-readonly">
+            This booking is closed. Messaging is disabled.
+          </div>
+        }
+      }
+    </div>
+
+  </aside>
+}

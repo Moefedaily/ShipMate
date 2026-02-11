@@ -34,13 +34,11 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // Argon2 password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new Argon2PasswordEncoder(16, 32, 1, 65536, 4);
     }
 
-    // AuthenticationProvider with UserDetailsService + Argon2
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
@@ -48,13 +46,11 @@ public class SecurityConfig {
         return provider;
     }
 
-    // AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -66,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login","/api/auth/logout", "/api/auth/register", "/api/auth/refresh", "/api/auth/verify-email", "/api/auth/reset-password", "/api/auth/forgot-password").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

@@ -5,8 +5,10 @@
     [activeRole]="activeRole()"
     (roleChange)="onRoleChange($event)"
     (menuAction)="onMenuAction($event)"
+    (chatToggle)="toggleChat()"
   >
   </app-dashboard-header>
+  <app-chat-drawer [open]="chatOpen()"  (closeDrawer)="closeChat()" />
 
   <main class="dashboard-content">
     <router-outlet></router-outlet>

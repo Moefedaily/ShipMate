@@ -67,12 +67,10 @@ export class DriverLocationSetupPage {
 
     this.locationService.updateMyLocation(lat, lng).subscribe({
       next: () => {
-        console.log('Location saved OK');
         this.loading.set(false);
         this.completed.emit();
       },
       error: (err) => {
-        console.log('Location save FAILED', err);
         this.loading.set(false);
         this.error.set(err?.error?.message || 'Failed to save location. Please try again.');
       }

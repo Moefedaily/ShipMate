@@ -1,4 +1,4 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.shipment;
 
 import org.springframework.stereotype.Component;
 

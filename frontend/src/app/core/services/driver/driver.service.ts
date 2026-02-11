@@ -23,7 +23,6 @@ export class DriverService {
     }),
     catchError(err => {
       if (err.status === 404) {
-        // resolver decide state
         return throwError(() => err);
       }
       return throwError(() => err);

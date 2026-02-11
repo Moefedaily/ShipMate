@@ -3,6 +3,8 @@ package com.shipmate.model.message;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.user.User;
@@ -42,7 +44,8 @@ public class Message {
     private boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "message_type", nullable = false, columnDefinition = "message_type")
     private MessageType messageType;
 
     @CreationTimestamp

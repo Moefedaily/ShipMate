@@ -1,6 +1,7 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.booking;
 
 import com.shipmate.dto.response.booking.BookingResponse;
+import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.booking.Booking;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

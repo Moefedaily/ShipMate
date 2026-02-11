@@ -13,7 +13,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shipmate.dto.request.user.UpdateUserProfileRequest;
 import com.shipmate.dto.response.user.UserProfileResponse;
-import com.shipmate.mapper.UserProfileMapper;
+import com.shipmate.mapper.user.UserProfileMapper;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.user.UserRepository;
 
@@ -38,7 +38,6 @@ public class UserProfileService {
         "image/webp"
     );
 
-    // ===================== PROFILE =====================
 
     public UserProfileResponse getMyProfile(UUID userId) {
         User user = userRepository.findById(userId)
@@ -57,7 +56,6 @@ public class UserProfileService {
         return mapper.toResponse(user);
     }
 
-    // ===================== AVATAR =====================
 
     public UserProfileResponse updateAvatar(UUID userId, MultipartFile file) {
         validateImage(file);
@@ -65,7 +63,6 @@ public class UserProfileService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Delete old avatar if exists
         if (user.getAvatarPublicId() != null) {
             deleteFromCloudinary(user.getAvatarPublicId());
         }
@@ -105,7 +102,6 @@ public class UserProfileService {
         userRepository.save(user);
     }
 
-    // ===================== HELPERS =====================
 
     private void validateImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {

@@ -54,8 +54,6 @@ export class ForgotPasswordPage {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError((err) => {
-          // SECURITY: Don't reveal if email exists
-          // Still show success message regardless of error
           console.error('Password reset error:', err);
           return of(null);
         })

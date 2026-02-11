@@ -1,7 +1,8 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.matching;
 
 import com.shipmate.dto.response.matching.MatchResultResponse;
 import com.shipmate.dto.response.matching.MatchingMetricsResponse;
+import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.shipment.Shipment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

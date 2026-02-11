@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, map, catchError, of, switchMap, Observable } from 'rxjs';
 
@@ -6,17 +6,37 @@ import { environment } from '../../../environments/environment';
 import { AuthState } from './auth.state';
 import { AuthUser, RegisterRequest } from './auth.models';
 import { getDeviceId, getSessionId } from './session.util';
+import { WsService } from '../services/ws/ws.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
   private readonly http = inject(HttpClient);
   private readonly authState = inject(AuthState);
+  private readonly ws = inject(WsService);
   private readonly api = environment.apiBaseUrl;
 
-  // =====================
-  // LOGIN
-  // =====================
+  private initialized = false;
+  initWsEffect(): void {
+  if (this.initialized) return;
+  this.initialized = true;
+
+  effect(() => {
+    const version = this.authState.tokenVersion();
+    const token = this.authState.accessToken();
+
+    if (!token) {
+      this.ws.disconnect();
+      return;
+    }
+
+    this.ws.disconnect();
+    this.ws.connect();
+  });
+}
+
+
+
   login(email: string, password: string): Observable<void> {
     return this.http.post<{ accessToken: string }>(
       `${this.api}/auth/login`,
@@ -33,9 +53,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // REGISTER
-  // =====================
   register(request: RegisterRequest): Observable<void> {
     return this.http.post<void>(
       `${this.api}/auth/register`,
@@ -43,9 +60,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // FETCH CURRENT USER
-  // =====================
   fetchMe(): Observable<AuthUser> {
     return this.http.get<AuthUser>(`${this.api}/users/me`).pipe(
       tap(user => {
@@ -57,9 +71,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // REFRESH ACCESS TOKEN
-  // =====================
   refreshAccessToken(): Observable<string | null> {
     return this.http.post<{ accessToken: string }>(
       `${this.api}/auth/refresh`,
@@ -72,9 +83,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // RESTORE SESSION
-  // =====================
   restoreSession(): Observable<AuthUser | null> {
     return this.refreshAccessToken().pipe(
       switchMap(token => {
@@ -91,9 +99,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // LOGOUT
-  // =====================
   logout(): Observable<void> {
     return this.http.post(
       `${this.api}/auth/logout`,
@@ -105,9 +110,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // PASSWORD RESET
-  // =====================
   forgotPassword(email: string) {
     return this.http.post(
       `${this.api}/auth/forgot-password`,
@@ -115,9 +117,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // PASSWORD RESET
-  // =====================
   resetPassword(token: string, newPassword: string) {
     return this.http.post(
       `${this.api}/auth/reset-password`,
@@ -125,9 +124,6 @@ export class AuthService {
     );
   }
 
-  // =====================
-  // EMAIL VERIFICATION
-  // =====================
   verifyEmail(token: string) {
     return this.http.get(
       `${this.api}/auth/verify-email`,

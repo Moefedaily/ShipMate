@@ -1,0 +1,46 @@
+<div class="chat">
+
+  <div class="chat-messages" #messagesContainer>
+
+    <div
+      class="chat-message"
+      *ngFor="let msg of messages(); trackBy: trackById"
+      [class.system]="msg.messageType === 'SYSTEM'"
+    >
+      {{ msg.messageContent }}
+    </div>
+
+    @if (!hasMessages()) {
+      <div class="chat-empty">
+        No messages yet
+      </div>
+    }
+  </div>
+
+  <!-- INPUT AREA -->
+  <div class="chat-input" [class.readonly]="readonly">
+
+    @if (readonly) {
+      <div class="chat-readonly-hint">
+        Messaging is disabled for closed bookings
+      </div>
+    } @else {
+      <input
+        type="text"
+        placeholder="Type a message…"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+        (keydown.enter)="send()"
+      />
+
+      <button
+        (click)="send()"
+        [disabled]="!canSend()"
+      >
+        Send
+      </button>
+    }
+
+  </div>
+
+</div>

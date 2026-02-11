@@ -1,4 +1,4 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.driver;
 
 import com.shipmate.dto.request.driver.DriverApplyRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;

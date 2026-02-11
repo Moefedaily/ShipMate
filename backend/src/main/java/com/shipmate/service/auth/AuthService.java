@@ -2,7 +2,7 @@ package com.shipmate.service.auth;
 
 import com.shipmate.dto.request.auth.*;
 import com.shipmate.dto.response.auth.*;
-import com.shipmate.mapper.UserMapper;
+import com.shipmate.mapper.user.UserMapper;
 import com.shipmate.model.auth.VerificationTokenType;
 import com.shipmate.model.refreshToken.RefreshToken;
 import com.shipmate.model.user.User;
@@ -39,7 +39,6 @@ public class AuthService {
     private final MailService mailService;
     private final VerificationTokenService verificationTokenService;
 
-    // ===================== REGISTER =====================
 
     public RegisterResponse register(RegisterRequest request) {
 
@@ -68,7 +67,6 @@ public class AuthService {
                 .build();
     }
 
-    // ===================== LOGIN =====================
 
     public AuthResponse login(LoginRequest request) {
 
@@ -121,11 +119,10 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshValue) // controller hides this
+                .refreshToken(refreshValue)
                 .build();
     }
 
-    // ===================== REFRESH =====================
 
     public AuthResponse refresh(String refreshTokenValue) {
 
@@ -162,7 +159,6 @@ public class AuthService {
                 .build();
     }
 
-    // ===================== LOGOUT =====================
 
     public void logout(String refreshTokenValue) {
         refreshTokenRepository.findByToken(refreshTokenValue)
@@ -172,7 +168,6 @@ public class AuthService {
                 });
     }
 
-    // ===================== EMAIL / PASSWORD =====================
 
     public VerifyEmailResponse verifyEmail(String tokenValue) {
         var token = verificationTokenService.validateToken(tokenValue, VerificationTokenType.EMAIL_VERIFICATION);

@@ -25,7 +25,7 @@ import com.shipmate.service.auth.AuthService;
 import com.shipmate.service.auth.VerificationTokenService;
 import com.shipmate.service.mail.MailService;
 import com.shipmate.dto.request.auth.RegisterRequest;
-import com.shipmate.mapper.UserMapper;
+import com.shipmate.mapper.user.UserMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
