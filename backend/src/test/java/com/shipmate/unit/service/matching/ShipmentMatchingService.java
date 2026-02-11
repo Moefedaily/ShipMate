@@ -21,7 +21,7 @@ import org.springframework.data.domain.PageRequest;
 
 import com.shipmate.dto.response.matching.MatchResultResponse;
 import com.shipmate.dto.response.matching.MatchingMetricsResponse;
-import com.shipmate.mapper.MatchResultMapper;
+import com.shipmate.mapper.matching.MatchResultMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;

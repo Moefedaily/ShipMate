@@ -1,7 +1,7 @@
 package com.shipmate.controller.booking;
 
 import com.shipmate.dto.response.booking.BookingResponse;
-import com.shipmate.mapper.BookingMapper;
+import com.shipmate.mapper.booking.BookingMapper;
 import com.shipmate.service.booking.BookingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +28,6 @@ public class AdminBookingController {
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
 
-    // ===================== GET ALL BOOKINGS =====================
 
     @Operation(
         summary = "Get all bookings",
@@ -49,7 +48,6 @@ public class AdminBookingController {
         );
     }
 
-    // ===================== GET BOOKING BY ID =====================
 
     @Operation(
         summary = "Get booking by ID",

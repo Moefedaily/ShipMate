@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.shipmate.dto.request.driver.DriverApplyRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;
-import com.shipmate.mapper.DriverProfileMapper;
+import com.shipmate.mapper.driver.DriverProfileMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.user.User;

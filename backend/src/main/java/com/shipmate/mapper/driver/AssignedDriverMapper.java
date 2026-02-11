@@ -1,4 +1,4 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.driver;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

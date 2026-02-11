@@ -1,10 +1,8 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { FooterComponent } from '../../shared/components/footer/footer.component';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 
 import {
   DashboardHeaderComponent,
@@ -12,8 +10,12 @@ import {
   UserType
 } from '../../shared/components/dashboard-header/dashboard-header.component';
 
+import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { ChatDrawerComponent } from '../../shared/components/chat-drawer/chat-drawer.component';
+
 import { AuthState } from '../../core/auth/auth.state';
 import { AuthService } from '../../core/auth/auth.service';
+import { NotificationState } from '../../core/state/notification/notification.state';
 
 @Component({
   standalone: true,
@@ -23,6 +25,7 @@ import { AuthService } from '../../core/auth/auth.service';
     RouterOutlet,
     DashboardHeaderComponent,
     FooterComponent,
+    ChatDrawerComponent
   ],
   templateUrl: './dashboard-layout.component.html',
   styleUrl: './dashboard-layout.component.scss'
@@ -32,8 +35,11 @@ export class DashboardLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authState = inject(AuthState);
   private readonly authService = inject(AuthService);
+  private readonly notificationState = inject(NotificationState);
+
   readonly userType = signal<UserType | undefined>(undefined);
   readonly activeRole = signal<ActiveRole>('SENDER');
+  readonly chatOpen = signal(false);
 
   readonly userName = computed(() => {
     const user = this.authState.user();
@@ -42,17 +48,23 @@ export class DashboardLayoutComponent implements OnInit {
   });
 
 
+  constructor() {
+    effect(() => {
+      const user = this.authState.user();
+      if (!user) return;
+
+      this.userType.set(user.userType);
+      this.notificationState.init();
+    });
+  }
+
+
   ngOnInit(): void {
-    const user = this.authState.user();
-    if (!user) return;
-
-    this.userType.set(user.userType);
-
-    this.syncRoleWithRoute();
-
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => this.syncRoleWithRoute());
+
+    this.syncRoleWithRoute();
   }
 
 
@@ -63,7 +75,8 @@ export class DashboardLayoutComponent implements OnInit {
       route = route.firstChild;
     }
 
-    const role = route?.snapshot.data['dashboardRole'] as ActiveRole | undefined;
+    const role =
+      route?.snapshot?.data?.['dashboardRole'] as ActiveRole | undefined;
 
     this.activeRole.set(role ?? 'SENDER');
   }
@@ -78,10 +91,8 @@ export class DashboardLayoutComponent implements OnInit {
       case 'profile':
         this.router.navigateByUrl('/dashboard/profile');
         break;
-
       case 'settings':
         break;
-
       case 'logout':
         this.onLogout();
         break;
@@ -90,10 +101,15 @@ export class DashboardLayoutComponent implements OnInit {
 
   onLogout(): void {
     this.authService.logout().subscribe({
-      complete: () => {
-        this.router.navigateByUrl('/login');
-      }
+      complete: () => this.router.navigateByUrl('/login')
     });
   }
 
+  toggleChat(): void {
+    this.chatOpen.update(v => !v);
+  }
+
+  closeChat(): void {
+    this.chatOpen.set(false);
+  }
 }

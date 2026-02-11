@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shipmate.dto.response.matching.MatchResultResponse;
 import com.shipmate.dto.response.matching.MatchingMetricsResponse;
-import com.shipmate.mapper.MatchResultMapper;
+import com.shipmate.mapper.matching.MatchResultMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
@@ -29,12 +29,10 @@ import com.shipmate.util.DistanceCalculator;
 @Transactional(readOnly = true)
 public class ShipmentMatchingService {
 
-    /* ===================== CONFIG ===================== */
 
     private static final double MAX_PICKUP_DETOUR_KM = 8.0;
     private static final double MAX_ALLOWED_DETOUR_KM = 15.0;
 
-    /* ===================== DEPENDENCIES ===================== */
 
     private final ShipmentRepository shipmentRepository;
     private final BookingRepository bookingRepository;
@@ -53,7 +51,6 @@ public class ShipmentMatchingService {
         this.matchResultMapper = matchResultMapper;
     }
 
-    /* ===================== MATCHING ===================== */
 
     public List<MatchResultResponse> matchShipments(
             UUID driverId,
@@ -69,9 +66,7 @@ public class ShipmentMatchingService {
                 .findByUser_Id(driverId)
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
 
-        // -----------------------------
-        // Resolve driver position
-        // -----------------------------
+
         double effectiveLat;
         double effectiveLng;
 
@@ -100,8 +95,6 @@ public class ShipmentMatchingService {
 
         for (Shipment shipment : page.getContent()) {
 
-            /* ================= BASIC GUARDS ================= */
-
             if (shipment.getBooking() != null) {
                 continue;
             }
@@ -109,8 +102,6 @@ public class ShipmentMatchingService {
             if (!isWeightCompatible(shipment, remainingCapacity)) {
                 continue;
             }
-
-            /* ================= DISTANCE FROM DRIVER ================= */
 
             double distanceToPickup = DistanceCalculator.kilometers(
                     effectiveLat,
@@ -123,8 +114,6 @@ public class ShipmentMatchingService {
                 continue;
             }
 
-            /* ================= BOOKING CONTEXT GUARDS ================= */
-
             Double detourKm = null;
 
             if (booking != null) {
@@ -135,7 +124,6 @@ public class ShipmentMatchingService {
 
                 if (anchor != null) {
 
-                    // Hard pickup zone constraint
                     double pickupDetour = DistanceCalculator.kilometers(
                             anchor.getPickupLatitude().doubleValue(),
                             anchor.getPickupLongitude().doubleValue(),
@@ -147,17 +135,14 @@ public class ShipmentMatchingService {
                         continue;
                     }
 
-                    // Detour estimation
                     detourKm = pickupDetour;
 
-                    // Hard detour constraint
                     if (detourKm > MAX_ALLOWED_DETOUR_KM) {
                         continue;
                     }
                 }
             }
 
-            /* ================= METRICS ================= */
 
             double pickupToDelivery = DistanceCalculator.kilometers(
                     shipment.getPickupLatitude().doubleValue(),
@@ -206,7 +191,6 @@ public class ShipmentMatchingService {
                 .toList();
     }
 
-    /* ===================== HELPERS ===================== */
 
     private Booking resolveBookingIfPresent(UUID bookingId, UUID driverId) {
         if (bookingId == null) {

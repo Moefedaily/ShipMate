@@ -1,39 +1,33 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, of } from 'rxjs';
-
-import { BookingService } from '../../core/services/booking/booking.service';
-import { BookingResponse } from '../../core/services/booking/booking.models';
 
 import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
 import { LeafletMapComponent } from '../../shared/components/map/leaflet-map.component';
 import { MapStop } from '../../shared/components/map/leaflet-map.types';
 import { MatIconModule } from '@angular/material/icon';
+import { BookingState } from '../../core/state/booking/booking.state';
 
 @Component({
   standalone: true,
   selector: 'app-booking-page',
-  imports: [CommonModule, LeafletMapComponent,MatIconModule],
+  imports: [CommonModule, LeafletMapComponent, MatIconModule],
+  providers: [BookingState],
   templateUrl: './booking.page.html',
   styleUrl: './booking.page.scss'
 })
 export class BookingPage implements OnInit {
-
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly bookingService = inject(BookingService);
+  private readonly bookingState = inject(BookingState);
   private readonly loader = inject(LoaderService);
   private readonly toast = inject(ToastService);
 
-  /* ---------------- State ---------------- */
-
-  readonly booking = signal<BookingResponse | null>(null);
-  readonly loading = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  readonly loading = computed(() => this.bookingState.loading());
+  readonly booking = this.bookingState.booking;
+  readonly errorMessage = this.bookingState.errorMessage;
   readonly acting = signal(false);
-
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -44,40 +38,14 @@ export class BookingPage implements OnInit {
       return;
     }
 
-    this.loadBooking(id);
+    this.bookingState.load(id);
   }
-
-  private loadBooking(id: string): void {
-    this.loading.set(true);
-    this.errorMessage.set(null);
-
-    this.bookingService.getById(id)
-      .pipe(
-        catchError(err => {
-          this.errorMessage.set(
-            err.error?.message || 'Unable to load booking'
-          );
-          return of(null);
-        })
-      )
-      .subscribe(booking => {
-        this.booking.set(booking);
-        console.log(booking);
-        this.loading.set(false);
-      });
-  }
-
-  /* ---------------- Computed ---------------- */
 
   readonly status = computed(() => this.booking()?.status);
-
   readonly shipments = computed(() => this.booking()?.shipments ?? []);
-
   readonly totalPrice = computed(() => this.booking()?.totalPrice ?? 0);
   readonly driverEarnings = computed(() => this.booking()?.driverEarnings ?? 0);
   readonly platformCommission = computed(() => this.booking()?.platformCommission ?? 0);
-
-  /* ---------------- UI helpers ---------------- */
 
   readonly statusBadgeClass = computed(() => {
     switch (this.status()) {
@@ -90,53 +58,51 @@ export class BookingPage implements OnInit {
     }
   });
 
+  readonly mapStops = computed<MapStop[]>(() => {
+    const booking = this.booking();
+    if (!booking) return [];
 
-    readonly mapStops = computed<MapStop[]>(() => {
-        const booking = this.booking();
-        if (!booking) return [];
+    const stops: MapStop[] = [];
+    let order = 1;
 
-        const stops: MapStop[] = [];
-        let order = 1;
+    for (const shipment of booking.shipments) {
+      // PICKUP
+      stops.push({
+        id: `${shipment.id}-pickup`,
+        type: 'PICKUP',
+        order: order++,
+        lat: shipment.pickupLatitude,
+        lng: shipment.pickupLongitude,
+        address: shipment.pickupAddress,
+        shipments: [{
+          id: shipment.id,
+          label: shipment.packageDescription || 'Shipment',
+          weightKg: shipment.packageWeight,
+          pickupAddress: shipment.pickupAddress,
+          deliveryAddress: shipment.deliveryAddress
+        }]
+      });
 
-        for (const shipment of booking.shipments) {
+      // DELIVERY
+      stops.push({
+        id: `${shipment.id}-delivery`,
+        type: 'DELIVERY',
+        order: order++,
+        lat: shipment.deliveryLatitude,
+        lng: shipment.deliveryLongitude,
+        address: shipment.deliveryAddress,
+        shipments: [{
+          id: shipment.id,
+          label: shipment.packageDescription || 'Shipment',
+          weightKg: shipment.packageWeight,
+          pickupAddress: shipment.pickupAddress,
+          deliveryAddress: shipment.deliveryAddress
+        }]
+      });
+    }
 
-            // PICKUP
-            stops.push({
-            id: `${shipment.id}-pickup`,
-            type: 'PICKUP',
-            order: order++,
-            lat: shipment.pickupLatitude,
-            lng: shipment.pickupLongitude,
-            address: shipment.pickupAddress,
-            shipments: [{
-                id: shipment.id,
-                label: shipment.packageDescription || 'Shipment',
-                weightKg: shipment.packageWeight,
-                pickupAddress: shipment.pickupAddress,
-                deliveryAddress: shipment.deliveryAddress
-            }]
-            });
-
-            // DELIVERY
-            stops.push({
-            id: `${shipment.id}-delivery`,
-            type: 'DELIVERY',
-            order: order++,
-            lat: shipment.deliveryLatitude,
-            lng: shipment.deliveryLongitude,
-            address: shipment.deliveryAddress,
-            shipments: [{
-                id: shipment.id,
-                label: shipment.packageDescription || 'Shipment',
-                weightKg: shipment.packageWeight,
-                pickupAddress: shipment.pickupAddress,
-                deliveryAddress: shipment.deliveryAddress
-            }]
-            });
-        }
-
-        return stops;
-        });
+    return stops;
+  });
 
   confirm(): void {
     this.runAction('confirm', 'Booking confirmed');
@@ -167,9 +133,8 @@ export class BookingPage implements OnInit {
     this.acting.set(true);
     this.loader.show();
 
-    this.bookingService[action](booking.id).subscribe({
-      next: updated => {
-        this.booking.set(updated);
+    this.bookingState.runAction(action).subscribe({
+      next: () => {
         this.toast.success(successMessage);
         this.acting.set(false);
         this.loader.hide();

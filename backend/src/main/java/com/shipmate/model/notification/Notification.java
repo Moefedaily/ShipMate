@@ -3,6 +3,8 @@ package com.shipmate.model.notification;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.shipmate.model.user.User;
 
@@ -33,7 +35,8 @@ public class Notification {
     private String message;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "notification_type", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "notification_type", nullable = false, columnDefinition = "notification_type")
     private NotificationType notificationType;
 
     @Builder.Default

@@ -87,13 +87,8 @@ export class ShipmentDetailPage implements OnInit {
     const hasPickupCoords = s.pickupLatitude != null && s.pickupLongitude != null;
     const hasDeliveryCoords = s.deliveryLatitude != null && s.deliveryLongitude != null;
 
-    console.log('hasPickupCoords', hasPickupCoords);
-    console.log('hasDeliveryCoords', hasDeliveryCoords);
+
     if (!hasPickupCoords || !hasDeliveryCoords) {
-      console.warn('Missing coordinates for shipment:', {
-        pickup: { lat: s.pickupLatitude, lng: s.pickupLongitude },
-        delivery: { lat: s.deliveryLatitude, lng: s.deliveryLongitude }
-      });
       return [];
     }
 

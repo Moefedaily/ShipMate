@@ -1,7 +1,7 @@
 package com.shipmate.controller.shipment;
 
 import com.shipmate.dto.response.shipment.ShipmentResponse;
-import com.shipmate.mapper.ShipmentMapper;
+import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.service.shipment.ShipmentService;
 
 import io.swagger.v3.oas.annotations.Operation;

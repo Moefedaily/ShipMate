@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
-import com.shipmate.mapper.ShipmentMapper;
+import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;

@@ -1,7 +1,6 @@
 <header class="app-header dashboard-header">
   <div class="header-inner">
 
-    <!-- LEFT -->
     <div class="header-left">
       <div class="logo">
         <mat-icon>local_shipping</mat-icon>
@@ -9,7 +8,6 @@
       </div>
     </div>
 
-    <!-- CENTER -->
     <div class="header-center">
       @if (userType === 'BOTH') {
         <div class="role-toggle">
@@ -30,15 +28,12 @@
       }
     </div>
 
-    <!-- RIGHT -->
   <div class="header-right">
 
     <div class="header-actions">
-      <button class="icon-btn">
-        <mat-icon>notifications</mat-icon>
-      </button>
+      <app-notifications />
 
-      <button class="icon-btn">
+      <button class="icon-btn" (click)="chatToggle.emit()">
         <mat-icon>chat_bubble</mat-icon>
       </button>
     </div>

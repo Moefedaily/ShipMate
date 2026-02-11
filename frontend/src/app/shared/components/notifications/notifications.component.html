@@ -1,0 +1,30 @@
+<div class="notifications" (clickOutside)="close()">
+
+    <button class="icon-btn" (click)="toggle(); $event.stopPropagation()">
+      <mat-icon>notifications</mat-icon>
+
+      @if (hasUnread()) {
+        <span class="badge">{{ unreadCount() }}</span>
+      }
+    </button>
+
+
+
+  @if (isOpen()) {
+    <div class="notifications-panel">
+      @if (notifications().length === 0) {
+        <div class="empty">No notifications</div>
+      }
+
+      @for (n of notifications(); track n.id) {
+        <div class="notification-item"[class.unread]="!n.isRead">
+          <strong>{{ n.title }}</strong>
+          <p>{{ n.message }}</p>
+          <small>{{ n.createdAt | date:'short' }}</small>
+        </div>
+      }
+    </div>
+  }
+
+
+</div>

@@ -4,8 +4,8 @@ import com.shipmate.dto.request.pricing.PricingRequest;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
-import com.shipmate.mapper.ShipmentAssembler;
-import com.shipmate.mapper.ShipmentMapper;
+import com.shipmate.mapper.shipment.ShipmentAssembler;
+import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
@@ -57,10 +57,6 @@ public class ShipmentService {
     );
 
 
-    /* =========================
-       CREATE
-       ========================= */
-
         public ShipmentResponse create(UUID senderId, CreateShipmentRequest request) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -86,10 +82,6 @@ public class ShipmentService {
         Shipment saved = shipmentRepository.saveAndFlush(shipment);
         return shipmentAssembler.toResponse(saved);
     }
-
-    /* =========================
-       READ
-       ========================= */
 
     @Transactional(readOnly = true)
     public Page<ShipmentResponse> getMyShipments(UUID senderId, Pageable pageable) {
@@ -123,9 +115,6 @@ public class ShipmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
     }
 
-    /* =========================
-       UPDATE
-       ========================= */
 
     public ShipmentResponse update(UUID shipmentId, UUID senderId, UpdateShipmentRequest request) {
         User sender = userRepository.findById(senderId)
@@ -156,9 +145,6 @@ public class ShipmentService {
         return shipmentAssembler.toResponse(shipment);
         }
 
-    /* =========================
-       DELETE
-       ========================= */
 
     public void delete(UUID shipmentId, UUID senderId) {
         User sender = userRepository.findById(senderId)
@@ -185,13 +171,11 @@ public class ShipmentService {
         Shipment shipment = shipmentRepository.findByIdAndSender(shipmentId, sender)
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
-        // Status guard
         if (shipment.getStatus() != ShipmentStatus.CREATED &&
                 shipment.getStatus() != ShipmentStatus.ASSIGNED) {
                 throw new IllegalStateException("Photos cannot be added in current shipment state");
         }
 
-        // Init photos list if null
         if (shipment.getPhotos() == null) {
                 shipment.setPhotos(new ArrayList<>());
         }

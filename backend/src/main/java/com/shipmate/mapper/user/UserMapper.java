@@ -1,4 +1,4 @@
-package com.shipmate.mapper;
+package com.shipmate.mapper.user;
 
 import com.shipmate.dto.request.auth.RegisterRequest;
 import com.shipmate.model.user.User;

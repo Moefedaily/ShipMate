@@ -5,6 +5,8 @@ import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.user.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +25,15 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     User driver,
     List<BookingStatus> statuses
     );
+
+    @Query("""
+    SELECT DISTINCT b FROM Booking b
+    LEFT JOIN b.shipments s
+    WHERE
+        b.driver.id = :userId
+        OR s.sender.id = :userId
+    """)
+    List<Booking> findAllUserBookings(@Param("userId") UUID userId);
+
 
 }

@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.shipmate.dto.request.user.UpdateUserProfileRequest;
 import com.shipmate.dto.response.user.UserProfileResponse;
-import com.shipmate.mapper.UserProfileMapper;
+import com.shipmate.mapper.user.UserProfileMapper;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.user.UserRepository;

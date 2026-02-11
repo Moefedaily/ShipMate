@@ -21,4 +21,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     Page<Shipment> findByStatus(ShipmentStatus status, Pageable pageable);
     
     List<Shipment> findByBookingId(UUID bookingId);
+    
+    boolean existsByBooking_IdAndSender_Id(UUID bookingId, UUID senderId);
 }
