@@ -18,7 +18,7 @@ export class ConversationService {
   }
   markConversationAsRead(bookingId: string) {
     return this.http.post<void>(
-        `${this.api}/messages/booking/${bookingId}/read`,
+        `${this.api}/bookings/${bookingId}/messages/read`,
         {}
     );
  }

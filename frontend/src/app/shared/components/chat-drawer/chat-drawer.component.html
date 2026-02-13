@@ -2,71 +2,143 @@
   <div class="chat-drawer-backdrop" (click)="requestClose()"></div>
 
   <aside class="chat-drawer">
+    
+    <div class="conversations-sidebar">
+      
+      <div class="sidebar-header">
+        <div class="header-title">
+          <mat-icon>chat_bubble</mat-icon>
+          <h3>Messages</h3>
+        </div>
+        <button class="close-btn" (click)="requestClose()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
-    <div class="chat-list">
-
-      <header class="chat-list-header">
-        <h3>Messages</h3>
-      </header>
-
-      @if (loading()) {
-        <div class="chat-loading">Loading…</div>
-      }
-
-      @if (errorMessage()) {
-        <div class="chat-error">{{ errorMessage() }}</div>
-      }
-
-      @if (hasConversations()) {
-        <div
-          class="chat-item"
-          *ngFor="let c of conversations(); trackBy: trackByBooking"
-          [class.active]="c.bookingId === selectedConversation()?.bookingId"
-          (click)="selectConversation(c)"
-        >
-          <div class="chat-item-main">
-            <strong>{{ c.otherUserName || 'Conversation' }}</strong>
-            <p>{{ c.lastMessagePreview || 'No messages yet' }}</p>
+      <div class="sidebar-body">
+        
+        @if (loading()) {
+          <div class="sidebar-loading">
+            <mat-icon class="spin">refresh</mat-icon>
+            <p>Loading conversations...</p>
           </div>
+        }
 
-          <div class="chat-item-meta">
-            @if (c.unreadCount > 0) {
-              <span class="badge">{{ c.unreadCount }}</span>
+        @else if (errorMessage()) {
+          <div class="sidebar-error">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ errorMessage() }}</p>
+          </div>
+        }
+
+        @else if (!hasConversations()) {
+          <div class="sidebar-empty">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            <p>No conversations yet</p>
+            <span class="empty-hint">Messages will appear here</span>
+          </div>
+        }
+
+        @else {
+          <div class="conversations-list">
+            @for (convo of conversations(); track trackByBooking($index, convo)) {
+              <article
+                class="conversation-item"
+                [class.active]="convo.bookingId === selectedConversation()?.bookingId"
+                [class.unread]="convo.unreadCount > 0"
+                (click)="selectConversation(convo)"
+              >
+                
+                <div class="conversation-avatar">
+                  @if (convo.otherUserAvatarUrl) {
+                    <img [src]="convo.otherUserAvatarUrl" [alt]="convo.otherUserName" />
+                  } @else {
+                    <mat-icon>person</mat-icon>
+                  }
+                </div>
+
+                <div class="conversation-content">
+                  <div class="conversation-header">
+                    <strong class="conversation-name">
+                      {{ convo.otherUserName || 'Unknown User' }}
+                    </strong>
+                    @if (convo.lastMessageAt) {
+                      <span class="conversation-time">
+                        {{ getRelativeTime(convo.lastMessageAt) }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="conversation-preview">
+                    <span class="preview-text">
+                      {{ convo.lastMessagePreview || 'No messages yet' }}
+                    </span>
+                    @if (convo.unreadCount > 0) {
+                      <span class="unread-badge">{{ convo.unreadCount }}</span>
+                    }
+                  </div>
+                </div>
+
+              </article>
             }
           </div>
-        </div>
-      }
+        }
+      </div>
 
-      @if (!loading() && !hasConversations()) {
-        <div class="chat-empty">
-          No conversations yet
-        </div>
-      }
     </div>
 
+    <!-- CHAT PANEL -->
     <div class="chat-panel">
-
+      
+      <!-- PLACEHOLDER (No conversation selected) -->
       @if (!selectedConversation()) {
         <div class="chat-placeholder">
-          Select a Conversation
-            <button class="icon-btn" (click)="requestClose()">
-                <mat-icon>close</mat-icon>
-            </button>
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <h4>Select a conversation</h4>
+          <p>Choose a conversation from the list to start messaging</p>
         </div>
       }
 
-      @if (selectedConversation()) {
-        <app-chat
-          [bookingId]="selectedConversation()!.bookingId"
-          [readonly]="isChatReadonly()"
-        />
+      <!-- ACTIVE CHAT -->
+      @else {
+        <div class="chat-panel-header">
+          <div class="panel-user-info">
+            <div class="user-avatar">
+              @if (selectedConversation()!.otherUserAvatarUrl) {
+                <img 
+                  [src]="selectedConversation()!.otherUserAvatarUrl" 
+                  [alt]="selectedConversation()!.otherUserName" 
+                />
+              } @else {
+                <mat-icon>person</mat-icon>
+              }
+            </div>
+            <div>
+              <strong>{{ selectedConversation()!.otherUserName || 'Unknown User' }}</strong>
+              <span class="booking-id">Booking #{{ selectedConversation()!.bookingId | slice:0:8 }}</span>
+            </div>
+          </div>
+
+          <button class="close-chat-btn" (click)="selectedConversation.set(null)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="chat-content">
+          <app-chat
+            [bookingId]="selectedConversation()!.bookingId"
+            [readonly]="isChatReadonly()"
+          />
+        </div>
 
         @if (isChatReadonly()) {
-          <div class="chat-readonly">
-            This booking is closed. Messaging is disabled.
+          <div class="readonly-banner">
+            <mat-icon>info</mat-icon>
+            <span>This booking is {{ selectedConversation()!.bookingStatus.toLowerCase() }}. Messaging is disabled.</span>
           </div>
         }
       }
+
     </div>
 
   </aside>

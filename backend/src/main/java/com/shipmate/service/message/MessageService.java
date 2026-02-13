@@ -3,8 +3,10 @@ package com.shipmate.service.message;
 import com.shipmate.dto.request.message.SendMessageRequest;
 import com.shipmate.dto.response.message.MessageResponse;
 import com.shipmate.listener.message.MessageSentEvent;
+import com.shipmate.listener.message.MessagesMarkedAsReadEvent;
 import com.shipmate.mapper.message.MessageMapper;
 import com.shipmate.model.booking.Booking;
+import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.message.Message;
 import com.shipmate.model.message.MessageType;
 import com.shipmate.repository.booking.BookingRepository;
@@ -34,6 +36,7 @@ public class MessageService {
     private final MessageMapper messageMapper;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+
 
 
 
@@ -92,6 +95,12 @@ public class MessageService {
 
     validateAccess(booking, senderId);
 
+    if (booking.getStatus() == BookingStatus.COMPLETED ||
+        booking.getStatus() == BookingStatus.CANCELLED) {
+
+        throw new IllegalStateException("Chat is closed for this booking");
+    }
+    
     UUID receiverId = resolveReceiver(booking, senderId);
 
     Message message = Message.builder()
@@ -113,29 +122,34 @@ public class MessageService {
     return messageMapper.toResponse(saved);
 }
 
-private UUID resolveReceiver(Booking booking, UUID senderId) {
+    private UUID resolveReceiver(Booking booking, UUID senderId) {
 
-    if (booking.getDriver() != null &&
-        booking.getDriver().getId().equals(senderId)) {
+        if (booking.getDriver() != null &&
+            booking.getDriver().getId().equals(senderId)) {
 
-        return booking.getShipments()
-                .get(0)
-                .getSender()
-                .getId();
+            return booking.getShipments()
+                    .get(0)
+                    .getSender()
+                    .getId();
+        }
+
+        if (booking.getDriver() != null) {
+            return booking.getDriver().getId();
+        }
+
+        throw new IllegalStateException("Cannot resolve message receiver");
     }
 
-    if (booking.getDriver() != null) {
-        return booking.getDriver().getId();
+    public void markMessagesAsRead(UUID bookingId, UUID userId) {
+
+        Booking booking = loadBooking(bookingId);
+        validateAccess(booking, userId);
+
+        messageRepository.markAllAsRead(bookingId, userId);
+            eventPublisher.publishEvent(
+        new MessagesMarkedAsReadEvent(bookingId, userId)
+    );
+
     }
-
-    throw new IllegalStateException("Cannot resolve message receiver");
-}
-
-public void markMessagesAsRead(UUID bookingId, UUID userId) {
-    Booking booking = loadBooking(bookingId);
-    validateAccess(booking, userId);
-
-    messageRepository.markAllAsRead(bookingId, userId);
-}
 
 }

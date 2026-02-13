@@ -32,3 +32,15 @@ export interface MessageWsDto {
   senderId: string;
 
 }
+export interface ConversationUpdateWsDto {
+  bookingId: string;
+  bookingStatus: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  lastMessagePreview: string;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+export interface TypingWsDto {
+  userId: string;
+  displayName: string;
+}

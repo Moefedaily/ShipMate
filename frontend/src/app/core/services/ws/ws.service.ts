@@ -106,4 +106,13 @@ export class WsService {
       return message.body;
     }
   }
+  publish(destination: string, body: any) {
+    if (!this.client || !this._connected()) return;
+
+    this.client.publish({
+      destination,
+      body: JSON.stringify(body)
+    });
+  }
+
 }

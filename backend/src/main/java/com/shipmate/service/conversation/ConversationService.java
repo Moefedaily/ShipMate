@@ -13,10 +13,12 @@ import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.message.MessageRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ConversationService {
 
     private final BookingRepository bookingRepository;
@@ -26,6 +28,7 @@ public class ConversationService {
 
         List<Booking> bookings =
             bookingRepository.findAllUserBookings(userId);
+        log.info("Found {} bookings for user {}", bookings.size(), userId);    
 
         return bookings.stream()
             .map(b -> toConversation(b, userId))
