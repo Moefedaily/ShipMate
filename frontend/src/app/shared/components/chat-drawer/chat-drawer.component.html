@@ -41,10 +41,10 @@
 
         @else {
           <div class="conversations-list">
-            @for (convo of conversations(); track trackByBooking($index, convo)) {
+            @for (convo of conversations(); track trackByShipment($index, convo)) {
               <article
                 class="conversation-item"
-                [class.active]="convo.bookingId === selectedConversation()?.bookingId"
+                [class.active]="convo.shipmentId === selectedConversation()?.shipmentId"
                 [class.unread]="convo.unreadCount > 0"
                 (click)="selectConversation(convo)"
               >
@@ -115,7 +115,7 @@
             </div>
             <div>
               <strong>{{ selectedConversation()!.otherUserName || 'Unknown User' }}</strong>
-              <span class="booking-id">Booking #{{ selectedConversation()!.bookingId | slice:0:8 }}</span>
+              <span class="booking-id">Booking #{{ selectedConversation()!.shipmentId | slice:0:8 }}</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@
 
         <div class="chat-content">
           <app-chat
-            [bookingId]="selectedConversation()!.bookingId"
+            [shipmentId]="selectedConversation()!.shipmentId"
             [readonly]="isChatReadonly()"
           />
         </div>
@@ -134,7 +134,7 @@
         @if (isChatReadonly()) {
           <div class="readonly-banner">
             <mat-icon>info</mat-icon>
-            <span>This booking is {{ selectedConversation()!.bookingStatus.toLowerCase() }}. Messaging is disabled.</span>
+            <span>This booking is {{ selectedConversation()!.shipmentStatus.toLowerCase() }}. Messaging is disabled.</span>
           </div>
         }
       }

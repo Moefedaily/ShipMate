@@ -19,10 +19,12 @@ export class MessageState {
   private typingSub?: Subscription;
   private typingTimer?: any;
 
-  private currentBookingId?: string;
-  private historyLoaded = false;
+  private currentShipmentId?: string;
+  private historyLoadedFor?: string;
   private loading = false;
+
   private lastTypingSentAt = 0;
+  private markReadDoneFor?: string;
 
   readonly messages = signal<ChatMessage[]>([]);
   readonly typingUser = signal<string | null>(null);
@@ -32,22 +34,22 @@ export class MessageState {
     () => this.messages().length > 0
   );
 
-  loadForBooking(bookingId: string): void {
-    if (this.currentBookingId === bookingId) return;
+  loadForShipment(shipmentId: string): void {
+    if (this.currentShipmentId === shipmentId) return;
 
     this.clear();
 
-    this.currentBookingId = bookingId;
+    this.currentShipmentId = shipmentId;
 
-    this.loadHistory(bookingId);
-    this.listenToMessages(bookingId);
+    this.loadHistory(shipmentId);
+    this.listenToMessages(shipmentId);
   }
 
   sendMessage(text: string): void {
-    const bookingId = this.currentBookingId;
-    if (!bookingId || !text.trim()) return;
+    const shipmentId = this.currentShipmentId;
+    if (!shipmentId || !text.trim()) return;
 
-    this.messageService.sendMessage(bookingId, text).subscribe({
+    this.messageService.sendMessage(shipmentId, text).subscribe({
       error: () => {
         this.errorMessage.set('Failed to send message');
       }
@@ -55,32 +57,34 @@ export class MessageState {
   }
 
   sendTyping(): void {
-    const bookingId = this.currentBookingId;
-    if (!bookingId) return;
+    const shipmentId = this.currentShipmentId;
+    if (!shipmentId) return;
 
     const now = Date.now();
 
+    // Prevent spam (send max once every 800ms)
     if (now - this.lastTypingSentAt < 800) return;
 
     this.lastTypingSentAt = now;
 
-    this.wsService.sendTyping(bookingId);
+    this.wsService.sendTyping(shipmentId);
   }
 
-
-
-  private loadHistory(bookingId: string): void {
-    if (this.historyLoaded || this.loading) return;
+  private loadHistory(shipmentId: string): void {
+    if (this.loading) return;
+    if (this.historyLoadedFor === shipmentId) return;
 
     this.loading = true;
 
-    this.messageService.getBookingMessages(bookingId).subscribe({
+    this.messageService.getShipmentMessages(shipmentId).subscribe({
       next: page => {
         this.messages.set(page.content);
-        this.historyLoaded = true;
+
+        this.historyLoadedFor = shipmentId;
         this.loading = false;
 
-        this.markAsRead();
+        // Mark as read ONCE after history is loaded (prevents double calls)
+        this.markAsReadOnce(shipmentId);
       },
       error: () => {
         this.errorMessage.set('Failed to load messages');
@@ -89,24 +93,34 @@ export class MessageState {
     });
   }
 
-  private markAsRead(): void {
-    if (!this.currentBookingId) return;
+  private markAsReadOnce(shipmentId: string): void {
+    if (this.markReadDoneFor === shipmentId) return;
+
+    this.markReadDoneFor = shipmentId;
 
     this.messageService
-      .markAsRead(this.currentBookingId)
-      .subscribe();
+      .markAsRead(shipmentId)
+      .subscribe({
+        error: () => {
+          // don’t block UI; just allow retry later if needed
+          this.markReadDoneFor = undefined;
+        }
+      });
   }
 
-  private listenToMessages(bookingId: string): void {
+  private listenToMessages(shipmentId: string): void {
 
     this.wsSub =
-      this.wsService.watchBookingMessages(bookingId)
+      this.wsService.watchShipmentMessages(shipmentId)
         .subscribe({
           next: msg => {
             this.messages.update(list => {
               if (list.some(m => m.id === msg.id)) return list;
               return [...list, msg];
             });
+            if (this.currentShipmentId === shipmentId) {
+              this.markAsReadOnce(shipmentId);
+            }
           },
           error: () => {
             this.errorMessage.set('Message stream error');
@@ -114,11 +128,12 @@ export class MessageState {
         });
 
     this.typingSub =
-      this.wsService.watchTyping(bookingId)
+      this.wsService.watchTyping(shipmentId)
         .subscribe(payload => {
 
           const currentUserId = this.authState.user()?.id;
 
+          // Ignore own typing events
           if (payload.userId === currentUserId) return;
 
           this.typingUser.set(payload.displayName);
@@ -142,9 +157,12 @@ export class MessageState {
     clearTimeout(this.typingTimer);
     this.typingUser.set(null);
 
-    this.currentBookingId = undefined;
-    this.historyLoaded = false;
+    this.currentShipmentId = undefined;
+    this.historyLoadedFor = undefined;
     this.loading = false;
+
+    this.lastTypingSentAt = 0;
+    this.markReadDoneFor = undefined;
 
     this.messages.set([]);
     this.errorMessage.set(null);

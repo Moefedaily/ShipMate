@@ -13,43 +13,62 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MessageRepository extends JpaRepository<Message, Long> {
+public interface MessageRepository extends JpaRepository<Message, UUID> {
+
     long countByMessageType(MessageType type);
-     Page<Message> findByBooking_IdOrderBySentAtAsc( UUID bookingId, Pageable pageable );
 
-    long countByBooking_IdAndReceiver_IdAndIsReadFalse( UUID bookingId, UUID receiverId );
+    Page<Message> findByShipment_IdOrderBySentAtAsc(
+        UUID shipmentId,
+        Pageable pageable
+    );
 
-    Page<Message> findByBooking_IdAndMessageTypeOrderBySentAtAsc( UUID bookingId, MessageType messageType, Pageable pageable );
+    long countByShipment_IdAndReceiver_IdAndIsReadFalse(
+        UUID shipmentId,
+        UUID receiverId
+    );
 
-    Page<Message> findByBooking_IdAndSender_IdAndReceiver_IdOrderBySentAtAsc(UUID bookingId, UUID senderId, UUID receiverId, Pageable pageable );
+    Page<Message> findByShipment_IdAndMessageTypeOrderBySentAtAsc(
+        UUID shipmentId,
+        MessageType messageType,
+        Pageable pageable
+    );
+
+    Page<Message> findByShipment_IdAndSender_IdAndReceiver_IdOrderBySentAtAsc(
+        UUID shipmentId,
+        UUID senderId,
+        UUID receiverId,
+        Pageable pageable
+    );
 
     @Query("""
         SELECT m FROM Message m
-        WHERE m.booking.id = :bookingId
+        WHERE m.shipment.id = :shipmentId
         ORDER BY m.sentAt DESC
-        """)
-    Page<Message> findLatestByBooking( @Param("bookingId") UUID bookingId, Pageable pageable );
+    """)
+    Page<Message> findLatestByShipment(
+        @Param("shipmentId") UUID shipmentId,
+        Pageable pageable
+    );
 
-    List<Message> findByBooking_Id(UUID bookingId);
+    List<Message> findByShipment_Id(UUID shipmentId);
 
-        @Modifying(clearAutomatically = true)
-        @Query("""
+    @Modifying(clearAutomatically = true)
+    @Query("""
         update Message m
         set m.isRead = true
-        where m.booking.id = :bookingId
+        where m.shipment.id = :shipmentId
         and m.receiver.id = :userId
         and m.isRead = false
-        """)
-        void markAllAsRead(UUID bookingId, UUID userId);
+    """)
+    void markAllAsRead(UUID shipmentId, UUID userId);
 
-        @Query("""
+
+    @Query("""
         select m from Message m
-        join fetch m.booking b
+        join fetch m.shipment sh
         join fetch m.sender s
         join fetch m.receiver r
         where m.id = :id
     """)
-    Message findWithRelationsById(@Param("id") Long id);
-
-
+    Message findWithRelationsById(@Param("id") UUID id);
 }

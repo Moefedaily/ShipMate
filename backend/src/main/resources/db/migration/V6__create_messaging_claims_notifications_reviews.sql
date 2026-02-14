@@ -75,11 +75,11 @@ CREATE INDEX idx_insurance_claims_status ON insurance_claims(claim_status);
 
 -- Messages Table
 CREATE TABLE messages (
-    id BIGSERIAL PRIMARY KEY,
-    booking_id UUID NOT NULL,
-    CONSTRAINT fk_messages_booking
-        FOREIGN KEY (booking_id)
-        REFERENCES bookings(id)
+    id UUID PRIMARY KEY,
+    shipment_id UUID NOT NULL,
+    CONSTRAINT fk_messages_shipment
+        FOREIGN KEY (shipment_id)
+        REFERENCES shipments(id)
         ON DELETE CASCADE,
     sender_id UUID NOT NULL,
     CONSTRAINT fk_messages_sender
@@ -97,7 +97,7 @@ CREATE TABLE messages (
     sent_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_messages_booking_id ON messages(booking_id);
+CREATE INDEX idx_messages_shipment_id ON messages(shipment_id);
 CREATE INDEX idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX idx_messages_receiver_id ON messages(receiver_id);
 CREATE INDEX idx_messages_is_read ON messages(is_read);

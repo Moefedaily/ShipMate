@@ -1,3 +1,5 @@
 package com.shipmate.listener.message;
 
-public record MessageSentEvent(Long messageId) {}
+import java.util.UUID;
+
+public record MessageSentEvent(UUID messageId) {}

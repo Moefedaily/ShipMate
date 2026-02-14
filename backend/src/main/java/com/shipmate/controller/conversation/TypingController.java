@@ -20,15 +20,16 @@ public class TypingController {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/bookings/{bookingId}/typing")
+    @MessageMapping("/shipments/{shipmentId}/typing")
     public void typing(
-            @DestinationVariable UUID bookingId,
+            @DestinationVariable UUID shipmentId,
             Principal principal
     ) {
 
         UUID userId = UUID.fromString(principal.getName());
 
-        var user = userRepository.findById(userId).orElseThrow();
+        var user = userRepository.findById(userId)
+                .orElseThrow();
 
         TypingWsDto payload =
                 new TypingWsDto(
@@ -37,7 +38,7 @@ public class TypingController {
                 );
 
         messagingTemplate.convertAndSend(
-                "/topic/bookings/" + bookingId + "/typing",
+                "/topic/shipments/" + shipmentId + "/typing",
                 payload
         );
     }

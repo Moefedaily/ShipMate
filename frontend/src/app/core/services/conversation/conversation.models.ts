@@ -1,13 +1,13 @@
-export type BookingStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
+export type ShipmentStatus =
+  | 'CREATED'
+  | 'ASSIGNED'
+  | 'IN_TRANSIT'
+  | 'DELIVERED'
   | 'CANCELLED';
 
 export interface ConversationSummary {
-  bookingId: string;
-  bookingStatus: BookingStatus;
+  shipmentId: string;
+  shipmentStatus: ShipmentStatus;
 
   lastMessagePreview: string | null;
   lastMessageAt: string | null;

@@ -154,6 +154,13 @@ export class DriverApprovedState implements OnInit {
   /* ================= ACTIONS ================= */
 
   goToBooking(id: string): void {
+    const status = this.activeBooking()?.status;
+
+    if (status === 'IN_PROGRESS') {
+      this.router.navigate(['/dashboard/trip', id]);
+      return;
+    }
+
     this.router.navigate(['/dashboard/bookings', id]);
   }
 

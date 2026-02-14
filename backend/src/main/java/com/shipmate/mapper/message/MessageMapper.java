@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
 
-    @Mapping(source = "booking.id", target = "bookingId")
+    @Mapping(source = "shipment.id", target = "shipmentId")
     @Mapping(source = "sender.id", target = "senderId")
     @Mapping(source = "receiver.id", target = "receiverId")
     MessageResponse toResponse(Message message);

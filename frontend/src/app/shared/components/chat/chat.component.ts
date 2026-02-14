@@ -25,11 +25,11 @@ import { AuthState } from '../../../core/auth/auth.state';
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent implements OnChanges {
-  
+
   @ViewChild('messagesContainer')
   private readonly messagesEl?: ElementRef<HTMLDivElement>;
 
-  @Input({ required: true }) bookingId!: string;
+  @Input({ required: true }) shipmentId!: string;
   @Input() readonly = false;
 
   /* ==================== Inject ==================== */
@@ -60,17 +60,18 @@ export class ChatComponent implements OnChanges {
 
   /* ==================== Lifecycle ==================== */
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['bookingId'] && this.bookingId) {
-      this.messageState.loadForBooking(this.bookingId);
+    if (changes['shipmentId'] && this.shipmentId) {
+      this.messageState.loadForShipment(this.shipmentId);
     }
   }
 
   /* ==================== Input Handling ==================== */
   onDraftInput(value: string): void {
     if (this.readonly) return;
+
     this.draft.set(value);
-    
-    if (this.bookingId) {
+
+    if (this.shipmentId) {
       this.messageState.sendTyping();
     }
   }
@@ -78,7 +79,7 @@ export class ChatComponent implements OnChanges {
   /* ==================== Send Message ==================== */
   send(): void {
     if (this.readonly) return;
-    
+
     const text = this.draft().trim();
     if (!text) return;
 
@@ -90,7 +91,7 @@ export class ChatComponent implements OnChanges {
   private scrollToBottom(): void {
     const el = this.messagesEl?.nativeElement;
     if (!el) return;
-    
+
     setTimeout(() => {
       el.scrollTop = el.scrollHeight;
     }, 50);

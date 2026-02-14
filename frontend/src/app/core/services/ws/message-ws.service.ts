@@ -11,28 +11,27 @@ export class MessageWsService {
   private readonly ws = inject(WsService);
 
   watchConversationUpdates(userId: string) {
-  return this.ws.subscribe<ConversationUpdateWsDto>(
-    `/topic/users/${userId}/conversation-updates`
-  );
-}
-
-  watchBookingMessages(bookingId: string): Observable<MessageResponse> {
-    return this.ws.subscribe<MessageResponse>(
-      `/topic/bookings/${bookingId}/messages`
+    return this.ws.subscribe<ConversationUpdateWsDto>(
+      `/topic/users/${userId}/conversation-updates`
     );
   }
 
-  sendTyping(bookingId: string) {
+  watchShipmentMessages(shipmentId: string): Observable<MessageResponse> {
+    return this.ws.subscribe<MessageResponse>(
+      `/topic/shipments/${shipmentId}/messages`
+    );
+  }
+
+  sendTyping(shipmentId: string) {
     this.ws.publish(
-      `/app/bookings/${bookingId}/typing`,
+      `/app/shipments/${shipmentId}/typing`,
       {}
     );
   }
 
-  watchTyping(bookingId: string) {
+  watchTyping(shipmentId: string) {
     return this.ws.subscribe<TypingWsDto>(
-      `/topic/bookings/${bookingId}/typing`
+      `/topic/shipments/${shipmentId}/typing`
     );
   }
-
 }

@@ -38,7 +38,6 @@ import java.util.UUID;
 class MessageServiceIT extends AbstractIntegrationTest {
 
     @Autowired private MessageService messageService;
-
     @Autowired private MessageRepository messageRepository;
     @Autowired private BookingRepository bookingRepository;
     @Autowired private ShipmentRepository shipmentRepository;
@@ -46,13 +45,12 @@ class MessageServiceIT extends AbstractIntegrationTest {
     @Autowired private DriverProfileRepository driverProfileRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
-
     @Test
-    void driver_shouldReadBookingMessages() {
-        TestContext ctx = prepareBookingWithMessages();
+    void driver_shouldReadShipmentMessages() {
+        TestContext ctx = prepareShipmentWithMessages();
 
-        var page = messageService.getBookingMessages(
-                ctx.booking.getId(),
+        var page = messageService.getShipmentMessages(
+                ctx.shipment.getId(),
                 ctx.driver.getId(),
                 PageRequest.of(0, 10)
         );
@@ -67,11 +65,11 @@ class MessageServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void senderOwningShipment_shouldReadBookingMessages() {
-        TestContext ctx = prepareBookingWithMessages();
+    void senderOwningShipment_shouldReadShipmentMessages() {
+        TestContext ctx = prepareShipmentWithMessages();
 
-        var page = messageService.getBookingMessages(
-                ctx.booking.getId(),
+        var page = messageService.getShipmentMessages(
+                ctx.shipment.getId(),
                 ctx.sender.getId(),
                 PageRequest.of(0, 10)
         );
@@ -81,29 +79,27 @@ class MessageServiceIT extends AbstractIntegrationTest {
 
     @Test
     void messages_shouldBeOrderedBySentAtAsc() {
-        TestContext ctx = prepareBookingWithMessages();
+        TestContext ctx = prepareShipmentWithMessages();
 
-        var page = messageService.getBookingMessages(
-                ctx.booking.getId(),
+        var page = messageService.getShipmentMessages(
+                ctx.shipment.getId(),
                 ctx.sender.getId(),
                 PageRequest.of(0, 10)
         );
 
         List<MessageResponse> messages = page.getContent();
-
         assertThat(messages.get(0).sentAt())
                 .isBefore(messages.get(1).sentAt());
     }
 
-
     @Test
-    void otherUser_shouldNotReadBookingMessages() {
-        TestContext ctx = prepareBookingWithMessages();
+    void otherUser_shouldNotReadShipmentMessages() {
+        TestContext ctx = prepareShipmentWithMessages();
         User other = createUser(UserType.SENDER);
 
         assertThatThrownBy(() ->
-                messageService.getBookingMessages(
-                        ctx.booking.getId(),
+                messageService.getShipmentMessages(
+                        ctx.shipment.getId(),
                         other.getId(),
                         PageRequest.of(0, 10)
                 )
@@ -111,25 +107,59 @@ class MessageServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void bookingNotFound_shouldFail() {
+    void shipmentNotFound_shouldFail() {
         User user = createUser(UserType.SENDER);
 
         assertThatThrownBy(() ->
-                messageService.getBookingMessages(
+                messageService.getShipmentMessages(
                         UUID.randomUUID(),
                         user.getId(),
                         PageRequest.of(0, 10)
                 )
         ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessageContaining("Booking not found");
+         .hasMessageContaining("Shipment not found");
     }
 
+    @Test
+    void markMessagesAsRead_shouldMarkOnlyReceiverMessages() {
+        TestContext ctx = prepareShipmentWithMessages();
 
-    private TestContext prepareBookingWithMessages() {
+        // sanity check - all messages unread
+        assertThat(
+            messageRepository.findByShipment_Id(ctx.shipment.getId())
+                .stream()
+                .allMatch(m -> !m.isRead())
+        ).isTrue();
 
+        // sender (receiver of SYSTEM messages) marks as read
+        messageService.markMessagesAsRead(
+                ctx.shipment.getId(),
+                ctx.sender.getId()
+        );
+
+        List<Message> messages =
+                messageRepository.findByShipment_Id(ctx.shipment.getId());
+
+        assertThat(messages)
+                .allMatch(Message::isRead);
+    }
+
+    @Test
+    void otherUser_shouldNotMarkMessagesAsRead() {
+        TestContext ctx = prepareShipmentWithMessages();
+        User other = createUser(UserType.SENDER);
+
+        assertThatThrownBy(() ->
+                messageService.markMessagesAsRead(
+                        ctx.shipment.getId(),
+                        other.getId()
+                )
+        ).isInstanceOf(AccessDeniedException.class);
+    }
+
+    private TestContext prepareShipmentWithMessages() {
         User sender = createUser(UserType.SENDER);
         User driver = createUser(UserType.DRIVER);
-
         createDriverProfile(driver);
 
         Booking booking = bookingRepository.save(
@@ -160,29 +190,29 @@ class MessageServiceIT extends AbstractIntegrationTest {
 
         messageRepository.save(
                 Message.builder()
-                        .booking(booking)
+                        .shipment(shipment)
                         .sender(driver)
                         .receiver(sender)
                         .messageType(MessageType.SYSTEM)
                         .messageContent("Booking confirmed")
-                        .isRead(false)  // Added this
+                        .isRead(false)
                         .sentAt(Instant.now().minusSeconds(60))
                         .build()
         );
 
         messageRepository.save(
                 Message.builder()
-                        .booking(booking)
+                        .shipment(shipment)
                         .sender(driver)
                         .receiver(sender)
                         .messageType(MessageType.SYSTEM)
                         .messageContent("Driver started delivery")
-                        .isRead(false)  // Added this
+                        .isRead(false)
                         .sentAt(Instant.now())
                         .build()
         );
 
-        return new TestContext(sender, driver, booking);
+        return new TestContext(sender, driver, shipment);
     }
 
     private User createUser(UserType type) {
@@ -216,42 +246,5 @@ class MessageServiceIT extends AbstractIntegrationTest {
         );
     }
 
-    @Test
-    void markMessagesAsRead_shouldMarkOnlyReceiverMessages() {
-        TestContext ctx = prepareBookingWithMessages();
-
-        // sanity check
-        assertThat(
-            messageRepository.findByBooking_Id(ctx.booking.getId())
-                .stream()
-                .allMatch(m -> !m.isRead())
-        ).isTrue();
-
-        // sender (receiver of SYSTEM messages)
-        messageService.markMessagesAsRead(
-                ctx.booking.getId(),
-                ctx.sender.getId()
-        );
-
-        List<Message> messages =
-                messageRepository.findByBooking_Id(ctx.booking.getId());
-
-        assertThat(messages)
-                .allMatch(Message::isRead);
-    }
-
-    @Test
-    void otherUser_shouldNotMarkMessagesAsRead() {
-        TestContext ctx = prepareBookingWithMessages();
-        User other = createUser(UserType.SENDER);
-
-        assertThatThrownBy(() ->
-                messageService.markMessagesAsRead(
-                        ctx.booking.getId(),
-                        other.getId()
-                )
-        ).isInstanceOf(AccessDeniedException.class);
-    }
-
-    private record TestContext(User sender, User driver, Booking booking) {}
+    private record TestContext(User sender, User driver, Shipment shipment) {}
 }

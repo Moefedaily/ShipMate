@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, inject, signal, computed, OnChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  inject,
+  signal,
+  computed,
+  OnChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -19,13 +28,11 @@ import { ConversationSummary } from '../../../core/services/conversation/convers
   styleUrl: './chat-drawer.component.scss'
 })
 export class ChatDrawerComponent implements OnChanges {
-  
-  private readonly conversationState = inject(ConversationListState);
 
+  private readonly conversationState = inject(ConversationListState);
 
   @Input({ required: true }) open!: boolean;
   @Output() closeDrawer = new EventEmitter<void>();
-
 
   readonly conversations = this.conversationState.sortedConversations;
   readonly loading = this.conversationState.loading;
@@ -37,14 +44,14 @@ export class ChatDrawerComponent implements OnChanges {
   );
 
   readonly isChatReadonly = computed(() => {
-    const status = this.selectedConversation()?.bookingStatus;
-    return status === 'COMPLETED' || status === 'CANCELLED';
+    const status = this.selectedConversation()?.shipmentStatus;
+    return status === 'DELIVERED' || status === 'CANCELLED';
   });
 
   ngOnChanges(): void {
     if (this.open) {
       this.conversationState.load();
-      
+
       const list = this.conversations();
       if (list.length && !this.selectedConversation()) {
         this.selectConversation(list[0]);
@@ -52,7 +59,6 @@ export class ChatDrawerComponent implements OnChanges {
     }
   }
 
-  
   selectConversation(convo: ConversationSummary): void {
     this.selectedConversation.set(convo);
   }
@@ -74,9 +80,12 @@ export class ChatDrawerComponent implements OnChanges {
     if (diffMins < 60) return `${diffMins}m`;
     if (diffHours < 24) return `${diffHours}h`;
     if (diffDays < 7) return `${diffDays}d`;
-    
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
   }
 
-  trackByBooking = (_: number, c: ConversationSummary) => c.bookingId;
+  trackByShipment = (_: number, c: ConversationSummary) => c.shipmentId;
 }

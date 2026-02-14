@@ -4,11 +4,15 @@ import com.shipmate.dto.request.pricing.PricingRequest;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
+import com.shipmate.listener.booking.BookingStatusChangedEvent;
+import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
 import com.shipmate.mapper.shipment.ShipmentAssembler;
 import com.shipmate.mapper.shipment.ShipmentMapper;
+import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
+import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.pricing.PricingService;
@@ -18,8 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +53,9 @@ public class ShipmentService {
     private final ShipmentAssembler shipmentAssembler;
     private final Cloudinary cloudinary;
     private final PricingService pricingService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final BookingRepository bookingRepository;
+
     @Value("${app.file.max-size:10485760}")
     private long maxFileSize;
 
@@ -218,5 +227,129 @@ public class ShipmentService {
                 throw new IllegalArgumentException("Invalid image type");
         }
         }
+
+    public ShipmentResponse markInTransit(UUID shipmentId, UUID driverId) {
+
+        Shipment shipment = shipmentRepository
+                .findWithBookingAndSender(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        validateDriverAccess(shipment, driverId);
+
+        if (shipment.getStatus() != ShipmentStatus.ASSIGNED) {
+            throw new IllegalStateException("Shipment cannot move to IN_TRANSIT");
+        }
+
+        if (shipment.getBooking().getStatus() != BookingStatus.IN_PROGRESS) {
+        throw new IllegalStateException("Booking must be IN_PROGRESS");
+        }
+
+        shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+
+        eventPublisher.publishEvent(
+                new ShipmentStatusChangedEvent(
+                        shipment.getId(),
+                        ShipmentStatus.IN_TRANSIT
+                )
+        );
+
+        return shipmentAssembler.toResponse(shipment);
+    }
+
+    public ShipmentResponse markDelivered(UUID shipmentId, UUID driverId) {
+
+        Shipment shipment = shipmentRepository
+                .findWithBookingAndSender(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        validateDriverAccess(shipment, driverId);
+
+        if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
+            throw new IllegalStateException("Shipment must be IN_TRANSIT to deliver");
+        }
+
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+
+        eventPublisher.publishEvent(
+                new ShipmentStatusChangedEvent(
+                        shipment.getId(),
+                        ShipmentStatus.DELIVERED
+                )
+        );
+
+        checkAndCompleteBooking(shipment, driverId);
+
+        return shipmentAssembler.toResponse(shipment);
+    }
+
+    public ShipmentResponse cancelShipment(UUID shipmentId, UUID actorId) {
+
+        Shipment shipment = shipmentRepository
+                .findWithBookingAndSender(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        validateParticipantAccess(shipment, actorId);
+
+        if (shipment.getStatus() == ShipmentStatus.DELIVERED) {
+            throw new IllegalStateException("Delivered shipment cannot be cancelled");
+        }
+
+        shipment.setStatus(ShipmentStatus.CANCELLED);
+
+        eventPublisher.publishEvent(
+                new ShipmentStatusChangedEvent(
+                        shipment.getId(),
+                        ShipmentStatus.CANCELLED
+                )
+        );
+
+        return shipmentAssembler.toResponse(shipment);
+    }
+
+        private void checkAndCompleteBooking(Shipment shipment, UUID actorId) {
+
+        var booking = shipment.getBooking();
+
+        boolean allDelivered = booking.getShipments().stream()
+                .allMatch(s -> s.getStatus() == ShipmentStatus.DELIVERED);
+
+        if (allDelivered) {
+
+                booking.setStatus(BookingStatus.COMPLETED);
+                bookingRepository.save(booking);
+
+                eventPublisher.publishEvent(
+                        new BookingStatusChangedEvent(
+                                booking.getId(),
+                                BookingStatus.COMPLETED,
+                                actorId
+                        )
+                );
+        }
+        }
+
+    private void validateDriverAccess(Shipment shipment, UUID driverId) {
+
+        if (shipment.getBooking().getDriver() == null ||
+            !shipment.getBooking().getDriver().getId().equals(driverId)) {
+
+            throw new AccessDeniedException("Only assigned driver can update shipment");
+        }
+    }
+
+    private void validateParticipantAccess(Shipment shipment, UUID userId) {
+
+        boolean isDriver =
+                shipment.getBooking().getDriver() != null &&
+                shipment.getBooking().getDriver().getId().equals(userId);
+
+        boolean isSender =
+                shipment.getSender().getId().equals(userId);
+
+        if (!isDriver && !isSender) {
+            throw new AccessDeniedException("Not authorized");
+        }
+    }
+
 
 }

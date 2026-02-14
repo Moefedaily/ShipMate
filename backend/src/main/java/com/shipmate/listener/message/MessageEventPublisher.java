@@ -23,52 +23,57 @@ public class MessageEventPublisher {
     private final MessageMapper messageMapper;
     private final MessageRepository messageRepository;
 
+
     public void messageSent(Message message) {
+
+        UUID shipmentId = message.getShipment().getId();
+
         messagingTemplate.convertAndSend(
-            "/topic/bookings/" + message.getBooking().getId() + "/messages",
-            messageMapper.toResponse(message)
+                "/topic/shipments/" + shipmentId + "/messages",
+                messageMapper.toResponse(message)
         );
 
         conversationUpdated(message);
     }
 
+
     public void conversationUpdated(Message message) {
 
-        UUID bookingId = message.getBooking().getId();
+        UUID shipmentId = message.getShipment().getId();
         UUID senderId = message.getSender().getId();
         UUID receiverId = message.getReceiver().getId();
 
-        publishConversationUpdate(bookingId, senderId);
-        publishConversationUpdate(bookingId, receiverId);
+        publishConversationUpdate(shipmentId, senderId);
+        publishConversationUpdate(shipmentId, receiverId);
     }
 
-    public void publishConversationUpdate(UUID bookingId, UUID userId) {
+    public void publishConversationUpdate(UUID shipmentId, UUID userId) {
 
         long unreadCount =
-            messageRepository.countByBooking_IdAndReceiver_IdAndIsReadFalse(
-                    bookingId,
-                    userId
-            );
+                messageRepository.countByShipment_IdAndReceiver_IdAndIsReadFalse(
+                        shipmentId,
+                        userId
+                );
 
         Message lastMessage =
-            messageRepository.findLatestByBooking(
-                    bookingId,
-                    PageRequest.of(0, 1)
-            ).stream().findFirst().orElse(null);
+                messageRepository.findLatestByShipment(
+                        shipmentId,
+                        PageRequest.of(0, 1)
+                ).stream().findFirst().orElse(null);
 
         if (lastMessage == null) {
-            log.debug("[MSG] No last message found for bookingId={}", bookingId);
+            log.debug("[MSG] No last message found for shipmentId={}", shipmentId);
             return;
         }
 
         ConversationResponse payload =
-            new ConversationResponse(
-                    bookingId,
-                    lastMessage.getBooking().getStatus(),
-                    lastMessage.getMessageContent(),
-                    lastMessage.getSentAt(),
-                    unreadCount
-            );
+                new ConversationResponse(
+                        shipmentId,
+                        lastMessage.getShipment().getStatus(),
+                        lastMessage.getMessageContent(),
+                        lastMessage.getSentAt(),
+                        unreadCount
+                );
 
         messagingTemplate.convertAndSend(
                 "/topic/users/" + userId + "/conversation-updates",
@@ -76,10 +81,10 @@ public class MessageEventPublisher {
         );
 
         log.info(
-            "[MSG] Conversation update pushed bookingId={} userId={} unread={}",
-            bookingId,
-            userId,
-            unreadCount
+                "[MSG] Conversation update pushed shipmentId={} userId={} unread={}",
+                shipmentId,
+                userId,
+                unreadCount
         );
     }
 }

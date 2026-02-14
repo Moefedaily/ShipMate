@@ -108,7 +108,7 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CONFIRMED);
-        publishStatusChange(booking);
+        publishStatusChange(booking, driverId);
         return booking;
     }
 
@@ -121,7 +121,7 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.IN_PROGRESS);
-        publishStatusChange(booking);
+        publishStatusChange(booking, driverId);
         return booking;
     }
 
@@ -134,7 +134,7 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.COMPLETED);
-        publishStatusChange(booking);
+        publishStatusChange(booking, driverId);
         return booking;
     }
 
@@ -148,7 +148,7 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
-        publishStatusChange(booking);
+        publishStatusChange(booking, driverId);
         return booking;
     }
 
@@ -422,11 +422,12 @@ public class BookingService {
 
         return R * c;
     }
-    private void publishStatusChange(Booking booking) {
+    private void publishStatusChange(Booking booking, UUID actorId) {
         eventPublisher.publishEvent(
                 new BookingStatusChangedEvent(
                         booking.getId(),
-                        booking.getStatus()
+                        booking.getStatus(),
+                        actorId
                 )
         );
     }

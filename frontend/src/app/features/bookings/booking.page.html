@@ -141,24 +141,6 @@
           }
         </button>
       }
-      
-      @if (status() === 'IN_PROGRESS') {
-        <button
-          type="button"
-          class="btn btn--primary"
-          (click)="complete()"
-          [disabled]="acting()"
-        >
-          @if (acting()) {
-            <mat-icon>hourglass_empty</mat-icon>
-            Completing…
-          } @else {
-            <mat-icon>check_circle</mat-icon>
-            Complete delivery
-          }
-        </button>
-      }
-      
     </section>
     
   }

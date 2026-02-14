@@ -25,7 +25,7 @@ export interface NotificationWsDto {
 
 export interface MessageWsDto {
   id: number;
-  bookingId: string;
+  shipmentId: string;
   messageType: 'SYSTEM' | 'TEXT' | 'IMAGE' | 'LOCATION_UPDATE';
   messageContent: string;
   sentAt: string;
@@ -33,8 +33,8 @@ export interface MessageWsDto {
 
 }
 export interface ConversationUpdateWsDto {
-  bookingId: string;
-  bookingStatus: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  shipmentId: string;
+  shipmentStatus: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
   lastMessagePreview: string;
   lastMessageAt: string;
   unreadCount: number;

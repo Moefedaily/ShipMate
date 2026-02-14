@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/bookings/{bookingId}/messages")
+@RequestMapping("/api/shipments/{shipmentId}/messages")
 @RequiredArgsConstructor
 public class MessageController {
 
@@ -26,72 +26,74 @@ public class MessageController {
 
 
     @Operation(
-        summary = "Get booking messages",
-        description = "Retrieve chat messages for a booking. Accessible only to the booking driver or senders owning shipments in the booking."
+        summary = "Get shipment messages",
+        description = "Retrieve chat messages for a shipment. Accessible only to the shipment sender or assigned driver."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Messages retrieved successfully"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Booking not found")
+        @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     @GetMapping
-    public ResponseEntity<Page<MessageResponse>> getBookingMessages(
-            @PathVariable UUID bookingId,
+    public ResponseEntity<Page<MessageResponse>> getShipmentMessages(
+            @PathVariable UUID shipmentId,
             @AuthenticationPrincipal(expression = "username") String userId,
             Pageable pageable
     ) {
         return ResponseEntity.ok(
-                messageService.getBookingMessages(
-                        bookingId,
+                messageService.getShipmentMessages(
+                        shipmentId,
                         UUID.fromString(userId),
                         pageable
                 )
         );
     }
 
-    @Operation(summary = "Mark messages as read")
+
+    @Operation(summary = "Mark shipment messages as read")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Messages marked as read"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Booking not found")
+        @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     @PostMapping("/read")
     public ResponseEntity<Void> markAsRead(
-            @PathVariable UUID bookingId,
+            @PathVariable UUID shipmentId,
             @AuthenticationPrincipal(expression = "username") String userId
     ) {
         messageService.markMessagesAsRead(
-                bookingId,
+                shipmentId,
                 UUID.fromString(userId)
         );
+
         return ResponseEntity.noContent().build();
     }
 
+
     @Operation(
-        summary = "Send a message to a booking",
-        description = "Send a message to a booking. Accessible only to the booking driver or senders owning shipments in the booking."
+        summary = "Send a message to a shipment",
+        description = "Send a chat message for a shipment. Accessible only to the shipment sender or assigned driver."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Message sent successfully"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Booking not found")
+        @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     @PostMapping
     public ResponseEntity<MessageResponse> sendMessage(
-            @PathVariable UUID bookingId,
+            @PathVariable UUID shipmentId,
             @AuthenticationPrincipal(expression = "username") String userId,
             @RequestBody SendMessageRequest request
     ) {
         return ResponseEntity.ok(
                 messageService.sendMessage(
-                        bookingId,
+                        shipmentId,
                         UUID.fromString(userId),
                         request
                 )
         );
     }
-
 }

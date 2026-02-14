@@ -18,19 +18,19 @@ public class MessagesMarkedAsReadListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onMessagesMarkedAsRead(MessagesMarkedAsReadEvent event) {
 
-        if (event.bookingId() == null || event.userId() == null) {
+        if (event.shipmentId() == null || event.userId() == null) {
             log.warn("[MSG] MessagesMarkedAsReadEvent ignored due to null values");
             return;
         }
 
         log.info(
             "[MSG] MessagesMarkedAsReadEvent fired bookingId={} userId={}",
-            event.bookingId(),
+            event.shipmentId(),
             event.userId()
         );
 
         messageEventPublisher.publishConversationUpdate(
-                event.bookingId(),
+                event.shipmentId(),
                 event.userId()
         );
     }

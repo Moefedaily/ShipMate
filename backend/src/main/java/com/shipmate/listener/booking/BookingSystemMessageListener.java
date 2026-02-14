@@ -5,6 +5,7 @@ import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.message.Message;
 import com.shipmate.model.message.MessageType;
+import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.message.MessageRepository;
@@ -14,9 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
 @Component
@@ -32,48 +33,48 @@ public class BookingSystemMessageListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onBookingStatusChanged(BookingStatusChangedEvent event) {
 
-        log.info("[SYSMSG] listener fired bookingId={}, status={}", event.bookingId(), event.status());
+        log.info("[SYSMSG] Booking status changed bookingId={}, status={}",
+                event.bookingId(), event.status());
 
         Booking booking = bookingRepository
                 .findWithShipmentsById(event.bookingId())
                 .orElseThrow();
 
-        User receiver = resolveReceiver(booking);
-
-        Message systemMessage = Message.builder()
-                .booking(booking)
-                .sender(booking.getDriver())
-                .receiver(receiver)
-                .messageType(MessageType.SYSTEM)
-                .messageContent(buildContent(event.status()))
-                .isRead(false)
-                .build();
-
-        Message saved = messageRepository.saveAndFlush(systemMessage);
-
-        if (saved.getId() == null) {
-            log.error("[SYSMSG] saveAndFlush returned null id. bookingId={}", booking.getId());
+        if (event.status() == BookingStatus.COMPLETED) {
             return;
         }
 
-        log.info("[SYSMSG] saved system message id={} bookingId={}", saved.getId(), booking.getId());
+        for (Shipment shipment : booking.getShipments()) {
 
-        eventPublisher.publishEvent(new MessageSentEvent(saved.getId()));
+            User receiver = shipment.getSender();
+            User driver = booking.getDriver();
+
+            Message systemMessage = Message.builder()
+                    .shipment(shipment)
+                    .sender(driver)
+                    .receiver(receiver)
+                    .messageType(MessageType.SYSTEM)
+                    .messageContent(buildContent(event.status()))
+                    .isRead(false)
+                    .build();
+
+            Message saved = messageRepository.save(systemMessage);
+
+            eventPublisher.publishEvent(
+                    new MessageSentEvent(saved.getId())
+            );
+
+            log.info("[SYSMSG] Created system message for shipmentId={}",
+                    shipment.getId());
+        }
     }
 
     private String buildContent(BookingStatus status) {
         return switch (status) {
-            case CONFIRMED -> "Driver accepted the booking";
-            case IN_PROGRESS -> "Delivery started";
-            case COMPLETED -> "Delivery completed";
+            case CONFIRMED -> "Driver accepted your shipment";
+            case IN_PROGRESS -> "Trip started";
             case CANCELLED -> "Booking was cancelled";
             default -> "Booking updated";
         };
-    }
-
-    private User resolveReceiver(Booking booking) {
-        return booking.getShipments()
-                .get(0)
-                .getSender();
     }
 }

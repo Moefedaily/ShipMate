@@ -65,7 +65,6 @@ export class ConversationListState {
     });
   }
 
-
   load(): void {
     if (this.loading()) return;
 
@@ -89,12 +88,11 @@ export class ConversationListState {
     this.load();
   }
 
-
   private applyConversationUpdate(update: ConversationUpdateWsDto) {
 
     this.conversations.update(list => {
 
-      const exists = list.some(c => c.bookingId === update.bookingId);
+      const exists = list.some(c => c.shipmentId === update.shipmentId);
 
       if (!exists) {
         queueMicrotask(() => this.refresh());
@@ -102,10 +100,10 @@ export class ConversationListState {
       }
 
       return list.map(c =>
-        c.bookingId === update.bookingId
+        c.shipmentId === update.shipmentId
           ? {
               ...c,
-              bookingStatus: update.bookingStatus,
+              shipmentStatus: update.shipmentStatus,
               lastMessagePreview: update.lastMessagePreview,
               lastMessageAt: update.lastMessageAt,
               unreadCount: update.unreadCount
@@ -114,7 +112,6 @@ export class ConversationListState {
       );
     });
   }
-
 
   clear(): void {
     this.conversationSub?.unsubscribe();
