@@ -277,7 +277,7 @@ public class ShipmentService {
                 )
         );
 
-        checkAndCompleteBooking(shipment, driverId);
+        recalculateBookingStatus(shipment, driverId);
 
         return shipmentAssembler.toResponse(shipment);
     }
@@ -303,30 +303,9 @@ public class ShipmentService {
                 )
         );
 
+        recalculateBookingStatus(shipment, actorId);
         return shipmentAssembler.toResponse(shipment);
     }
-
-        private void checkAndCompleteBooking(Shipment shipment, UUID actorId) {
-
-        var booking = shipment.getBooking();
-
-        boolean allDelivered = booking.getShipments().stream()
-                .allMatch(s -> s.getStatus() == ShipmentStatus.DELIVERED);
-
-        if (allDelivered) {
-
-                booking.setStatus(BookingStatus.COMPLETED);
-                bookingRepository.save(booking);
-
-                eventPublisher.publishEvent(
-                        new BookingStatusChangedEvent(
-                                booking.getId(),
-                                BookingStatus.COMPLETED,
-                                actorId
-                        )
-                );
-        }
-        }
 
     private void validateDriverAccess(Shipment shipment, UUID driverId) {
 
@@ -351,5 +330,61 @@ public class ShipmentService {
         }
     }
 
+        private void recalculateBookingStatus(Shipment shipment, UUID actorId) {
+
+        var booking = shipment.getBooking();
+
+        var shipments = booking.getShipments();
+
+        boolean allCancelled = shipments.stream()
+                .allMatch(s -> s.getStatus() == ShipmentStatus.CANCELLED);
+
+        boolean allDelivered = shipments.stream()
+                .allMatch(s -> s.getStatus() == ShipmentStatus.DELIVERED);
+
+        boolean allFinished = shipments.stream()
+                .allMatch(s ->
+                        s.getStatus() == ShipmentStatus.DELIVERED ||
+                        s.getStatus() == ShipmentStatus.CANCELLED
+                );
+
+        BookingStatus previousStatus = booking.getStatus();
+        BookingStatus newStatus = previousStatus;
+
+        if (allCancelled) {
+                newStatus = BookingStatus.CANCELLED;
+        }
+        else if (allDelivered || allFinished) {
+                newStatus = BookingStatus.COMPLETED;
+        }
+        else {
+                if (previousStatus == BookingStatus.CONFIRMED ||
+                previousStatus == BookingStatus.IN_PROGRESS) {
+
+                newStatus = BookingStatus.IN_PROGRESS;
+                }
+        }
+
+        if (newStatus != previousStatus) {
+
+                booking.setStatus(newStatus);
+                bookingRepository.save(booking);
+
+                eventPublisher.publishEvent(
+                        new BookingStatusChangedEvent(
+                                booking.getId(),
+                                newStatus,
+                                actorId
+                        )
+                );
+
+                log.info(
+                        "[BOOKING] recalculated status bookingId={} from {} to {}",
+                        booking.getId(),
+                        previousStatus,
+                        newStatus
+                );
+        }
+        }
 
 }

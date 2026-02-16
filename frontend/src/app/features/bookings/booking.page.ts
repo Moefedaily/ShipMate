@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
@@ -12,7 +12,7 @@ import { BookingState } from '../../core/state/booking/booking.state';
 @Component({
   standalone: true,
   selector: 'app-booking-page',
-  imports: [CommonModule, LeafletMapComponent, MatIconModule],
+  imports: [CommonModule, LeafletMapComponent, MatIconModule, RouterLink],
   providers: [BookingState],
   templateUrl: './booking.page.html',
   styleUrl: './booking.page.scss'

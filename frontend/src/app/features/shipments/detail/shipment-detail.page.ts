@@ -128,7 +128,7 @@ export class ShipmentDetailPage implements OnInit {
 
   /* ==================== Actions ==================== */
   goBack(): void {
-    this.router.navigate(['/dashboard/sender']);
+    this.router.navigate(['/dashboard/shipments']);
   }
 
   editShipment(): void {

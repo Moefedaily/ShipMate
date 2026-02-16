@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { LeafletMapComponent, MapPoint } from '../../../../shared/components/map/leaflet-map.component';
 import { MatchingService } from '../../../../core/services/driver/matching/matching.service';
@@ -16,7 +16,7 @@ import { BookingResponse } from '../../../../core/services/booking/booking.model
 @Component({
   standalone: true,
   selector: 'app-driver-matching-page',
-  imports: [CommonModule, MatIconModule, LeafletMapComponent, LocationUpdateModalComponent],
+  imports: [CommonModule, MatIconModule, LeafletMapComponent, LocationUpdateModalComponent,RouterModule],
   templateUrl: './driver-matching.page.html',
   styleUrl: './driver-matching.page.scss'
 })

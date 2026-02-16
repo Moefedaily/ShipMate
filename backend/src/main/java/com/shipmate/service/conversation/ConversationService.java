@@ -40,22 +40,39 @@ public class ConversationService {
 
         var lastMessage =
                 messageRepository.findLatestByShipment(
-                        shipment.getId(),
-                        PageRequest.of(0, 1)
+                shipment.getId(),
+                PageRequest.of(0, 1)
                 ).stream().findFirst().orElse(null);
 
         long unread =
-                messageRepository.countByShipment_IdAndReceiver_IdAndIsReadFalse(
+                messageRepository
+                .countByShipment_IdAndReceiver_IdAndIsReadFalse(
                         shipment.getId(),
                         userId
                 );
+
+        var booking = shipment.getBooking();
+        var driver = booking.getDriver();
+        var sender = shipment.getSender();
+
+        var otherUser =
+                sender.getId().equals(userId)
+                ? driver
+                : sender;
 
         return new ConversationResponse(
                 shipment.getId(),
                 shipment.getStatus(),
                 lastMessage != null ? lastMessage.getMessageContent() : null,
                 lastMessage != null ? lastMessage.getSentAt() : null,
-                unread
+                unread,
+                otherUser != null
+                ? otherUser.getFirstName() + " " + otherUser.getLastName()
+                : null,
+                otherUser != null
+                ? otherUser.getAvatarUrl()
+                : null
         );
-    }
+        }
+
 }

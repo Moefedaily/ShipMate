@@ -47,7 +47,7 @@ public class MessageEventPublisher {
         publishConversationUpdate(shipmentId, receiverId);
     }
 
-    public void publishConversationUpdate(UUID shipmentId, UUID userId) {
+  public void publishConversationUpdate(UUID shipmentId, UUID userId) {
 
         long unreadCount =
                 messageRepository.countByShipment_IdAndReceiver_IdAndIsReadFalse(
@@ -62,17 +62,34 @@ public class MessageEventPublisher {
                 ).stream().findFirst().orElse(null);
 
         if (lastMessage == null) {
-            log.debug("[MSG] No last message found for shipmentId={}", shipmentId);
-            return;
+                log.debug("[MSG] No last message found for shipmentId={}", shipmentId);
+                return;
         }
+
+        var shipment = lastMessage.getShipment();
+        var booking = shipment.getBooking();
+
+        var driver = booking.getDriver();
+        var sender = shipment.getSender();
+
+        var otherUser =
+                sender.getId().equals(userId)
+                        ? driver
+                        : sender;
 
         ConversationResponse payload =
                 new ConversationResponse(
                         shipmentId,
-                        lastMessage.getShipment().getStatus(),
+                        shipment.getStatus(),
                         lastMessage.getMessageContent(),
                         lastMessage.getSentAt(),
-                        unreadCount
+                        unreadCount,
+                        otherUser != null
+                                ? otherUser.getFirstName() + " " + otherUser.getLastName()
+                                : null,
+                        otherUser != null
+                                ? otherUser.getAvatarUrl()
+                                : null
                 );
 
         messagingTemplate.convertAndSend(
@@ -86,5 +103,6 @@ public class MessageEventPublisher {
                 userId,
                 unreadCount
         );
-    }
+        }
+
 }

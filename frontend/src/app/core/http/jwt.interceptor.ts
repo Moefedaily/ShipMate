@@ -55,6 +55,12 @@ export const jwtInterceptor: HttpInterceptorFn = ( req: HttpRequest<any>, next: 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
 
+       if (req.url.includes('/auth/refresh')) {
+        return throwError(() => error);
+      }
+      if (error.status === 401 && skipRefresh) {
+        return throwError(() => error);
+      }
       if (
         error.status === 404 &&
         req.url.includes('/drivers/me')
@@ -65,7 +71,7 @@ export const jwtInterceptor: HttpInterceptorFn = ( req: HttpRequest<any>, next: 
       if (
         error.status === 401 &&
         !skipRefresh &&
-        authState.isAuthenticated()
+        !!token
       ) {
         return handle401Error(authReq, next, authService, toast);
       }

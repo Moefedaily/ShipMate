@@ -29,7 +29,6 @@
       border-radius: 24px;
       font-weight: $font-weight-semibold;
       
-      // Add pulsing dot animation
       &::before {
         content: '';
         width: 6px;
@@ -52,6 +51,52 @@
     transform: scale(0.8);
   }
 }
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    font-weight: $font-weight-semibold;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background: $bg-surface;
+      transform: translateX(-3px);
+    }
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.35rem;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    line-height: 1.5;
+    margin: 0;
+  }
 
 .current-delivery {
   display: grid;
