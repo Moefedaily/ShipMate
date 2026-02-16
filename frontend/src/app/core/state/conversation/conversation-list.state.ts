@@ -1,18 +1,20 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { catchError, of, finalize } from 'rxjs';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
+import { catchError, of, finalize, Subscription } from 'rxjs';
 
 import { ConversationService } from '../../services/conversation/conversation.service';
 import { ConversationSummary } from '../../services/conversation/conversation.models';
-import { MessageWsDto } from '../../services/ws/ws.models';
-import { MessageWsService } from '../../services/ws/message-ws.service';
+import { ConversationUpdateWsDto } from '../../services/ws/ws.models';
 import { AuthState } from '../../auth/auth.state';
+import { MessageWsService } from '../../services/ws/message-ws.service';
 
 @Injectable()
 export class ConversationListState {
 
   private readonly conversationService = inject(ConversationService);
-  private readonly messageWs = inject(MessageWsService);
+  private readonly wsService = inject(MessageWsService);
   private readonly authState = inject(AuthState);
+
+  private conversationSub?: Subscription;
 
   readonly conversations = signal<ConversationSummary[]>([]);
   readonly loading = signal(false);
@@ -30,41 +32,38 @@ export class ConversationListState {
     () => this.totalUnread() > 0
   );
 
-  private readonly currentUserId = computed(
-    () => this.authState.user()?.id
-  );
+  readonly sortedConversations = computed(() => {
+    return [...this.conversations()].sort((a, b) => {
+      if (!a.lastMessageAt && !b.lastMessageAt) return 0;
+      if (!a.lastMessageAt) return 1;
+      if (!b.lastMessageAt) return -1;
 
-  constructor() {
-    this.messageWs.watchMessages().subscribe(msg => {
-      this.onIncomingMessage(msg);
-    });
-  }
-
-private onIncomingMessage(incoming: MessageWsDto): void {
-  this.conversations.update(list => {
-
-    if (!list.some(c => c.bookingId === incoming.bookingId)) {
-      this.refresh();
-      return list;
-    }
-
-    return list.map(c => {
-      if (c.bookingId !== incoming.bookingId) {
-        return c;
-      }
-
-      const isMine = incoming.senderId === this.currentUserId();
-
-      return {
-        ...c,
-        lastMessagePreview: incoming.messageContent,
-        lastMessageAt: incoming.sentAt,
-        unreadCount: isMine ? c.unreadCount : c.unreadCount + 1
-      };
+      return (
+        new Date(b.lastMessageAt).getTime() -
+        new Date(a.lastMessageAt).getTime()
+      );
     });
   });
-}
 
+  constructor() {
+    effect(() => {
+      const userId = this.authState.user()?.id;
+
+      this.conversationSub?.unsubscribe();
+      this.conversationSub = undefined;
+
+      if (!userId) {
+        this.conversations.set([]);
+        return;
+      }
+
+      this.conversationSub =
+        this.wsService.watchConversationUpdates(userId)
+          .subscribe(update => {
+            this.applyConversationUpdate(update);
+          });
+    });
+  }
 
   load(): void {
     if (this.loading()) return;
@@ -88,38 +87,36 @@ private onIncomingMessage(incoming: MessageWsDto): void {
   refresh(): void {
     this.load();
   }
-  markAsRead(conversation: ConversationSummary): void {
-    if (conversation.unreadCount === 0) return;
 
-    this.conversationService
-      .markConversationAsRead(conversation.bookingId)
-      .subscribe({
-        next: () => {
-          this.conversations.update(list =>
-            list.map(c =>
-              c.bookingId === conversation.bookingId
-                ? { ...c, unreadCount: 0 }
-                : c
-            )
-          );
-        }
-      });
-  }
+  private applyConversationUpdate(update: ConversationUpdateWsDto) {
 
-  readonly sortedConversations = computed(() => {
-    return [...this.conversations()].sort((a, b) => {
-      if (!a.lastMessageAt && !b.lastMessageAt) return 0;
-      if (!a.lastMessageAt) return 1;
-      if (!b.lastMessageAt) return -1;
-      return (
-        new Date(b.lastMessageAt).getTime() -
-        new Date(a.lastMessageAt).getTime()
+    this.conversations.update(list => {
+
+      const exists = list.some(c => c.shipmentId === update.shipmentId);
+
+      if (!exists) {
+        queueMicrotask(() => this.refresh());
+        return list;
+      }
+
+      return list.map(c =>
+        c.shipmentId === update.shipmentId
+          ? {
+              ...c,
+              shipmentStatus: update.shipmentStatus,
+              lastMessagePreview: update.lastMessagePreview,
+              lastMessageAt: update.lastMessageAt,
+              unreadCount: update.unreadCount
+            }
+          : c
       );
     });
-  });
-
+  }
 
   clear(): void {
+    this.conversationSub?.unsubscribe();
+    this.conversationSub = undefined;
+
     this.conversations.set([]);
     this.errorMessage.set(null);
     this.loading.set(false);

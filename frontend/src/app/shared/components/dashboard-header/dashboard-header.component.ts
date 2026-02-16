@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  Input,
-  Output
-} from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';

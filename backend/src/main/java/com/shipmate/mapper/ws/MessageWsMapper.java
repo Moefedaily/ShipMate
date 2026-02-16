@@ -8,7 +8,7 @@ public class MessageWsMapper {
     public static MessageWsDto toWsDto(Message message) {
         return new MessageWsDto(
                 message.getId(),
-                message.getBooking().getId(),
+                message.getShipment().getId(),
                 message.getMessageType(),
                 message.getMessageContent(),
                 message.getSentAt()

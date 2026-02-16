@@ -1,46 +1,117 @@
-<div class="chat">
-
-  <div class="chat-messages" #messagesContainer>
-
-    <div
-      class="chat-message"
-      *ngFor="let msg of messages(); trackBy: trackById"
-      [class.system]="msg.messageType === 'SYSTEM'"
-    >
-      {{ msg.messageContent }}
+<div class="chat-container">
+  
+  <!-- CHAT HEADER -->
+  <div class="chat-header">
+    <div class="header-info">
+      <mat-icon>chat_bubble</mat-icon>
+      <div>
+        <h4>Conversation</h4>
+        <span class="status-text">
+          @if (readonly) {
+            <mat-icon>lock</mat-icon>
+            Read only
+          } @else {
+            <mat-icon>circle</mat-icon>
+            Active
+          }
+        </span>
+      </div>
     </div>
+  </div>
 
+  <!-- MESSAGES AREA -->
+  <div class="chat-messages" #messagesContainer>
+    
     @if (!hasMessages()) {
       <div class="chat-empty">
-        No messages yet
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>No messages yet</p>
+        <span class="empty-hint">Start the conversation!</span>
+      </div>
+    }
+
+    @else {
+      <div class="messages-list">
+        @for (msg of messages(); track trackById($index, msg)) {
+          <div 
+            class="message-wrapper"
+            [class.system]="msg.messageType === 'SYSTEM'"
+            [class.sent]="msg.senderId === currentUserId()"
+            [class.received]="msg.senderId !== currentUserId()"
+          >
+            
+            <!-- SYSTEM MESSAGE -->
+            @if (msg.messageType === 'SYSTEM') {
+              <div class="system-message">
+                <mat-icon>info</mat-icon>
+                <span>{{ msg.messageContent }}</span>
+              </div>
+            }
+            
+            <!-- USER MESSAGE -->
+            @else {
+              <div class="message-bubble">
+                <div class="message-content">
+                  {{ msg.messageContent }}
+                </div>
+                <div class="message-footer">
+                  <span class="message-time">
+                    {{ msg.sentAt | date:'shortTime' }}
+                  </span>
+                  @if (msg.senderId === currentUserId()) {
+                    <mat-icon class="message-status">
+                      {{ msg.isRead ? 'done_all' : 'done' }}
+                    </mat-icon>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
     }
   </div>
 
-  <!-- INPUT AREA -->
-  <div class="chat-input" [class.readonly]="readonly">
+  <!-- TYPING INDICATOR -->
+  @if (typingUser() && !readonly) {
+    <div class="typing-indicator">
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span class="typing-text">{{ typingUser() }} is typing...</span>
+    </div>
+  }
 
+  <!-- INPUT AREA -->
+  <div class="chat-input-wrapper">
     @if (readonly) {
-      <div class="chat-readonly-hint">
-        Messaging is disabled for closed bookings
+      <div class="readonly-notice">
+        <mat-icon>lock</mat-icon>
+        <span>Messaging is disabled for closed bookings</span>
       </div>
     } @else {
-      <input
-        type="text"
-        placeholder="Type a message…"
-        [value]="draft()"
-        (input)="draft.set($any($event.target).value)"
-        (keydown.enter)="send()"
-      />
-
-      <button
-        (click)="send()"
-        [disabled]="!canSend()"
-      >
-        Send
-      </button>
+      <div class="chat-input-container">
+        <textarea
+          class="chat-input"
+          placeholder="Type a message..."
+          [value]="draft()"
+          (input)="onDraftInput($any($event.target).value)"
+          (keydown.enter)="$any($event).shiftKey || send(); $any($event).shiftKey || $event.preventDefault()"
+          rows="1"
+        ></textarea>
+        
+        <button
+          class="send-btn"
+          (click)="send()"
+          [disabled]="!canSend()"
+          [class.can-send]="canSend()"
+        >
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
     }
-
   </div>
 
 </div>

@@ -12,30 +12,30 @@ export class MessageService {
   private readonly http = inject(HttpClient);
   private readonly api = environment.apiBaseUrl;
 
-  getBookingMessages(
-    bookingId: string,
+  getShipmentMessages(
+    shipmentId: string,
     page = 0,
     size = 50
   ): Observable<PageResponse<MessageResponse>> {
     return this.http.get<PageResponse<MessageResponse>>(
-      `${this.api}/bookings/${bookingId}/messages`,
+      `${this.api}/shipments/${shipmentId}/messages`,
       { params: { page, size } }
     );
   }
 
   sendMessage(
-    bookingId: string,
+    shipmentId: string,
     message: string
   ): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(
-      `${this.api}/bookings/${bookingId}/messages`,
+      `${this.api}/shipments/${shipmentId}/messages`,
       { message }
     );
   }
 
-  markAsRead(bookingId: string): Observable<void> {
+  markAsRead(shipmentId: string): Observable<void> {
     return this.http.post<void>(
-      `${this.api}/bookings/${bookingId}/messages/read`,
+      `${this.api}/shipments/${shipmentId}/messages/read`,
       {}
     );
   }

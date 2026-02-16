@@ -6,10 +6,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.shipmate.model.booking.Booking;
+import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "messages")
@@ -20,13 +21,14 @@ import java.time.Instant;
 @Builder
 public class Message {
 
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipment shipment;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "sender_id", nullable = false)

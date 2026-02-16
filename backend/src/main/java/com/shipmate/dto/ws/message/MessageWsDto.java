@@ -6,8 +6,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MessageWsDto(
-        Long id,
-        UUID bookingId,
+        UUID id,
+        UUID shipmentId,
         MessageType type,
         String content,
         Instant sentAt

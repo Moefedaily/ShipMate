@@ -3,11 +3,12 @@ package com.shipmate.service.message;
 import com.shipmate.dto.request.message.SendMessageRequest;
 import com.shipmate.dto.response.message.MessageResponse;
 import com.shipmate.listener.message.MessageSentEvent;
+import com.shipmate.listener.message.MessagesMarkedAsReadEvent;
 import com.shipmate.mapper.message.MessageMapper;
-import com.shipmate.model.booking.Booking;
 import com.shipmate.model.message.Message;
 import com.shipmate.model.message.MessageType;
-import com.shipmate.repository.booking.BookingRepository;
+import com.shipmate.model.shipment.Shipment;
+import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.repository.message.MessageRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
@@ -29,113 +30,123 @@ import java.util.UUID;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    private final BookingRepository bookingRepository;
     private final ShipmentRepository shipmentRepository;
     private final MessageMapper messageMapper;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-
+    
 
 
     @Transactional(readOnly = true)
-    public Page<MessageResponse> getBookingMessages(
-            UUID bookingId,
+    public Page<MessageResponse> getShipmentMessages(
+            UUID shipmentId,
             UUID userId,
             Pageable pageable
     ) {
-        Booking booking = loadBooking(bookingId);
 
-        validateAccess(booking, userId);
+        Shipment shipment = loadShipment(shipmentId);
+
+        validateAccess(shipment, userId);
 
         return messageRepository
-                .findByBooking_IdOrderBySentAtAsc(bookingId, pageable)
+                .findByShipment_IdOrderBySentAtAsc(shipmentId, pageable)
                 .map(messageMapper::toResponse);
     }
 
+    public MessageResponse sendMessage(
+            UUID shipmentId,
+            UUID senderId,
+            SendMessageRequest request
+    ) {
 
-    private void validateAccess(Booking booking, UUID userId) {
+        Shipment shipment = loadShipment(shipmentId);
 
-        if (booking.getDriver() != null &&
-            booking.getDriver().getId().equals(userId)) {
-            return;
+        validateAccess(shipment, senderId);
+
+        if (shipment.getStatus() == ShipmentStatus.DELIVERED ||
+            shipment.getStatus() == ShipmentStatus.CANCELLED) {
+
+            throw new IllegalStateException("Chat is closed for this shipment");
         }
 
-        boolean isSenderInBooking =
-                shipmentRepository.existsByBooking_IdAndSender_Id(
-                        booking.getId(),
-                        userId
-                );
+        UUID receiverId = resolveReceiver(shipment, senderId);
 
-        if (isSenderInBooking) {
-            return;
-        }
+        Message message = Message.builder()
+                .shipment(shipment)
+                .sender(userRepository.getReferenceById(senderId))
+                .receiver(userRepository.getReferenceById(receiverId))
+                .messageContent(request.message())
+                .messageType(MessageType.TEXT)
+                .isRead(false)
+                .build();
 
-        throw new AccessDeniedException(
-                "You are not allowed to access messages for this booking"
+        Message saved = messageRepository.save(message);
+
+        eventPublisher.publishEvent(
+                new MessageSentEvent(saved.getId())
+        );
+
+        return messageMapper.toResponse(saved);
+    }
+
+
+    public void markMessagesAsRead(UUID shipmentId, UUID userId) {
+
+        Shipment shipment = loadShipment(shipmentId);
+
+        validateAccess(shipment, userId);
+
+        messageRepository.markAllAsRead(shipmentId, userId);
+
+        eventPublisher.publishEvent(
+                new MessagesMarkedAsReadEvent(shipmentId, userId)
         );
     }
 
 
-    private Booking loadBooking(UUID bookingId) {
-        return bookingRepository.findById(bookingId)
+    private Shipment loadShipment(UUID shipmentId) {
+        return shipmentRepository.findById(shipmentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Booking not found")
+                        new IllegalArgumentException("Shipment not found")
                 );
     }
 
-    public MessageResponse sendMessage(
-        UUID bookingId,
-        UUID senderId,
-        SendMessageRequest request
-) {
-    Booking booking = loadBooking(bookingId);
+    private void validateAccess(Shipment shipment, UUID userId) {
 
-    validateAccess(booking, senderId);
+        if (shipment.getBooking().getDriver() != null &&
+            shipment.getBooking().getDriver().getId().equals(userId)) {
+            return;
+        }
 
-    UUID receiverId = resolveReceiver(booking, senderId);
+        if (shipment.getSender().getId().equals(userId)) {
+            return;
+        }
 
-    Message message = Message.builder()
-            .booking(booking)
-            .sender(userRepository.getReferenceById(senderId))
-            .receiver(userRepository.getReferenceById(receiverId))
-            .messageContent(request.message())
-            .messageType(MessageType.TEXT)
-            .isRead(false)
-            .build();
-
-    Message saved = messageRepository.save(message);
-
-    eventPublisher.publishEvent(
-            new MessageSentEvent(saved.getId())
-    );
-
-
-    return messageMapper.toResponse(saved);
-}
-
-private UUID resolveReceiver(Booking booking, UUID senderId) {
-
-    if (booking.getDriver() != null &&
-        booking.getDriver().getId().equals(senderId)) {
-
-        return booking.getShipments()
-                .get(0)
-                .getSender()
-                .getId();
+        throw new AccessDeniedException(
+                "You are not allowed to access messages for this shipment"
+        );
     }
 
-    if (booking.getDriver() != null) {
-        return booking.getDriver().getId();
+    private UUID resolveReceiver(Shipment shipment, UUID senderId) {
+
+        if (shipment.getBooking() == null ||
+            shipment.getBooking().getDriver() == null) {
+
+            throw new IllegalStateException("Shipment is not assigned to a driver yet");
+        }
+
+        UUID driverId = shipment.getBooking().getDriver().getId();
+        UUID senderShipmentId = shipment.getSender().getId();
+
+        if (senderId.equals(driverId)) {
+            return senderShipmentId;
+        }
+
+        if (senderId.equals(senderShipmentId)) {
+            return driverId;
+        }
+
+        throw new IllegalStateException("Cannot resolve message receiver");
     }
-
-    throw new IllegalStateException("Cannot resolve message receiver");
-}
-
-public void markMessagesAsRead(UUID bookingId, UUID userId) {
-    Booking booking = loadBooking(bookingId);
-    validateAccess(booking, userId);
-
-    messageRepository.markAllAsRead(bookingId, userId);
-}
 
 }

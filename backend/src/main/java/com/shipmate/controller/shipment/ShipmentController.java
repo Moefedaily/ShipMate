@@ -160,4 +160,75 @@ public class ShipmentController {
         );
     }
 
+    // ===================== MARK SHIPMENT IN TRANSIT =====================
+    @Operation(
+        summary = "Mark shipment as in transit",
+        description = "Driver marks a shipment as in transit."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Shipment marked as in transit"),
+        @ApiResponse(responseCode = "400", description = "Invalid shipment state"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not assigned driver")
+    })
+    @PostMapping("/{shipmentId}/in-transit")
+    public ResponseEntity<ShipmentResponse> markInTransit(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId) {
+
+        return ResponseEntity.ok(
+                shipmentService.markInTransit(
+                        shipmentId,
+                        UUID.fromString(userId)
+                )
+        );
+    }
+    // ===================== MARK SHIPMENT DELIVERED =====================
+    @Operation(
+        summary = "Mark shipment as delivered",
+        description = "Driver marks a shipment as delivered."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Shipment delivered successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid shipment state"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not assigned driver")
+    })
+    @PostMapping("/{shipmentId}/deliver")
+    public ResponseEntity<ShipmentResponse> markDelivered(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId) {
+
+        return ResponseEntity.ok(
+                shipmentService.markDelivered(
+                        shipmentId,
+                        UUID.fromString(userId)
+                )
+        );
+    }
+
+    // ===================== CANCEL SHIPMENT =====================
+    @Operation(
+        summary = "Cancel shipment",
+        description = "Cancels a shipment (driver or sender)."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Shipment cancelled successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid shipment state"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not allowed")
+    })
+    @PostMapping("/{shipmentId}/cancel")
+    public ResponseEntity<ShipmentResponse> cancelShipment(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId) {
+
+        return ResponseEntity.ok(
+                shipmentService.cancelShipment(
+                        shipmentId,
+                        UUID.fromString(userId)
+                )
+        );
+    }
+
 }

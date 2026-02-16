@@ -1,6 +1,6 @@
 export interface MessageResponse {
   id: number;
-  bookingId: string;
+  shipmentId: string;
   messageType: 'SYSTEM' | 'TEXT' | 'IMAGE' | 'LOCATION_UPDATE';
   messageContent: string;
   senderId: string;

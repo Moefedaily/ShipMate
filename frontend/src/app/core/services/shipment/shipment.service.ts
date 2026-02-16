@@ -51,5 +51,27 @@ export class ShipmentService {
       req
     );
   }
+  markInTransit(shipmentId: string): any {
+    return this.http.post(
+      `${this.api}/shipments/${shipmentId}/in-transit`,
+      {}
+    );
+  }
+
+  markDelivered(shipmentId: string): any {
+    return this.http.post(
+      `${this.api}/shipments/${shipmentId}/deliver`,
+      {}
+    );
+  }
+
+  cancelShipment(shipmentId: string): any {
+    return this.http.post(
+      `${this.api}/shipments/${shipmentId}/cancel`,
+      {}
+    );
+  }
+
 }
+
 

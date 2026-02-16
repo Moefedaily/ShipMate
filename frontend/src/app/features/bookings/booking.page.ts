@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
@@ -12,7 +12,7 @@ import { BookingState } from '../../core/state/booking/booking.state';
 @Component({
   standalone: true,
   selector: 'app-booking-page',
-  imports: [CommonModule, LeafletMapComponent, MatIconModule],
+  imports: [CommonModule, LeafletMapComponent, MatIconModule, RouterLink],
   providers: [BookingState],
   templateUrl: './booking.page.html',
   styleUrl: './booking.page.scss'
@@ -52,7 +52,6 @@ export class BookingPage implements OnInit {
       case 'PENDING': return 'badge--warning';
       case 'CONFIRMED':
       case 'IN_PROGRESS': return 'badge--info';
-      case 'COMPLETED': return 'badge--success';
       case 'CANCELLED': return 'badge--danger';
       default: return 'badge--neutral';
     }
@@ -112,10 +111,6 @@ export class BookingPage implements OnInit {
     this.runAction('start', 'Delivery started');
   }
 
-  complete(): void {
-    this.runAction('complete', 'Delivery completed');
-  }
-
   cancel(): void {
     const ok = confirm('Cancel this booking?');
     if (!ok) return;
@@ -123,10 +118,8 @@ export class BookingPage implements OnInit {
     this.runAction('cancel', 'Booking cancelled');
   }
 
-  private runAction(
-    action: 'confirm' | 'start' | 'complete' | 'cancel',
-    successMessage: string
-  ): void {
+  private runAction( action: 'confirm' | 'start' | 'cancel', successMessage: string ): void {
+    
     const booking = this.booking();
     if (!booking) return;
 
@@ -134,8 +127,15 @@ export class BookingPage implements OnInit {
     this.loader.show();
 
     this.bookingState.runAction(action).subscribe({
-      next: () => {
+      next: (updated) => {
+        if (!updated) return;
+
         this.toast.success(successMessage);
+
+        if (action === 'start') {
+          this.router.navigate(['/dashboard/trip', updated.id]);
+        }
+
         this.acting.set(false);
         this.loader.hide();
       },
@@ -148,4 +148,5 @@ export class BookingPage implements OnInit {
       }
     });
   }
+
 }

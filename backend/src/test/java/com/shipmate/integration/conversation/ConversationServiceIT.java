@@ -36,7 +36,6 @@ import java.util.UUID;
 class ConversationServiceIT extends AbstractIntegrationTest {
 
     @Autowired private ConversationService conversationService;
-
     @Autowired private BookingRepository bookingRepository;
     @Autowired private ShipmentRepository shipmentRepository;
     @Autowired private MessageRepository messageRepository;
@@ -44,10 +43,8 @@ class ConversationServiceIT extends AbstractIntegrationTest {
     @Autowired private DriverProfileRepository driverProfileRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
-
     @Test
     void sender_shouldSeeConversation_withUnreadCount_andLastMessage() {
-
         TestContext ctx = prepareConversation();
 
         List<ConversationResponse> conversations =
@@ -57,8 +54,8 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
         ConversationResponse convo = conversations.get(0);
 
-        assertThat(convo.bookingId()).isEqualTo(ctx.booking.getId());
-        assertThat(convo.bookingStatus()).isEqualTo(BookingStatus.CONFIRMED);
+        assertThat(convo.shipmentId()).isEqualTo(ctx.shipment.getId());
+        assertThat(convo.shipmentStatus()).isEqualTo(ShipmentStatus.ASSIGNED);
         assertThat(convo.unreadCount()).isEqualTo(2);
         assertThat(convo.lastMessagePreview())
                 .isEqualTo("Driver started delivery");
@@ -67,7 +64,6 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
     @Test
     void driver_shouldSeeConversation_withUnreadCount() {
-
         TestContext ctx = prepareConversation();
 
         List<ConversationResponse> conversations =
@@ -77,14 +73,12 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
         ConversationResponse convo = conversations.get(0);
 
-        assertThat(convo.bookingId()).isEqualTo(ctx.booking.getId());
+        assertThat(convo.shipmentId()).isEqualTo(ctx.shipment.getId());
         assertThat(convo.unreadCount()).isEqualTo(0);
     }
 
-
     @Test
     void unrelatedUser_shouldNotSeeAnyConversations() {
-
         prepareConversation();
 
         User stranger = createUser(UserType.SENDER);
@@ -95,16 +89,14 @@ class ConversationServiceIT extends AbstractIntegrationTest {
         assertThat(conversations).isEmpty();
     }
 
-
     @Test
-    void userWithMultipleBookings_shouldSeeMultipleConversations() {
-
+    void userWithMultipleShipments_shouldSeeMultipleConversations() {
         User sender = createUser(UserType.SENDER);
         User driver = createUser(UserType.DRIVER);
         createDriverProfile(driver);
 
-        Booking b1 = createBookingWithMessage(sender, driver, "First booking");
-        Booking b2 = createBookingWithMessage(sender, driver, "Second booking");
+        Shipment s1 = createShipmentWithMessage(sender, driver, "First shipment");
+        Shipment s2 = createShipmentWithMessage(sender, driver, "Second shipment");
 
         List<ConversationResponse> conversations =
                 conversationService.getMyConversations(sender.getId());
@@ -112,13 +104,11 @@ class ConversationServiceIT extends AbstractIntegrationTest {
         assertThat(conversations).hasSize(2);
 
         assertThat(conversations)
-                .extracting(ConversationResponse::bookingId)
-                .containsExactlyInAnyOrder(b1.getId(), b2.getId());
+                .extracting(ConversationResponse::shipmentId)
+                .containsExactlyInAnyOrder(s1.getId(), s2.getId());
     }
 
-
     private TestContext prepareConversation() {
-
         User sender = createUser(UserType.SENDER);
         User driver = createUser(UserType.DRIVER);
         createDriverProfile(driver);
@@ -130,7 +120,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        shipmentRepository.save(
+        Shipment shipment = shipmentRepository.save(
                 Shipment.builder()
                         .booking(booking)
                         .sender(sender)
@@ -151,7 +141,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
         messageRepository.save(
                 Message.builder()
-                        .booking(booking)
+                        .shipment(shipment)
                         .sender(driver)
                         .receiver(sender)
                         .messageType(MessageType.SYSTEM)
@@ -163,7 +153,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
         messageRepository.save(
                 Message.builder()
-                        .booking(booking)
+                        .shipment(shipment)
                         .sender(driver)
                         .receiver(sender)
                         .messageType(MessageType.SYSTEM)
@@ -173,15 +163,14 @@ class ConversationServiceIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        return new TestContext(sender, driver, booking);
+        return new TestContext(sender, driver, shipment);
     }
 
-    private Booking createBookingWithMessage(
+    private Shipment createShipmentWithMessage(
             User sender,
             User driver,
             String message
     ) {
-
         Booking booking = bookingRepository.save(
                 Booking.builder()
                         .driver(driver)
@@ -189,7 +178,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        shipmentRepository.save(
+        Shipment shipment = shipmentRepository.save(
                 Shipment.builder()
                         .booking(booking)
                         .sender(sender)
@@ -210,7 +199,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
 
         messageRepository.save(
                 Message.builder()
-                        .booking(booking)
+                        .shipment(shipment)
                         .sender(driver)
                         .receiver(sender)
                         .messageType(MessageType.SYSTEM)
@@ -220,7 +209,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        return booking;
+        return shipment;
     }
 
     private User createUser(UserType type) {
@@ -254,5 +243,5 @@ class ConversationServiceIT extends AbstractIntegrationTest {
         );
     }
 
-    private record TestContext(User sender, User driver, Booking booking) {}
+    private record TestContext(User sender, User driver, Shipment shipment) {}
 }

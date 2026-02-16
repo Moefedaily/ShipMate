@@ -17,7 +17,11 @@
     
     <div class="page-header">
       <div>
-        <h1>Current Delivery</h1>
+      <button class="btn btn--ghost back-btn" routerLink="/dashboard/driver">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+         <h1>Current Delivery</h1>
         <p class="subtitle">
           Track and manage your active booking with real-time updates
         </p>
@@ -141,24 +145,6 @@
           }
         </button>
       }
-      
-      @if (status() === 'IN_PROGRESS') {
-        <button
-          type="button"
-          class="btn btn--primary"
-          (click)="complete()"
-          [disabled]="acting()"
-        >
-          @if (acting()) {
-            <mat-icon>hourglass_empty</mat-icon>
-            Completing…
-          } @else {
-            <mat-icon>check_circle</mat-icon>
-            Complete delivery
-          }
-        </button>
-      }
-      
     </section>
     
   }

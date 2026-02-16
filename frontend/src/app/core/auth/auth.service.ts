@@ -91,10 +91,6 @@ export class AuthService {
           return of(null);
         }
         return this.fetchMe();
-      }),
-      catchError(() => {
-        this.authState.clear();
-        return of(null);
       })
     );
   }

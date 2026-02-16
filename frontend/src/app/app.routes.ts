@@ -126,6 +126,14 @@ export const routes: Routes = [
             .then(m => m.BookingPage)
       },
       {
+        path: 'trip/:id',
+        canActivate: [driverGuard],
+        data: { dashboardRole: 'DRIVER' },
+        loadComponent: () =>
+          import('./features/trip/trip.page')
+            .then(m => m.TripPage)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.page')

@@ -170,7 +170,11 @@
           class="btn btn--primary confirm-btn"
           (click)="goToBooking(activeBooking()!.id)"
         >
-          View delivery
+          @if (bookingStatus() === 'IN_PROGRESS') {
+            Continue trip
+          } @else {
+            View booking
+          }
           <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>

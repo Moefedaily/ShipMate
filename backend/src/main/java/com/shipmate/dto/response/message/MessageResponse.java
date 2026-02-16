@@ -6,12 +6,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MessageResponse(
-        Long id,
-        UUID bookingId,
+        UUID id,
+        UUID shipmentId,
         MessageType messageType,
         String messageContent,
         UUID senderId,
         UUID receiverId,
-        boolean read,
+        boolean isRead,
         Instant sentAt
 ) {}
