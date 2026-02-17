@@ -9,12 +9,16 @@ import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
 import com.shipmate.mapper.shipment.ShipmentAssembler;
 import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.booking.BookingStatus;
+import com.shipmate.model.payment.Payment;
+import com.shipmate.model.payment.PaymentStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.booking.BookingRepository;
+import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.payment.PaymentService;
 import com.shipmate.service.pricing.PricingService;
 import com.shipmate.util.GeoUtils;
 
@@ -55,6 +59,9 @@ public class ShipmentService {
     private final PricingService pricingService;
     private final ApplicationEventPublisher eventPublisher;
     private final BookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
+
 
     @Value("${app.file.max-size:10485760}")
     private long maxFileSize;
@@ -237,11 +244,20 @@ public class ShipmentService {
         validateDriverAccess(shipment, driverId);
 
         if (shipment.getStatus() != ShipmentStatus.ASSIGNED) {
-            throw new IllegalStateException("Shipment cannot move to IN_TRANSIT");
+                throw new IllegalStateException("Shipment cannot move to IN_TRANSIT");
         }
 
         if (shipment.getBooking().getStatus() != BookingStatus.IN_PROGRESS) {
-        throw new IllegalStateException("Booking must be IN_PROGRESS");
+                throw new IllegalStateException("Booking must be IN_PROGRESS");
+        }
+
+        Payment payment = paymentRepository.findByShipment(shipment)
+                .orElseThrow(() -> new IllegalStateException("Payment not initialized"));
+
+        if (payment.getPaymentStatus() != PaymentStatus.AUTHORIZED &&
+                payment.getPaymentStatus() != PaymentStatus.CAPTURED) {
+
+                throw new IllegalStateException("Shipment payment is not authorized");
         }
 
         shipment.setStatus(ShipmentStatus.IN_TRANSIT);
@@ -254,7 +270,7 @@ public class ShipmentService {
         );
 
         return shipmentAssembler.toResponse(shipment);
-    }
+        }
 
     public ShipmentResponse markDelivered(UUID shipmentId, UUID driverId) {
 
@@ -265,7 +281,7 @@ public class ShipmentService {
         validateDriverAccess(shipment, driverId);
 
         if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
-            throw new IllegalStateException("Shipment must be IN_TRANSIT to deliver");
+                throw new IllegalStateException("Shipment must be IN_TRANSIT to deliver");
         }
 
         shipment.setStatus(ShipmentStatus.DELIVERED);
@@ -277,12 +293,14 @@ public class ShipmentService {
                 )
         );
 
+        paymentService.capturePaymentForShipment(shipment);
+
         recalculateBookingStatus(shipment, driverId);
 
         return shipmentAssembler.toResponse(shipment);
-    }
+        }
 
-    public ShipmentResponse cancelShipment(UUID shipmentId, UUID actorId) {
+   public ShipmentResponse cancelShipment(UUID shipmentId, UUID actorId) {
 
         Shipment shipment = shipmentRepository
                 .findWithBookingAndSender(shipmentId)
@@ -291,8 +309,14 @@ public class ShipmentService {
         validateParticipantAccess(shipment, actorId);
 
         if (shipment.getStatus() == ShipmentStatus.DELIVERED) {
-            throw new IllegalStateException("Delivered shipment cannot be cancelled");
+                throw new IllegalStateException("Delivered shipment cannot be cancelled");
         }
+
+        if (shipment.getStatus() == ShipmentStatus.IN_TRANSIT) {
+                throw new IllegalStateException("Shipment already in transit cannot be cancelled");
+        }
+
+        paymentService.handleCancellation(shipment);
 
         shipment.setStatus(ShipmentStatus.CANCELLED);
 
@@ -304,6 +328,7 @@ public class ShipmentService {
         );
 
         recalculateBookingStatus(shipment, actorId);
+
         return shipmentAssembler.toResponse(shipment);
     }
 

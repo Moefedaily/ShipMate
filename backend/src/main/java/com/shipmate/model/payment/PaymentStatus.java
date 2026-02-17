@@ -1,9 +1,11 @@
 package com.shipmate.model.payment;
 
 public enum PaymentStatus {
-    PENDING,
+    REQUIRED,
     PROCESSING,
-    SUCCEEDED,
+    AUTHORIZED,
+    CAPTURED,
     FAILED,
+    CANCELLED,
     REFUNDED
 }
