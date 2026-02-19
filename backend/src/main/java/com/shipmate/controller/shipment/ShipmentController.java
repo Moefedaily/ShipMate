@@ -8,9 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.shipmate.dto.request.confirmDelivery.ConfirmDeliveryRequest;
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
+import com.shipmate.dto.response.delivery.DeliveryCodeStatusResponse;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
+import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.shipment.ShipmentService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +34,7 @@ import java.util.List;
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
+    private final DeliveryCodeService deliveryCodeService;
 
     // ===================== CREATE SHIPMENT =====================
     @Operation(
@@ -183,28 +187,55 @@ public class ShipmentController {
                 )
         );
     }
-    // ===================== MARK SHIPMENT DELIVERED =====================
+
+    // ===================== CONFIRM DELIVERY =====================
     @Operation(
-        summary = "Mark shipment as delivered",
-        description = "Driver marks a shipment as delivered."
+        summary = "Confirm delivery",
+        description = "Driver confirms delivery of a shipment."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Shipment delivered successfully"),
+        @ApiResponse(responseCode = "200", description = "Delivery confirmed"),
         @ApiResponse(responseCode = "400", description = "Invalid shipment state"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Not assigned driver")
     })
-    @PostMapping("/{shipmentId}/deliver")
-    public ResponseEntity<ShipmentResponse> markDelivered(
+    @PostMapping("/{shipmentId}/confirm-delivery")
+    public ResponseEntity<ShipmentResponse> confirmDelivery(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId,
+            @RequestBody ConfirmDeliveryRequest request) {
+
+        return ResponseEntity.ok(
+                shipmentService.confirmDelivery(
+                        shipmentId,
+                        UUID.fromString(userId),
+                        request.getCode()
+                )
+        );
+    }
+
+    // ===================== RESET DELIVERY CODE =====================
+    @Operation(
+        summary = "Reset delivery code",
+        description = "Resets the delivery code for a shipment."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Delivery code reset successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid shipment state"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not allowed")
+    })
+    @PostMapping("/{shipmentId}/delivery-code/reset")
+    public ResponseEntity<Void> resetDeliveryCode(
             @PathVariable UUID shipmentId,
             @AuthenticationPrincipal(expression = "username") String userId) {
 
-        return ResponseEntity.ok(
-                shipmentService.markDelivered(
-                        shipmentId,
-                        UUID.fromString(userId)
-                )
+        shipmentService.resetDeliveryCode(
+                shipmentId,
+                UUID.fromString(userId)
         );
+
+        return ResponseEntity.noContent().build();
     }
 
     // ===================== CANCEL SHIPMENT =====================
@@ -229,6 +260,34 @@ public class ShipmentController {
                         UUID.fromString(userId)
                 )
         );
+    }
+
+    @Operation(
+        summary = "Get active delivery code",
+        description = "Returns the active delivery code for the shipment if available."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Delivery code returned"),
+        @ApiResponse(responseCode = "204", description = "No active delivery code"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Not allowed")
+    })
+    @GetMapping("/{shipmentId}/delivery-code")
+    public ResponseEntity<DeliveryCodeStatusResponse> getActiveCode(
+            @PathVariable UUID shipmentId,
+            @AuthenticationPrincipal(expression = "username") String userId) {
+
+        DeliveryCodeStatusResponse response =
+                deliveryCodeService.getActiveCode(
+                        shipmentId,
+                        UUID.fromString(userId)
+                );
+
+        if (response == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(response);
     }
 
 }

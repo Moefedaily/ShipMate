@@ -44,3 +44,8 @@ export interface TypingWsDto {
   userId: string;
   displayName: string;
 }
+export interface DeliveryCodeWsDto {
+  shipmentId: string;
+  code: string;
+  expiresAt?: string;
+}

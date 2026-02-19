@@ -431,7 +431,92 @@
     }
   }
 }
+.payment-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.02) 0%, $bg-surface 100%);
+  border: 1px solid $border-default;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
+.payment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  mat-icon {
+    color: $color-primary;
+  }
+
+  .label {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+}
+
+.payment-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.payment-completed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-weight: $font-weight-medium;
+}
+
+.payment-refunded {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $color-danger;
+  font-weight: $font-weight-medium;
+}
+
+.delivery-code-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.delivery-code-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.delivery-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.delivery-code-box .code {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+}
 
 @media (max-width: 968px) {
   .content {
@@ -456,6 +541,7 @@
     }
   }
 }
+
 
 @media (max-width: 640px) {
   .shipment-detail-card {
@@ -484,4 +570,5 @@
       font-size: 1.35rem;
     }
   }
+
 }

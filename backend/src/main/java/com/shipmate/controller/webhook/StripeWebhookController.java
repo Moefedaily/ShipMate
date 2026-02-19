@@ -5,6 +5,8 @@ import com.shipmate.service.payment.stripeEventVerifier.StripeEventVerifier;
 import com.stripe.model.Event;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/api/webhooks/stripe")
 @RequiredArgsConstructor
+@Slf4j
 public class StripeWebhookController {
 
     private final PaymentService paymentService;
@@ -49,11 +52,12 @@ public class StripeWebhookController {
 
     private void handleEvent(Event event, String payload) {
         String eventType = event.getType();
+        log.info("[STRIPE] Received event type={}", eventType);
 
         switch (eventType) {
 
             case "payment_intent.amount_capturable_updated" ->
-                    paymentService.handleAuthorized(event);
+                    paymentService.handleAuthorized(payload);
 
             case "payment_intent.payment_failed" ->
                     paymentService.handlePaymentFailed(event);
@@ -64,6 +68,9 @@ public class StripeWebhookController {
             case "charge.refunded" ->
                     paymentService.handleRefunded(payload);
 
+            case "payment_intent.canceled" ->
+                    paymentService.handleStripeCanceled(payload);
+        
             default -> {
                 // ignore other events
             }

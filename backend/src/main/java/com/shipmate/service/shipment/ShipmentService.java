@@ -5,6 +5,7 @@ import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.listener.booking.BookingStatusChangedEvent;
+import com.shipmate.listener.delivery.DeliveryCodeEventPublisher;
 import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
 import com.shipmate.mapper.shipment.ShipmentAssembler;
 import com.shipmate.mapper.shipment.ShipmentMapper;
@@ -18,6 +19,7 @@ import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.payment.PaymentService;
 import com.shipmate.service.pricing.PricingService;
 import com.shipmate.util.GeoUtils;
@@ -61,6 +63,9 @@ public class ShipmentService {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentService paymentService;
+    private final DeliveryCodeService deliveryCodeService;
+    private final DeliveryCodeEventPublisher deliveryCodeEventPublisher;
+
 
 
     @Value("${app.file.max-size:10485760}")
@@ -299,6 +304,68 @@ public class ShipmentService {
 
         return shipmentAssembler.toResponse(shipment);
         }
+
+   public ShipmentResponse confirmDelivery( UUID shipmentId, UUID driverId, String plainCode) {
+
+        Shipment shipment = shipmentRepository
+                .findWithBookingAndSender(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        validateDriverAccess(shipment, driverId);
+
+        if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
+            throw new IllegalStateException("Shipment must be IN_TRANSIT to confirm delivery");
+        }
+
+        Payment payment = paymentRepository.findByShipment(shipment)
+                .orElseThrow(() -> new IllegalStateException("Payment not found"));
+
+        if (payment.getPaymentStatus() != PaymentStatus.AUTHORIZED) {
+            throw new IllegalStateException("Payment not authorized");
+        }
+
+        deliveryCodeService.verify(shipment, plainCode);
+
+        paymentService.capturePaymentForShipment(shipment);
+
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+        eventPublisher.publishEvent(
+                new ShipmentStatusChangedEvent(
+                        shipment.getId(),
+                        ShipmentStatus.DELIVERED
+                )
+        );
+        recalculateBookingStatus(shipment, driverId);
+
+        log.info(
+                "[DELIVERY] Confirmed shipmentId={} by driverId={}",
+                shipmentId,
+                driverId
+        );
+
+        return shipmentAssembler.toResponse(shipment);
+    }
+
+    public void resetDeliveryCode(UUID shipmentId, UUID senderId) {
+
+        Shipment shipment = shipmentRepository
+                .findWithBookingAndSender(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        if (!shipment.getSender().getId().equals(senderId)) {
+            throw new AccessDeniedException("Not authorized");
+        }
+
+        String newCode = deliveryCodeService.reset(shipmentId, senderId);
+
+        if (newCode != null) {
+            deliveryCodeEventPublisher.publishToSender(
+                    shipment.getSender().getId(),
+                    shipment.getId(),
+                    newCode
+            );
+        }
+    }
 
    public ShipmentResponse cancelShipment(UUID shipmentId, UUID actorId) {
 

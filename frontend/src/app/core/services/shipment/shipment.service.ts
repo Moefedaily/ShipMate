@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { CreateShipmentRequest, PageResponse, PricingEstimateRequest, PricingEstimateResponse, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
+import { CreateShipmentRequest, DeliveryCodeStatusResponse, PageResponse, PricingEstimateRequest, PricingEstimateResponse, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -60,7 +60,7 @@ export class ShipmentService {
 
   markDelivered(shipmentId: string): any {
     return this.http.post(
-      `${this.api}/shipments/${shipmentId}/deliver`,
+      `${this.api}/shipments/${shipmentId}/confirm-delivery`,
       {}
     );
   }
@@ -71,6 +71,24 @@ export class ShipmentService {
       {}
     );
   }
+  confirmDelivery(shipmentId: string, code: string) {
+    return this.http.post<ShipmentResponse>(
+      `${this.api}/shipments/${shipmentId}/confirm-delivery`,
+      { code }
+    );
+  }
+
+  getActiveDeliveryCode(shipmentId: string): Observable<DeliveryCodeStatusResponse | null> {
+      return this.http.get<DeliveryCodeStatusResponse>(
+        `${this.api}/shipments/${shipmentId}/delivery-code`,
+        { observe: 'response' }
+      ).pipe(
+        map((res: HttpResponse<DeliveryCodeStatusResponse>) => {
+          if (res.status === 204) return null;
+          return res.body ?? null;
+        })
+      );
+    }
 
 }
 

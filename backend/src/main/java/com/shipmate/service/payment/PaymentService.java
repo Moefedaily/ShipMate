@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipmate.dto.response.payment.CreatePaymentIntentResponse;
 import com.shipmate.dto.response.payment.PaymentResponse;
+import com.shipmate.listener.delivery.DeliveryCodeEventPublisher;
 import com.shipmate.mapper.payment.PaymentMapper;
 import com.shipmate.model.payment.Payment;
 import com.shipmate.model.payment.PaymentStatus;
@@ -13,6 +14,7 @@ import com.shipmate.model.user.User;
 import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.earning.DriverEarningService;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.Refund;
@@ -44,6 +46,8 @@ public class PaymentService {
     private final DriverEarningService driverEarningService;
     private final PaymentGateway paymentGateway;
     private final ObjectMapper objectMapper;
+    private final DeliveryCodeService deliveryCodeService;
+    private final DeliveryCodeEventPublisher deliveryCodeEventPublisher;
 
     public CreatePaymentIntentResponse createPaymentIntent(UUID shipmentId, UUID senderId) {
 
@@ -64,10 +68,53 @@ public class PaymentService {
         Payment payment = paymentRepository.findByShipment(shipment)
                 .orElseGet(() -> createPaymentEntity(shipment));
 
+        // Already paid (terminal for pay action)
         if (payment.getPaymentStatus() == PaymentStatus.AUTHORIZED ||
             payment.getPaymentStatus() == PaymentStatus.CAPTURED) {
 
             throw new IllegalStateException("Shipment already paid");
+        }
+
+        // If user already started payment and i have an existing intent -> reuse it
+        if (payment.getPaymentStatus() == PaymentStatus.PROCESSING &&
+            payment.getStripePaymentIntentId() != null &&
+            !payment.getStripePaymentIntentId().isBlank()) {
+
+            try {
+
+                PaymentIntent existing = PaymentIntent.retrieve(
+                        payment.getStripePaymentIntentId()
+                );
+
+                String clientSecret = existing.getClientSecret();
+
+                if (clientSecret == null || clientSecret.isBlank()) {
+                    log.warn("[PAYMENT] Existing intent missing clientSecret paymentId={} intentId={}",
+                            payment.getId(),
+                            payment.getStripePaymentIntentId());
+                    throw new IllegalStateException("Existing payment intent not usable");
+                }
+
+                return CreatePaymentIntentResponse.builder()
+                        .clientSecret(clientSecret)
+                        .paymentStatus(payment.getPaymentStatus())
+                        .amountTotal(payment.getAmountTotal())
+                        .currency(payment.getCurrency())
+                        .build();
+
+            } catch (Exception e) {
+                log.error("[PAYMENT] Failed to retrieve existing intent, will create a new one paymentId={}",
+                        payment.getId(), e);
+                // fallthrough to create a new intent below
+            }
+        }
+
+        // If previously FAILED or REQUIRED, create a new attempt
+        if (payment.getPaymentStatus() != PaymentStatus.REQUIRED &&
+            payment.getPaymentStatus() != PaymentStatus.FAILED &&
+            payment.getPaymentStatus() != PaymentStatus.PROCESSING) {
+
+            throw new IllegalStateException("Invalid payment state for intent creation: " + payment.getPaymentStatus());
         }
 
         try {
@@ -90,6 +137,7 @@ public class PaymentService {
 
             payment.setStripePaymentIntentId(intent.getId());
             payment.setPaymentStatus(PaymentStatus.PROCESSING);
+            payment.setFailureReason(null); // reset previous failure
 
             paymentRepository.save(payment);
 
@@ -106,6 +154,7 @@ public class PaymentService {
         }
     }
 
+
     @Transactional(readOnly = true)
     public PaymentResponse getPaymentForShipment(UUID shipmentId, UUID senderId) {
 
@@ -116,10 +165,24 @@ public class PaymentService {
             throw new IllegalArgumentException("Not authorized");
         }
 
-        Payment payment = paymentRepository.findByShipment(shipment)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        return paymentRepository.findByShipment(shipment)
+                .map(paymentMapper::toResponse)
+                .orElse(
+                    PaymentResponse.builder()
+                        .shipmentId(shipment.getId())
+                        .paymentStatus(PaymentStatus.REQUIRED)
+                        .amountTotal(
+                            shipment.getBasePrice()
+                                .add(
+                                    shipment.getExtraInsuranceFee() != null
+                                        ? shipment.getExtraInsuranceFee()
+                                        : BigDecimal.ZERO
+                                )
+                        )
+                        .currency("EUR")
+                        .build()
+                );
 
-        return paymentMapper.toResponse(payment);
     }
 
     private Payment createPaymentEntity(Shipment shipment) {
@@ -151,34 +214,101 @@ public class PaymentService {
                 .longValueExact();
     }
 
-    public void handleAuthorized(Event event) {
+   @Transactional
+    public void handleAuthorized(String payload) {
 
-        EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
-        if (deserializer == null) return;
+        try {
 
+            JsonNode root = objectMapper.readTree(payload);
+            JsonNode objectNode = root.path("data").path("object");
 
-        if (deserializer.getObject().isEmpty()) return;
+            String paymentIntentId = objectNode.path("id").asText(null);
+            String status = objectNode.path("status").asText(null);
 
-        PaymentIntent intent = (PaymentIntent) deserializer.getObject().get();
+            if (paymentIntentId == null || status == null) {
+                log.warn("[PAYMENT] Invalid authorization payload");
+                return;
+            }
 
-        paymentRepository.findByStripePaymentIntentId(intent.getId())
-                .ifPresent(payment -> {
+            if (!"requires_capture".equals(status)) {
+                return;
+            }
 
-                    if (payment.getPaymentStatus() == PaymentStatus.AUTHORIZED) {
-                        return;
-                    }
+            paymentRepository.findByStripePaymentIntentId(paymentIntentId)
+                    .ifPresent(payment -> {
 
-                    payment.setPaymentStatus(PaymentStatus.AUTHORIZED);
-                    paymentRepository.save(payment);
-                });
+                        Shipment shipment = payment.getShipment();
+
+                        // Terminal guard
+                        if (isPaymentTerminal(payment.getPaymentStatus())) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored AUTHORIZED - payment terminal status={}",
+                                    payment.getPaymentStatus());
+                            return;
+                        }
+
+                        if (shipment.getStatus() == ShipmentStatus.CANCELLED) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored AUTHORIZED - shipment CANCELLED shipmentId={}",
+                                    shipment.getId());
+                            return;
+                        }
+
+                        // Shipment state must be ASSIGNED
+                        if (shipment.getStatus() != ShipmentStatus.ASSIGNED) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored AUTHORIZED - shipment status={} shipmentId={}",
+                                    shipment.getStatus(),
+                                    shipment.getId());
+                            return;
+                        }
+
+                        // Transition guard
+                        if (payment.getPaymentStatus() == PaymentStatus.AUTHORIZED) {
+                            return;
+                        }
+
+                        if (!isValidTransition(payment.getPaymentStatus(), PaymentStatus.AUTHORIZED)) {
+                            log.warn("[PAYMENT][WEBHOOK] Invalid transition {} -> AUTHORIZED paymentId={}",
+                                    payment.getPaymentStatus(),
+                                    payment.getId());
+                            return;
+                        }
+
+                        // Apply transition
+                        payment.setPaymentStatus(PaymentStatus.AUTHORIZED);
+                        paymentRepository.save(payment);
+
+                        log.info("[PAYMENT] Authorized paymentIntentId={}", paymentIntentId);
+
+                        // Generate delivery code safely
+                        if (!deliveryCodeService.isVerified(shipment)) {
+
+                            String code = deliveryCodeService.generateAndStore(shipment);
+
+                            if (code != null) {
+
+                                deliveryCodeEventPublisher.publishToSender(
+                                        shipment.getSender().getId(),
+                                        shipment.getId(),
+                                        code
+                                );
+
+                                log.info("[DELIVERY_CODE] Generated & pushed shipmentId={}",
+                                        shipment.getId());
+                            }
+                        }
+                    });
+
+        } catch (Exception e) {
+            log.error("[PAYMENT] Failed to process authorization event", e);
+            throw new IllegalStateException("Failed to process authorization event", e);
+        }
     }
+
 
     public void handlePaymentFailed(Event event) {
 
         EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
         if (deserializer == null) return;
 
-
         if (deserializer.getObject().isEmpty()) return;
 
         PaymentIntent intent = (PaymentIntent) deserializer.getObject().get();
@@ -186,88 +316,153 @@ public class PaymentService {
         paymentRepository.findByStripePaymentIntentId(intent.getId())
                 .ifPresent(payment -> {
 
+                    if (isPaymentTerminal(payment.getPaymentStatus())) {
+                        log.warn("[PAYMENT][WEBHOOK] Ignored FAILED - terminal status={}",
+                                payment.getPaymentStatus());
+                        return;
+                    }
+
+                    if (!isValidTransition(payment.getPaymentStatus(), PaymentStatus.FAILED)) {
+                        log.warn("[PAYMENT][WEBHOOK] Invalid transition {} -> FAILED paymentId={}",
+                                payment.getPaymentStatus(),
+                                payment.getId());
+                        return;
+                    }
+
                     payment.setPaymentStatus(PaymentStatus.FAILED);
-                    payment.setFailureReason(intent.getLastPaymentError() != null
-                            ? intent.getLastPaymentError().getMessage()
-                            : "Payment failed");
+                    payment.setFailureReason(
+                            intent.getLastPaymentError() != null
+                                    ? intent.getLastPaymentError().getMessage()
+                                    : "Payment failed"
+                    );
 
                     paymentRepository.save(payment);
                 });
     }
 
-   public void handleCaptured(String payload) {
 
-    try {
+    @Transactional
+    public void handleCaptured(String payload) {
 
-        JsonNode root = objectMapper.readTree(payload);
+        try {
 
-        String paymentIntentId = root
-                .path("data")
-                .path("object")
-                .path("id")
-                .asText();
+            JsonNode root = objectMapper.readTree(payload);
 
-        if (paymentIntentId == null || paymentIntentId.isBlank()) {
-            return;
+            String paymentIntentId = root
+                    .path("data")
+                    .path("object")
+                    .path("id")
+                    .asText(null);
+
+            if (paymentIntentId == null || paymentIntentId.isBlank()) {
+                log.warn("[PAYMENT] Capture event missing paymentIntentId");
+                return;
+            }
+
+            paymentRepository.findByStripePaymentIntentId(paymentIntentId)
+                    .ifPresent(payment -> {
+
+                        Shipment shipment = payment.getShipment();
+
+                        // Terminal guard
+                        if (isPaymentTerminal(payment.getPaymentStatus())) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored CAPTURED - payment terminal status={}",
+                                    payment.getPaymentStatus());
+                            return;
+                        }
+
+                        if (shipment.getStatus() == ShipmentStatus.CANCELLED) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored CAPTURED - shipment CANCELLED shipmentId={}",
+                                    shipment.getId());
+                            return;
+                        }
+
+                        // Shipment must be DELIVERED
+                        if (shipment.getStatus() != ShipmentStatus.DELIVERED) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored CAPTURED - shipment not DELIVERED shipmentId={} status={}",
+                                    shipment.getId(),
+                                    shipment.getStatus());
+                            return;
+                        }
+
+                        // Transition guard
+                        if (payment.getPaymentStatus() == PaymentStatus.CAPTURED) {
+                            return; // idempotent
+                        }
+
+                        if (!isValidTransition(payment.getPaymentStatus(), PaymentStatus.CAPTURED)) {
+                            log.warn("[PAYMENT][WEBHOOK] Invalid transition {} -> CAPTURED paymentId={}",
+                                    payment.getPaymentStatus(),
+                                    payment.getId());
+                            return;
+                        }
+
+                        // Apply transition
+                        payment.setPaymentStatus(PaymentStatus.CAPTURED);
+                        paymentRepository.save(payment);
+
+                        driverEarningService.createIfAbsent(payment);
+
+                        log.info("[PAYMENT] Captured paymentIntentId={}", paymentIntentId);
+                    });
+
+        } catch (Exception e) {
+            log.error("[PAYMENT] Failed to process capture event", e);
+            throw new IllegalStateException("Failed to process capture event", e);
         }
-
-        paymentRepository.findByStripePaymentIntentId(paymentIntentId)
-                .ifPresent(payment -> {
-
-                    if (payment.getPaymentStatus() == PaymentStatus.CAPTURED) {
-                        return;
-                    }
-
-                    payment.setPaymentStatus(PaymentStatus.CAPTURED);
-                    paymentRepository.save(payment);
-
-                    driverEarningService.createIfAbsent(payment);
-                });
-
-    } catch (Exception e) {
-        throw new IllegalStateException("Failed to process capture event", e);
     }
-}
 
+    public void handleRefunded(String payload) {
 
+        try {
 
-  public void handleRefunded(String payload) {
+            JsonNode root = objectMapper.readTree(payload);
 
-    try {
+            String paymentIntentId = root
+                    .path("data")
+                    .path("object")
+                    .path("payment_intent")
+                    .asText(null);
 
-        JsonNode root = objectMapper.readTree(payload);
+            if (paymentIntentId == null || paymentIntentId.isBlank()) {
+                return;
+            }
 
-        String paymentIntentId = root
-                .path("data")
-                .path("object")
-                .path("payment_intent")
-                .asText();
+            paymentRepository.findByStripePaymentIntentId(paymentIntentId)
+                    .ifPresent(payment -> {
 
-        if (paymentIntentId == null || paymentIntentId.isBlank()) {
-            return;
+                        // Terminal guard
+                        if (payment.getPaymentStatus() == PaymentStatus.REFUNDED) {
+                            return;
+                        }
+
+                        if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
+                            log.warn("[PAYMENT][WEBHOOK] Ignored REFUND - payment CANCELLED paymentId={}",
+                                    payment.getId());
+                            return;
+                        }
+
+                        // Transition guard
+                        if (!isValidTransition(payment.getPaymentStatus(), PaymentStatus.REFUNDED)) {
+                            log.warn("[PAYMENT][WEBHOOK] Invalid transition {} -> REFUNDED paymentId={}",
+                                    payment.getPaymentStatus(),
+                                    payment.getId());
+                            return;
+                        }
+
+                        // Apply transition
+                        payment.setPaymentStatus(PaymentStatus.REFUNDED);
+                        paymentRepository.save(payment);
+
+                        driverEarningService.createRefundAdjustment(payment);
+
+                        log.info("[PAYMENT] Refunded paymentIntentId={}", paymentIntentId);
+                    });
+
+        } catch (Exception e) {
+            throw new IllegalStateException("Refund handling failed", e);
         }
-
-        paymentRepository.findByStripePaymentIntentId(paymentIntentId)
-                .ifPresent(payment -> {
-
-                    if (payment.getPaymentStatus() == PaymentStatus.REFUNDED) {
-                        return;
-                    }
-
-                    payment.setPaymentStatus(PaymentStatus.REFUNDED);
-                    paymentRepository.save(payment);
-
-                    driverEarningService.createRefundAdjustment(payment);
-                });
-
-    } catch (Exception e) {
-        throw new IllegalStateException("Refund handling failed", e);
     }
-}
-
-
-
-
 
 
     public void capturePaymentForShipment(Shipment shipment) {
@@ -297,7 +492,9 @@ public class PaymentService {
         paymentRepository.findByShipment(shipment)
                 .ifPresent(payment -> {
 
-                    switch (payment.getPaymentStatus()) {
+                    PaymentStatus current = payment.getPaymentStatus();
+
+                    switch (current) {
 
                         case REQUIRED -> {
                             payment.setPaymentStatus(PaymentStatus.CANCELLED);
@@ -305,25 +502,87 @@ public class PaymentService {
                         }
 
                         case PROCESSING -> {
+                            cancelStripeIntentIfExists(payment);
                             payment.setPaymentStatus(PaymentStatus.CANCELLED);
                             paymentRepository.save(payment);
                         }
 
                         case AUTHORIZED -> {
-                            cancelAuthorization(payment);
+                            cancelStripeIntentIfExists(payment);
+                            payment.setPaymentStatus(PaymentStatus.CANCELLED);
+                            paymentRepository.save(payment);
                         }
 
                         case CAPTURED -> {
                             refundPayment(payment);
                         }
 
+                        case FAILED -> {
+                            payment.setPaymentStatus(PaymentStatus.CANCELLED);
+                            paymentRepository.save(payment);
+                        }
+
                         default -> {
+                            // CANCELLED / REFUNDED → nothing
                         }
                     }
+
+                    log.info("[PAYMENT] Cancellation handled shipmentId={} paymentStatus={}",
+                            shipment.getId(),
+                            payment.getPaymentStatus());
                 });
     }
 
-    private void cancelAuthorization(Payment payment) {
+    @Transactional
+    public void handleStripeCanceled(String payload) {
+
+        try {
+
+            JsonNode root = objectMapper.readTree(payload);
+
+            String paymentIntentId = root
+                    .path("data")
+                    .path("object")
+                    .path("id")
+                    .asText(null);
+
+            if (paymentIntentId == null || paymentIntentId.isBlank()) {
+                return;
+            }
+
+            paymentRepository.findByStripePaymentIntentId(paymentIntentId)
+                    .ifPresent(payment -> {
+
+                        if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
+                            return; // idempotent
+                        }
+
+                        if (!isValidTransition(payment.getPaymentStatus(), PaymentStatus.CANCELLED)) {
+                            log.warn("[PAYMENT][WEBHOOK] Invalid transition {} -> CANCELLED paymentId={}",
+                                    payment.getPaymentStatus(),
+                                    payment.getId());
+                            return;
+                        }
+
+                        payment.setPaymentStatus(PaymentStatus.CANCELLED);
+                        paymentRepository.save(payment);
+
+                        log.info("[PAYMENT] Stripe confirmed cancellation intentId={}",
+                                paymentIntentId);
+                    });
+
+        } catch (Exception e) {
+            log.error("[PAYMENT] Failed to process Stripe cancel event", e);
+            throw new IllegalStateException("Cancel webhook failed", e);
+        }
+    }
+
+    private void cancelStripeIntentIfExists(Payment payment) {
+
+        if (payment.getStripePaymentIntentId() == null ||
+            payment.getStripePaymentIntentId().isBlank()) {
+            return;
+        }
 
         try {
 
@@ -333,14 +592,16 @@ public class PaymentService {
 
             intent.cancel();
 
-            // Webhook will update status to CANCELLED
-            payment.setPaymentStatus(PaymentStatus.CANCELLED);
-            paymentRepository.save(payment);
+            log.info("[PAYMENT] Stripe intent cancelled intentId={}",
+                    payment.getStripePaymentIntentId());
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to cancel authorization", e);
+
+            log.error("[PAYMENT] Failed to cancel Stripe intent intentId={}",
+                    payment.getStripePaymentIntentId(), e);
         }
     }
+
 
     private void refundPayment(Payment payment) {
 
@@ -360,6 +621,36 @@ public class PaymentService {
         } catch (Exception e) {
             throw new RuntimeException("Refund failed", e);
         }
+    }
+
+    private boolean isPaymentTerminal(PaymentStatus status) {
+        return status == PaymentStatus.CANCELLED ||
+            status == PaymentStatus.REFUNDED;
+    }
+
+    private boolean isValidTransition(PaymentStatus from, PaymentStatus to) {
+
+        return switch (from) {
+
+            case REQUIRED -> to == PaymentStatus.PROCESSING;
+
+            case PROCESSING ->
+                    to == PaymentStatus.AUTHORIZED ||
+                    to == PaymentStatus.FAILED ||
+                    to == PaymentStatus.CANCELLED;
+
+            case AUTHORIZED ->
+                    to == PaymentStatus.CAPTURED ||
+                    to == PaymentStatus.CANCELLED;
+
+            case CAPTURED ->
+                    to == PaymentStatus.REFUNDED;
+
+            case FAILED ->
+                    to == PaymentStatus.PROCESSING;
+
+            case CANCELLED, REFUNDED -> false;
+        };
     }
 
 }

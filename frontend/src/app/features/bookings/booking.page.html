@@ -130,11 +130,18 @@
       }
       
       @if (status() === 'CONFIRMED') {
+
+        @if (!canStartBooking()) {
+          <div class="info-banner">
+            Waiting for sender payment before starting delivery.
+          </div>
+        }
+
         <button
           type="button"
           class="btn btn--primary"
           (click)="start()"
-          [disabled]="acting()"
+          [disabled]="acting() || !canStartBooking()"
         >
           @if (acting()) {
             <mat-icon>hourglass_empty</mat-icon>

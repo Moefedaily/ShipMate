@@ -92,8 +92,8 @@ export class TripState {
     this.runShipmentAction(shipmentId, 'inTransit');
   }
 
-  markDelivered(shipmentId: string): void {
-    this.runShipmentAction(shipmentId, 'deliver');
+  confirmDelivery(shipmentId: string, code: string) {
+    return this.shipmentService.confirmDelivery(shipmentId, code);
   }
 
   cancelShipment(shipmentId: string): void {

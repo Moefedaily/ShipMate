@@ -122,6 +122,84 @@
           </div>
         }
 
+        <!-- PAYMENT SECTION -->
+      @if (shipment()?.status === 'ASSIGNED') {
+
+        <div class="payment-section">
+
+          <div class="payment-header">
+            <mat-icon>payments</mat-icon>
+            <div>
+              <span class="label">Payment Status</span>
+              <strong>{{ paymentStatus() }}</strong>
+            </div>
+          </div>
+
+          @if (canPay()) {
+            <button
+              class="btn btn--primary"
+              (click)="goToPayment()"
+            >
+              <mat-icon>credit_card</mat-icon>
+              Pay Now
+            </button>
+          }
+
+            @if (isAuthorized()) {
+
+              <div class="payment-success">
+                <mat-icon>verified</mat-icon>
+                Payment secured — driver can start delivery.
+              </div>
+
+              @if (deliveryCodeState.hasCode()) {
+
+                <div class="delivery-code-card">
+
+                  <div class="delivery-code-header">
+                    <mat-icon>vpn_key</mat-icon>
+                    <span>Delivery Confirmation Code</span>
+                  </div>
+
+                  <div class="delivery-code-box">
+                    <span class="code">
+                      {{ deliveryCodeState.code() }}
+                    </span>
+
+                    <button
+                      class="btn btn--ghost"
+                      (click)="deliveryCodeState.copyToClipboard()"
+                    >
+                      <mat-icon>content_copy</mat-icon>
+                      Copy
+                    </button>
+                  </div>
+
+                  <small class="hint">
+                    Share this code with the driver upon delivery.
+                  </small>
+
+                </div>
+              }
+            }
+
+          @if (isCaptured()) {
+            <div class="payment-completed">
+              <mat-icon>check_circle</mat-icon>
+              Payment completed successfully.
+            </div>
+          }
+
+          @if (isRefunded()) {
+            <div class="payment-refunded">
+              <mat-icon>undo</mat-icon>
+              Payment refunded.
+            </div>
+          }
+
+        </div>
+      }
+
         <!-- ACTIONS -->
         @if (shipment()?.status === 'CREATED') {
           <button
@@ -143,7 +221,6 @@
           [showLegend]="false"
         />
       </div>
-
     </div>
   </section>
 
@@ -162,5 +239,4 @@
       </div>
     </section>
   }
-
 </div>

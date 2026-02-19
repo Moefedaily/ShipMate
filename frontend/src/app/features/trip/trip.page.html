@@ -178,7 +178,13 @@
 
             <!-- SHIPMENT ACTIONS -->
             <div class="shipment-actions">
-              @if (shipment.status === 'ASSIGNED' && status() === 'IN_PROGRESS') {
+                @if ( shipment.status === 'ASSIGNED' && status() === 'IN_PROGRESS' &&
+                (shipment.paymentStatus === 'AUTHORIZED' || shipment.paymentStatus === 'CAPTURED') )
+                {
+                  <div class="info-banner">
+                    Waiting for sender payment...
+                  </div>
+    
                 <button
                   class="btn btn--primary btn-action"
                   (click)="markInTransit(shipment.id)"
@@ -189,17 +195,16 @@
                 </button>
               }
 
-              @if (shipment.status === 'IN_TRANSIT') {
-                <button
-                  class="btn btn--success btn-action"
-                  (click)="markDelivered(shipment.id)"
-                  [disabled]="isActing(shipment.id)"
-                >
-                  <mat-icon>check_circle</mat-icon>
-                  Mark Delivered
-                </button>
-              }
-
+            @if (shipment.status === 'IN_TRANSIT') {
+              <button
+                class="btn btn--success btn-action"
+                (click)="openConfirmModal(shipment.id)"
+                [disabled]="isActing(shipment.id)"
+              >
+                <mat-icon>verified</mat-icon>
+                Confirm Delivery
+              </button>
+            }
               @if (shipment.status === 'DELIVERED') {
                 <div class="completed-badge">
                   <mat-icon>check_circle</mat-icon>
@@ -227,3 +232,51 @@
   }
 
 </div>
+@if (confirmModalOpen()) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+
+      <h3>
+        <mat-icon>lock</mat-icon>
+        Confirm Delivery
+      </h3>
+
+      <p>Enter the 6-digit delivery code provided by the sender.</p>
+
+      <input
+        type="text"
+        maxlength="6"
+        inputmode="numeric"
+        [value]="deliveryCode()"
+        (input)="deliveryCode.set($any($event.target).value)"
+        placeholder="______"
+        class="code-input"
+      />
+
+      @if (confirmError()) {
+        <div class="error-text">
+          <mat-icon>error</mat-icon>
+          {{ confirmError() }}
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button class="btn btn--ghost" (click)="closeConfirmModal()">
+          Cancel
+        </button>
+
+        <button
+          class="btn btn--success"
+          (click)="confirmDelivery()"
+          [disabled]="confirmLoading()"
+        >
+          @if (confirmLoading()) {
+            <mat-icon class="spin">refresh</mat-icon>
+          }
+          Confirm
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

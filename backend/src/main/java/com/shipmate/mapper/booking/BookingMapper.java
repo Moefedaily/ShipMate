@@ -1,17 +1,15 @@
 package com.shipmate.mapper.booking;
 
 import com.shipmate.dto.response.booking.BookingResponse;
-import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.booking.Booking;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 
-@Mapper(componentModel = "spring", uses = ShipmentMapper.class)
+@Mapper(componentModel = "spring")
 public interface BookingMapper {
-    
+
     @Mapping(source = "driver.id", target = "driverId")
-    @Mapping(source = "shipments", target = "shipments")
+    @Mapping(target = "shipments", ignore = true)
     BookingResponse toResponse(Booking booking);
-    
-} 
+}

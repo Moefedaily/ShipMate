@@ -1,5 +1,6 @@
 package com.shipmate.dto.response.earning;
 
+import com.shipmate.model.earning.EarningType;
 import com.shipmate.model.earning.PayoutStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,5 +29,8 @@ public class DriverEarningResponse {
 
     private PayoutStatus payoutStatus;
 
+    private EarningType earningType;
+
     private Instant createdAt;
 }
+

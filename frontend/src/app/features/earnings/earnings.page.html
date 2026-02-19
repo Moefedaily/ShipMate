@@ -1,0 +1,90 @@
+<div class="earnings-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Your Earnings</h1>
+      <p class="subtitle">Transparent breakdown of your completed deliveries</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Loading earnings...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-banner">{{ errorMessage() }}</div>
+  }
+
+  @if (summary()) {
+
+    <section class="summary-grid">
+
+      <div class="summary-card primary">
+        <span>Total Net</span>
+        <strong>€{{ summary()?.totalNet }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Total Gross</span>
+        <strong>€{{ summary()?.totalGross }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Commission</span>
+        <strong>€{{ summary()?.totalCommission }}</strong>
+      </div>
+
+      <div class="summary-card warning">
+        <span>Pending</span>
+        <strong>€{{ summary()?.totalPending }}</strong>
+      </div>
+
+      <div class="summary-card success">
+        <span>Paid</span>
+        <strong>€{{ summary()?.totalPaid }}</strong>
+      </div>
+
+    </section>
+
+  }
+
+  @if (earnings().length > 0) {
+
+    <section class="ledger">
+
+      @for (e of earnings(); track e.id) {
+
+        <div
+          class="ledger-row"
+          [ngClass]="{
+            refund: e.earningType === 'REFUND'
+          }"
+        >
+
+          <div class="ledger-left">
+            <span class="type">
+              {{ e.earningType === 'REFUND' ? 'Refund Adjustment' : 'Delivery Earnings' }}
+            </span>
+            <span class="date">
+              {{ e.createdAt | date:'mediumDate' }}
+            </span>
+          </div>
+
+          <div class="ledger-right">
+            <strong>
+              {{ e.netAmount < 0 ? '-' : '+' }}€{{ e.netAmount }}
+            </strong>
+            <span class="status">
+              {{ e.payoutStatus }}
+            </span>
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+  }
+
+</div>

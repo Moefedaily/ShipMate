@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { WsService } from './ws.service';
-import { ConversationUpdateWsDto, MessageWsDto, TypingWsDto } from './ws.models';
+import { ConversationUpdateWsDto, TypingWsDto } from './ws.models';
 import { MessageResponse } from '../message/message.models';
 
 @Injectable({ providedIn: 'root' })

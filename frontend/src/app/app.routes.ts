@@ -100,6 +100,14 @@ export const routes: Routes = [
             .then(m => m.ShipmentEditPage)
       },
       {
+        path: 'shipments/:id/payment',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/shipments/payment/shipment-payment.page')
+            .then(m => m.ShipmentPaymentPage)
+      },
+      {
         path: 'driver',
         canActivate: [driverGuard],
         resolve: { state: driverDashboardResolver },
@@ -116,6 +124,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/driver/matching/driver-matching.page')
             .then(m => m.DriverMatchingPage)
+      },
+      {
+        path: 'earnings',
+        canActivate: [driverGuard],
+        data: { dashboardRole: 'DRIVER' },
+        loadComponent: () =>
+          import('./features/earnings/earnings.page')
+            .then(m => m.EarningsPage)
       },
       {
         path: 'bookings/:id',

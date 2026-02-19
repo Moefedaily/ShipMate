@@ -5,9 +5,11 @@ import org.springframework.stereotype.Component;
 import com.shipmate.dto.response.driver.AssignedDriverResponse;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.payment.Payment;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.driver.DriverProfileRepository;
+import com.shipmate.repository.payment.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +19,8 @@ public class ShipmentAssembler {
 
     private final ShipmentMapper shipmentMapper;
     private final DriverProfileRepository driverProfileRepository;
+    private final PaymentRepository paymentRepository;
+
 
     public ShipmentResponse toResponse(Shipment shipment) {
 
@@ -43,6 +47,10 @@ public class ShipmentAssembler {
             }
         }
 
+            paymentRepository.findByShipment(shipment)
+            .map(Payment::getPaymentStatus)
+            .ifPresent(response::setPaymentStatus);
+            
         return response;
     }
 }

@@ -1,0 +1,74 @@
+@use '../../../styles/variables/colors' as *;
+@use '../../../styles/variables/typography' as *;
+
+.earnings-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.summary-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  transition: 0.2s;
+
+  span {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: $text-muted;
+  }
+
+  strong {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+  }
+
+  &.primary strong {
+    color: $color-primary;
+  }
+
+  &.warning strong {
+    color: #d97706;
+  }
+
+  &.success strong {
+    color: $color-success;
+  }
+}
+
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ledger-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+
+  &.refund {
+    background: rgba($color-danger, 0.05);
+    border-color: rgba($color-danger, 0.2);
+
+    strong {
+      color: $color-danger;
+    }
+  }
+}

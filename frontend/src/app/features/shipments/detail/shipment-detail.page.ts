@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
@@ -10,15 +10,19 @@ import { LeafletMapComponent } from '../../../shared/components/map/leaflet-map.
 import { MapStop } from '../../../shared/components/map/leaflet-map.types';
 import { ToastService } from '../../../core/ui/toast/toast.service';
 import { LoaderService } from '../../../core/ui/loader/loader.service';
+import { PaymentState } from '../../../core/state/payment/payment.state';
+import { DeliveryCodeState } from '../../../core/state/delivery-code/delivery-code.state';
+import { DeliveryCodeWsService } from '../../../core/services/ws/delivery-code-ws.service';
+
 
 @Component({
   standalone: true,
   selector: 'app-shipment-detail-page',
+  providers: [PaymentState,DeliveryCodeState],
   imports: [
     CommonModule,
     MatIconModule,
-    LeafletMapComponent
-  ],
+    LeafletMapComponent],
   templateUrl: './shipment-detail.page.html',
   styleUrl: './shipment-detail.page.scss'
 })
@@ -30,13 +34,54 @@ export class ShipmentDetailPage implements OnInit {
   private readonly shipmentService = inject(ShipmentService);
   private readonly toast = inject(ToastService);
   private readonly loader = inject(LoaderService);
+  private readonly paymentState = inject(PaymentState);
+  readonly deliveryCodeState = inject(DeliveryCodeState);
 
   /* ==================== State ==================== */
   readonly shipment = signal<ShipmentResponse | null>(null);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly payment = this.paymentState.payment;
+  readonly paymentStatus = this.paymentState.paymentStatus;
+  readonly canPay = computed(() =>
+    this.shipment()?.status === 'ASSIGNED' &&
+    (this.paymentStatus() === 'REQUIRED' ||
+    this.paymentStatus() === 'FAILED')
+  );
 
-  /* ==================== Lifecycle ==================== */
+  readonly isAuthorized = computed(() =>
+    this.paymentStatus() === 'AUTHORIZED'
+  );
+
+  readonly isCaptured = computed(() =>
+    this.paymentStatus() === 'CAPTURED'
+  );
+
+  readonly isRefunded = computed(() =>
+    this.paymentStatus() === 'REFUNDED'
+  );
+
+  private hasFetchedCode = false;
+  private loadedPaymentForShipmentId: string | null = null;
+
+  constructor() {
+    effect(() => {
+      const s = this.shipment();
+      const status = this.paymentStatus();
+
+      if (!s) return;
+
+      if (s.status === 'ASSIGNED' && this.loadedPaymentForShipmentId !== s.id) {
+        this.loadedPaymentForShipmentId = s.id;
+        this.paymentState.load(s.id);
+      }
+      if (!this.hasFetchedCode && status === 'AUTHORIZED') {
+        this.hasFetchedCode = true;
+        this.deliveryCodeState.checkActiveCode(s.id);
+      }
+    });
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -44,10 +89,14 @@ export class ShipmentDetailPage implements OnInit {
       this.router.navigate(['/dashboard/sender']);
       return;
     }
+
+    this.hasFetchedCode = false;
+    this.loadedPaymentForShipmentId = null;
+
+    this.deliveryCodeState.init();
     this.loadShipment(id);
   }
 
-  /* ==================== Loaders ==================== */
   private loadShipment(id: string): void {
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -56,29 +105,31 @@ export class ShipmentDetailPage implements OnInit {
     this.shipmentService.getMyShipment(id)
       .pipe(
         catchError(err => {
-          this.errorMessage.set(
-            err.error?.message || 'Unable to load shipment'
-          );
+          this.errorMessage.set(err.error?.message || 'Unable to load shipment');
           this.toast.error('Unable to load shipment');
           return of(null);
         })
       )
       .subscribe(shipment => {
         this.shipment.set(shipment);
+
+        if (shipment?.status === 'ASSIGNED') {
+          this.paymentState.load(shipment.id);
+
+          this.deliveryCodeState.checkActiveCode(shipment.id);
+        }
+
         this.loading.set(false);
         this.loader.hide();
       });
   }
 
-  /* ==================== Computed ==================== */
+
   readonly canEdit = computed(() =>
     this.shipment()?.status === 'CREATED'
   );
 
-  /**
-   * Map stops for route preview
-   * Always: Pickup → Delivery
-   */
+
   readonly mapStops = computed<MapStop[]>(() => {
     const s = this.shipment();
     if (!s) return [];
@@ -126,7 +177,6 @@ export class ShipmentDetailPage implements OnInit {
     ];
   });
 
-  /* ==================== Actions ==================== */
   goBack(): void {
     this.router.navigate(['/dashboard/shipments']);
   }
@@ -136,4 +186,11 @@ export class ShipmentDetailPage implements OnInit {
     if (!s) return;
     this.router.navigate(['/dashboard/shipments', s.id, 'edit']);
   }
+  goToPayment(): void {
+    const s = this.shipment();
+    if (!s) return;
+
+    this.router.navigate(['/dashboard/shipments', s.id, 'payment']);
+  }
+
 }

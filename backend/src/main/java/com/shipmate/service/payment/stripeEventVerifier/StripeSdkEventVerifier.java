@@ -1,6 +1,5 @@
-package com.shipmate.service.payment;
+package com.shipmate.service.payment.stripeEventVerifier;
 
-import com.shipmate.service.payment.stripeEventVerifier.StripeEventVerifier;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 

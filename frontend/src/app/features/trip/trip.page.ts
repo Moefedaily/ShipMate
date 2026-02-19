@@ -32,6 +32,12 @@ export class TripPage implements OnInit {
   readonly loading = this.tripState.loading;
   readonly errorMessage = this.tripState.errorMessage;
   readonly status = this.tripState.status;
+  readonly confirmModalOpen = signal(false);
+  readonly activeShipmentId = signal<string | null>(null);
+  readonly deliveryCode = signal('');
+  readonly confirmLoading = signal(false);
+  readonly confirmError = signal<string | null>(null);
+
 
   /* ==================== Lifecycle ==================== */
   ngOnInit(): void {
@@ -110,10 +116,36 @@ export class TripPage implements OnInit {
     this.toast.success('Shipment marked as in transit');
   }
 
-  markDelivered(id: string): void {
-    this.tripState.markDelivered(id);
-    this.toast.success('Shipment delivered');
+  confirmDelivery(): void {
+    const shipmentId = this.activeShipmentId();
+    const code = this.deliveryCode().trim();
+
+    if (!shipmentId) return;
+
+    if (!/^\d{6}$/.test(code)) {
+      this.confirmError.set('Enter a valid 6-digit code');
+      return;
+    }
+
+    this.confirmLoading.set(true);
+    this.confirmError.set(null);
+
+    this.tripState.confirmDelivery(shipmentId, code).subscribe({
+      next: () => {
+        this.confirmLoading.set(false);
+        this.closeConfirmModal();
+        this.tripState.refresh();
+        this.toast.success('Delivery confirmed');
+      },
+      error: err => {
+        this.confirmLoading.set(false);
+        this.confirmError.set(
+          err.error?.message || 'Invalid confirmation code'
+        );
+      }
+    });
   }
+
 
   cancelShipment(id: string): void {
     const ok = confirm('Cancel this shipment?');
@@ -127,8 +159,19 @@ export class TripPage implements OnInit {
     return this.tripState.isActing(id);
   }
 
-  /* ==================== Helpers ==================== */
-  
+
+  openConfirmModal(id: string): void {
+    this.activeShipmentId.set(id);
+    this.deliveryCode.set('');
+    this.confirmError.set(null);
+    this.confirmModalOpen.set(true);
+  }
+
+  closeConfirmModal(): void {
+    this.confirmModalOpen.set(false);
+    this.activeShipmentId.set(null);
+  }
+
   getStatusIcon(): string {
     const statusIconMap: Record<string, string> = {
       'PENDING': 'schedule',
