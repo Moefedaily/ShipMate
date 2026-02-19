@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Cipher;
@@ -43,6 +42,7 @@ public class DeliveryCodeService {
 
     private final ShipmentRepository shipmentRepository;
     private final PaymentRepository paymentRepository;
+    private final DeliveryCodeAttemptService attemptService;
 
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final int MAX_ATTEMPTS = 5;
@@ -124,7 +124,7 @@ public class DeliveryCodeService {
         );
 
         if (!matches) {
-            incrementAttempts(shipment);
+            attemptService.incrementAttempts(shipment.getId());
             throw new IllegalArgumentException("Invalid delivery code");
         }
 
@@ -325,15 +325,6 @@ public class DeliveryCodeService {
         } catch (Exception e) {
             throw new IllegalStateException("Decryption failed", e);
         }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void incrementAttempts(Shipment shipment) {
-        Integer attempts = shipment.getDeliveryCodeAttempts();
-        shipment.setDeliveryCodeAttempts(
-            attempts == null ? 1 : attempts + 1
-        );
-        shipmentRepository.save(shipment);
     }
 
     private record EncryptionResult(String cipherText, String iv) {}

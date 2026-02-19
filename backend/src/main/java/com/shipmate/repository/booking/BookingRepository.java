@@ -17,8 +17,14 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     @EntityGraph(attributePaths = "shipments")
     List<Booking> findByDriver(User driver);
 
-    @EntityGraph(attributePaths = "shipments")
-    Optional<Booking> findWithShipmentsById(UUID id);
+    @Query("""
+    SELECT DISTINCT b FROM Booking b
+    LEFT JOIN FETCH b.driver
+    LEFT JOIN FETCH b.shipments s
+    LEFT JOIN FETCH s.sender
+    WHERE b.id = :id
+    """)
+    Optional<Booking> findWithShipmentsById(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = "shipments")
     Optional<Booking> findFirstByDriverAndStatusInOrderByCreatedAtDesc(
