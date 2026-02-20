@@ -92,7 +92,11 @@ export class DashboardLayoutComponent implements OnInit {
         this.router.navigateByUrl('/dashboard/profile');
         break;
       case 'settings':
+        break;  
+      case 'earnings':
+        this.router.navigate(['/dashboard/earnings']);
         break;
+
       case 'logout':
         this.onLogout();
         break;

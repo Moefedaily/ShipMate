@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -157,4 +158,30 @@ public class DriverEarningService {
         );
     }
 
+    @Transactional
+    public void markAsPaid(UUID earningId) {
+
+        DriverEarning earning = driverEarningRepository.findById(earningId)
+                .orElseThrow(() -> new IllegalArgumentException("Earning not found"));
+
+        if (earning.getPayoutStatus() == PayoutStatus.PAID) {
+            return;
+        }
+
+        if (earning.getEarningType() != EarningType.ORIGINAL) {
+            throw new IllegalStateException("Only ORIGINAL earnings can be paid");
+        }
+
+        earning.setPayoutStatus(PayoutStatus.PAID);
+
+        driverEarningRepository.save(earning);
+    }
+
+    @Transactional
+    public void markMultipleAsPaid(List<UUID> earningIds) {
+
+        for (UUID id : earningIds) {
+            markAsPaid(id);
+        }
+    }
 }

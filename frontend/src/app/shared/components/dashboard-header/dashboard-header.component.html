@@ -86,6 +86,15 @@
         Settings
       </button>
 
+      @if (showDriverWallet()) {
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item (click)="menuAction.emit('earnings')">
+          <mat-icon>account_balance_wallet</mat-icon>
+          Wallet / Earnings
+        </button>
+      }
+
       <mat-divider></mat-divider>
 
       <button mat-menu-item class="logout" (click)="menuAction.emit('logout')">
