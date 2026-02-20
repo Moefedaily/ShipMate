@@ -39,8 +39,8 @@ public class DeliveryUnlockedListener {
                         "Delivery Unlocked",
                         "You may now retry delivery confirmation.",
                         NotificationType.SYSTEM_ALERT,
-                        event.shipmentId(),
-                        ReferenceType.SHIPMENT
+                        event.bookingId(),
+                        ReferenceType.BOOKING
                 )
         );
 

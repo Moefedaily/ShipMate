@@ -39,13 +39,13 @@ public class DeliveryCodeAttemptService {
             shipmentRepository.save(shipment);
 
             eventPublisher.publishEvent(
-                    new DeliveryLockedEvent(
-                            shipment.getId(),
-                            shipment.getSender().getId(),
-                            shipment.getBooking().getDriver().getId()
-                    )
+                new DeliveryLockedEvent(
+                    shipment.getId(),
+                    shipment.getBooking().getId(),
+                    shipment.getSender().getId(),
+                    shipment.getBooking().getDriver().getId()
+                )
             );
-
         } else {
             shipmentRepository.save(shipment);
         }

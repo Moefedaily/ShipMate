@@ -63,7 +63,7 @@ export class NotificationState {
   }
 
   private onWsNotification(ws: NotificationWsDto): void {
-
+  console.log('WS notification received:', ws);
     const exists = this.notifications().some(n => n.id === ws.id);
     if (exists) return;
 
@@ -98,6 +98,7 @@ export class NotificationState {
 
     this.notificationService.getMyNotifications(false, 0, 50).subscribe({
       next: page => {
+        console.log('History loaded', page.content);
         this.notifications.set(page.content);
         this.historyLoaded = true;
         this.loading.set(false);

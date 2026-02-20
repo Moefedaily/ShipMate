@@ -327,9 +327,10 @@ public class DeliveryCodeService {
         eventPublisher.publishEvent(
                 new DeliveryUnlockedEvent(
                         shipment.getId(),
+                        shipment.getBooking().getId(),
                         shipment.getSender().getId(),
                         shipment.getBooking().getDriver().getId()
-                )
+                    )
         );
 
         log.info("[ADMIN] Delivery unlocked shipmentId={}", shipmentId);

@@ -51,8 +51,8 @@ public class DeliveryLockedListener {
                             "Delivery Locked",
                             "Maximum delivery code attempts reached. Please cancel the shipment or contact support.",
                             NotificationType.SYSTEM_ALERT,
-                            event.shipmentId(),
-                            ReferenceType.SHIPMENT
+                            event.bookingId(),
+                            ReferenceType.BOOKING
                     )
             );
 

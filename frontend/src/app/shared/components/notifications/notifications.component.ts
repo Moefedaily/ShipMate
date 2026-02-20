@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { NotificationState } from '../../../core/state/notification/notification.state';
 import { ClickOutsideDirective } from '../click-outside/click-outside.directive';
 import { NotificationResponse } from '../../../core/services/notification/notification.models';
+import { AuthState } from '../../../core/auth/auth.state';
 
 @Component({
   standalone: true,
@@ -18,6 +19,7 @@ export class NotificationsComponent {
   
   private readonly state = inject(NotificationState);
   private readonly router = inject(Router);
+  private readonly authState = inject(AuthState);
 
   readonly notifications = this.state.notifications;
   readonly unreadCount = this.state.unreadCount;
@@ -68,6 +70,8 @@ export class NotificationsComponent {
       return;
     }
 
+    const roleType = this.authState.user()?.userType;
+
     if (
       notification.notificationType === 'PAYMENT_STATUS' &&
       notification.referenceType === 'SHIPMENT'
@@ -83,17 +87,25 @@ export class NotificationsComponent {
     switch (notification.referenceType) {
 
       case 'SHIPMENT':
-        this.router.navigate([
-          '/dashboard/shipments',
-          notification.referenceId
-        ]);
+        if (roleType === 'SENDER') {
+          this.router.navigate([
+            '/dashboard/shipments',
+            notification.referenceId
+          ]);
+        }
         break;
 
       case 'BOOKING':
-        this.router.navigate([
-          '/dashboard/bookings',
-          notification.referenceId
-        ]);
+        if (roleType === 'DRIVER') {
+          this.router.navigate([
+            '/dashboard/trip',
+            notification.referenceId
+          ]);
+        } else if (roleType === 'SENDER') {
+          this.router.navigate([
+            '/dashboard/shipments'
+          ]);
+        }
         break;
 
       case 'MESSAGE':
