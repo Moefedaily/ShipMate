@@ -120,13 +120,6 @@ export class NotificationsComponent {
     }
   }
 
-
-  viewAllNotifications(): void {
-    this.close();
-    // Navigate to a notifications page
-    // this.router.navigate(['/notifications']);
-  }
-
   
   getNotificationIcon(type: string): string {
     const iconMap: Record<string, string> = {
