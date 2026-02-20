@@ -22,7 +22,9 @@ public class NotificationRequestedListener {
                 event.recipientUserId(),
                 event.title(),
                 event.message(),
-                event.type()
+                event.type(),
+                event.referenceId(),
+                event.referenceType()
         );
     }
 }

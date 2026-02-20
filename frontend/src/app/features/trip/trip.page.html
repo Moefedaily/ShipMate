@@ -1,5 +1,6 @@
 <div class="trip-page">
   
+  <!-- HEADER -->
   <div class="dashboard-hero page-header">
     <div class="header-content">
       <div class="header-left">
@@ -22,6 +23,7 @@
     </div>
   </div>
 
+  <!-- LOADING STATE -->
   @if (loading()) {
     <div class="loading-state">
       <mat-icon class="spin">refresh</mat-icon>
@@ -29,6 +31,7 @@
     </div>
   }
 
+  <!-- ERROR STATE -->
   @else if (errorMessage()) {
     <div class="card error-banner">
       <mat-icon>error_outline</mat-icon>
@@ -43,8 +46,10 @@
     </div>
   }
 
+  <!-- MAIN CONTENT -->
   @else if (booking()) {
     
+    <!-- TRIP OVERVIEW CARDS -->
     <section class="trip-overview">
       <div class="overview-card">
         <div class="overview-icon">
@@ -176,8 +181,21 @@
               }
             </div>
 
+            <!-- DELIVERY LOCKED BANNER -->
+            @if (shipment.deliveryLocked) {
+              <div class="delivery-locked-banner">
+                <mat-icon>lock</mat-icon>
+                <div class="locked-content">
+                  <strong>Delivery Confirmation Locked</strong>
+                  <p>Maximum verification attempts reached. Please contact support to unlock.</p>
+                </div>
+              </div>
+            }
+
             <!-- SHIPMENT ACTIONS -->
             <div class="shipment-actions">
+              
+              <!-- Start Delivery Button -->
               @if (shipment.status === 'ASSIGNED' && status() === 'IN_PROGRESS') {
                 <button
                   class="btn btn--primary btn-action"
@@ -189,17 +207,21 @@
                 </button>
               }
 
+              <!-- Confirm Delivery Button -->
               @if (shipment.status === 'IN_TRANSIT') {
                 <button
                   class="btn btn--success btn-action"
-                  (click)="markDelivered(shipment.id)"
-                  [disabled]="isActing(shipment.id)"
+                  (click)="openConfirmModal(shipment.id)"
+                  [disabled]="!canConfirmShipment(shipment)"
                 >
-                  <mat-icon>check_circle</mat-icon>
-                  Mark Delivered
+                  <mat-icon>
+                    {{ (shipment.deliveryLocked || shipment.deliveryCodeAttempts >= maxAttempts) ? 'lock' : 'verified' }}
+                  </mat-icon>
+                  {{ (shipment.deliveryLocked || shipment.deliveryCodeAttempts  >= maxAttempts) ? 'Locked' : 'Confirm Delivery' }}
                 </button>
               }
 
+              <!-- Completed Badge -->
               @if (shipment.status === 'DELIVERED') {
                 <div class="completed-badge">
                   <mat-icon>check_circle</mat-icon>
@@ -207,6 +229,7 @@
                 </div>
               }
 
+              <!-- Cancel Button -->
               @if (shipment.status !== 'DELIVERED' && shipment.status !== 'CANCELLED') {
                 <button
                   class="btn btn--ghost btn-cancel"
@@ -227,3 +250,140 @@
   }
 
 </div>
+
+<!-- DELIVERY CONFIRMATION MODAL -->
+@if (confirmModalOpen()) {
+  <div class="modal-overlay" (click)="closeConfirmModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-icon">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+        <h3>Confirm Delivery</h3>
+        <p>Enter the 6-digit code provided by the sender</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Code Input -->
+        <div class="code-input-group">
+          <label>Delivery Code</label>
+          <input
+            type="text"
+            maxlength="6"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            [value]="deliveryCode()"
+            (input)="onCodeInput($any($event.target).value)"
+            placeholder="000000"
+            class="code-input"
+            [class.error]="confirmError()"
+            [disabled]="isLocked() || confirmLoading()"
+            autofocus
+          />
+          <span class="code-hint">Please enter the 6-digit code</span>
+        </div>
+
+        <!-- Attempts Indicator -->
+        @if (!activeShipment()?.deliveryLocked) {
+          <!-- Attempts Block -->
+          @if (!isLocked()) {
+            <div class="attempts-card" [ngClass]="attemptsSeverityClass()">
+              
+              <div class="attempts-header">
+                <div class="attempts-title">
+                  <mat-icon>security</mat-icon>
+                  <span>Verification Attempts</span>
+                </div>
+
+                <div class="attempts-count">
+                  {{ attemptsUsed() }} / {{ maxAttempts }}
+                </div>
+              </div>
+
+              <div class="attempts-progress">
+                <div 
+                  class="progress-bar"
+                  [style.width.%]="attemptsProgressPercent()"
+                ></div>
+              </div>
+
+              <div class="attempts-meta">
+                @if (attemptsRemaining() > 0) {
+                  <span>
+                    {{ attemptsRemaining() }} attempt{{ attemptsRemaining() > 1 ? 's' : '' }} remaining
+                  </span>
+                }
+              </div>
+
+            </div>
+          }
+
+          @if (isLocked()) {
+            <div class="attempts-locked-card">
+              <mat-icon>lock</mat-icon>
+              <div>
+                <strong>Verification Locked</strong>
+                <p>Maximum attempts reached. Please contact support to continue.</p>
+              </div>
+            </div>
+          }        
+        }
+
+        <!-- Error Message -->
+        @if (confirmError()) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ confirmError() }}</span>
+          </div>
+        }
+
+        <!-- Locked Message -->
+        @if (activeShipment()?.deliveryLocked) {
+          <div class="locked-message">
+            <mat-icon>lock</mat-icon>
+            <div>
+              <strong>Delivery Locked</strong>
+              <p>Maximum attempts reached. Please contact support for assistance.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Security Note -->
+        <div class="security-note">
+          <mat-icon>info</mat-icon>
+          <p>The sender will provide this code upon successful delivery. Each incorrect attempt is logged for security.</p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button 
+          class="btn btn--ghost" 
+          (click)="closeConfirmModal()"
+          [disabled]="confirmLoading()"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn--success"
+          (click)="confirmDelivery()"
+          [disabled]="confirmLoading() || isLocked() || deliveryCode().length !== 6"
+        >
+          @if (confirmLoading()) {
+            <mat-icon class="spin">refresh</mat-icon>
+            Verifying...
+          } @else {
+            <mat-icon>check_circle</mat-icon>
+            Confirm
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

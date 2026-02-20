@@ -1,6 +1,8 @@
 package com.shipmate.repository.notification;
 
 import com.shipmate.model.notification.Notification;
+import com.shipmate.model.notification.NotificationType;
+import com.shipmate.model.notification.ReferenceType;
 import com.shipmate.model.user.User;
 
 import org.springframework.data.domain.Page;
@@ -41,4 +43,16 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
             @Param("notificationId") UUID notificationId,
             @Param("user") User user
     );
+
+    boolean existsByUserIdAndNotificationTypeAndMessageContaining(
+    UUID userId, NotificationType notificationType, String messageFragment);
+
+    boolean existsByUserIdAndReferenceIdAndReferenceTypeAndNotificationType(UUID userId, UUID referenceId,
+      ReferenceType referenceType, NotificationType notificationType );
+
+
+    boolean existsByUser_IdAndReferenceIdAndReferenceTypeAndTitle(UUID userId, UUID referenceId,
+      ReferenceType referenceType, String title);
+
+
 }

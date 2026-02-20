@@ -4,8 +4,10 @@ import com.shipmate.listener.notification.NotificationRequestedEvent;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.notification.NotificationType;
+import com.shipmate.model.notification.ReferenceType;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.booking.BookingRepository;
+import com.shipmate.repository.notification.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +27,13 @@ public class BookingNotificationListener {
 
     private final BookingRepository bookingRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationRepository notificationRepository;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onBookingStatusChanged(BookingStatusChangedEvent event) {
 
         if (event.status() != BookingStatus.CONFIRMED &&
-            event.status() != BookingStatus.CANCELLED){
+            event.status() != BookingStatus.CANCELLED) {
             return;
         }
 
@@ -46,12 +49,29 @@ public class BookingNotificationListener {
                 continue;
             }
 
+            boolean alreadyNotified =
+                    notificationRepository.existsByUserIdAndReferenceIdAndReferenceTypeAndNotificationType(
+                            recipient.getId(),
+                            booking.getId(),
+                            ReferenceType.BOOKING,
+                            NotificationType.BOOKING_UPDATE
+                    );
+
+            if (alreadyNotified) {
+                log.info("[BOOKING-NOTIF] Already notified bookingId={} userId={}",
+                        booking.getId(),
+                        recipient.getId());
+                continue;
+            }
+
             eventPublisher.publishEvent(
                     new NotificationRequestedEvent(
                             recipient.getId(),
                             "Trip update",
                             buildMessage(event.status()),
-                            NotificationType.BOOKING_UPDATE
+                            NotificationType.BOOKING_UPDATE,
+                            booking.getId(),
+                            ReferenceType.BOOKING
                     )
             );
         }

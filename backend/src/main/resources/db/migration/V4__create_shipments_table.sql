@@ -38,6 +38,11 @@ CREATE TABLE shipments (
     delivery_order INT,
     extra_insurance_fee DECIMAL(8,2) DEFAULT 0 CHECK (extra_insurance_fee >= 0),
     photos JSONB,
+    delivery_code_hash TEXT,
+    delivery_code_salt TEXT,
+    delivery_code_created_at TIMESTAMPTZ,
+    delivery_code_verified_at TIMESTAMPTZ,
+    delivery_code_attempts INT,
     booking_id UUID,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

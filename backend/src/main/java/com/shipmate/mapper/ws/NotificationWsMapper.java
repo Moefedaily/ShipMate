@@ -11,7 +11,10 @@ public class NotificationWsMapper {
                 notification.getTitle(),
                 notification.getMessage(),
                 notification.getNotificationType(),
+                notification.getReferenceId(),
+                notification.getReferenceType(),
                 notification.getCreatedAt()
         );
     }
+
 }

@@ -63,16 +63,24 @@ export class NotificationState {
   }
 
   private onWsNotification(ws: NotificationWsDto): void {
+  console.log('WS notification received:', ws);
+    const exists = this.notifications().some(n => n.id === ws.id);
+    if (exists) return;
+
     const item: UiNotification = {
       id: ws.id,
       title: ws.title,
       message: ws.message,
       notificationType: ws.type,
+      referenceId: ws.referenceId ?? null,
+      referenceType: ws.referenceType ?? null,
       isRead: false,
       createdAt: ws.createdAt
     };
 
     this.notifications.update(list => [item, ...list]);
+
+    this.unreadCount.update(count => count + 1);
   }
 
 
@@ -90,6 +98,7 @@ export class NotificationState {
 
     this.notificationService.getMyNotifications(false, 0, 50).subscribe({
       next: page => {
+        console.log('History loaded', page.content);
         this.notifications.set(page.content);
         this.historyLoaded = true;
         this.loading.set(false);

@@ -2,6 +2,7 @@ package com.shipmate.controller.booking;
 
 import com.shipmate.dto.request.booking.CreateBookingRequest;
 import com.shipmate.dto.response.booking.BookingResponse;
+import com.shipmate.mapper.booking.BookingAssembler;
 import com.shipmate.mapper.booking.BookingMapper;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.service.booking.BookingService;
@@ -30,6 +31,7 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
+    private final BookingAssembler bookingAssembler;
 
     // ===================== CREATE BOOKING =====================
 
@@ -50,7 +52,8 @@ public class BookingController {
         Booking booking  =bookingService.createBooking(UUID.fromString(driverId), request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(bookingMapper.toResponse(booking));
+                .body(bookingAssembler.toResponse(booking));
+
     }
 
     // ===================== CONFIRM BOOKING =====================
@@ -67,7 +70,8 @@ public class BookingController {
 
          Booking booking = bookingService.confirm(id, UUID.fromString(driverId));       
 
-        return ResponseEntity.ok(bookingMapper.toResponse(booking));
+        return ResponseEntity.ok(bookingAssembler.toResponse(booking));
+        
     }
 
     // ===================== START BOOKING =====================
@@ -85,7 +89,7 @@ public class BookingController {
 
         Booking booking = bookingService.start(id, UUID.fromString(driverId));
 
-        return ResponseEntity.ok(bookingMapper.toResponse(booking));
+        return ResponseEntity.ok(bookingAssembler.toResponse(booking));
     }
 
     // ===================== COMPLETE BOOKING =====================
@@ -103,7 +107,7 @@ public class BookingController {
 
         Booking booking = bookingService.complete(id, UUID.fromString(driverId));
 
-        return ResponseEntity.ok(bookingMapper.toResponse(booking));
+        return ResponseEntity.ok(bookingAssembler.toResponse(booking));
     }
 
     // ===================== CANCEL BOOKING =====================
@@ -121,7 +125,7 @@ public class BookingController {
 
         Booking booking = bookingService.cancel(id, UUID.fromString(driverId));
 
-        return ResponseEntity.ok(bookingMapper.toResponse(booking));
+        return ResponseEntity.ok(bookingAssembler.toResponse(booking));
     }
 
     // ===================== GET MY BOOKINGS =====================
@@ -156,7 +160,7 @@ public class BookingController {
     ) {
         Booking booking = bookingService.getMyActiveBooking(UUID.fromString(userId));
         return ResponseEntity.ok(
-            booking != null ? bookingMapper.toResponse(booking) : null
+            booking != null ? bookingAssembler.toResponse(booking) : null
         );
     }
 

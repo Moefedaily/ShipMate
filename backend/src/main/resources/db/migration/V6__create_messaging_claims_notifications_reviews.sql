@@ -25,10 +25,12 @@ CREATE TYPE notification_type AS ENUM (
 );
 
 CREATE TYPE payment_status AS ENUM (
-    'PENDING',
+    'REQUIRED',
     'PROCESSING',
-    'SUCCEEDED',
+    'AUTHORIZED',
+    'CAPTURED',
     'FAILED',
+    'CANCELLED',
     'REFUNDED'
 );
 
@@ -152,21 +154,31 @@ CREATE INDEX idx_reviews_reviewed_id ON reviews(reviewed_id);
 -- Payments Table
 CREATE TABLE payments (
     id UUID PRIMARY KEY,
-    booking_id UUID NOT NULL UNIQUE,
-    CONSTRAINT fk_payments_booking
-        FOREIGN KEY (booking_id)
-        REFERENCES bookings(id)
+    shipment_id UUID NOT NULL UNIQUE,
+    CONSTRAINT fk_payments_shipment
+        FOREIGN KEY (shipment_id)
+        REFERENCES shipments(id)
         ON DELETE RESTRICT,
-    stripe_payment_intent_id VARCHAR(255),
-    amount NUMERIC(10,2) NOT NULL CHECK (amount > 0),
-    currency VARCHAR(3) NOT NULL,
+
+    sender_id UUID NOT NULL,
+    CONSTRAINT fk_payments_sender
+        FOREIGN KEY (sender_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    stripe_payment_intent_id VARCHAR(255) UNIQUE,
+
+    amount_total NUMERIC(10,2) NOT NULL CHECK (amount_total > 0),
+    currency VARCHAR(3) NOT NULL DEFAULT 'EUR',
+
     payment_status payment_status NOT NULL,
-    payment_method payment_method NOT NULL,
+
     failure_reason TEXT,
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_payments_booking_id ON payments(booking_id);
+
+CREATE INDEX idx_payments_sender_id ON payments(sender_id);
 CREATE INDEX idx_payments_status ON payments(payment_status);
-CREATE INDEX idx_payments_stripe_intent ON payments(stripe_payment_intent_id);

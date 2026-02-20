@@ -1,3 +1,5 @@
+import { PaymentStatus } from "../payment/payment.model";
+
 export interface CreateShipmentRequest {
   pickupAddress: string;
   pickupLatitude: number;
@@ -25,12 +27,15 @@ export interface AssignedDriver {
 export interface ShipmentResponse {
   id: string;
   senderId: string;
+  paymentStatus: PaymentStatus;
   pickupAddress: string;
   pickupLatitude: number;          
   pickupLongitude: number;
   deliveryAddress: string;
   deliveryLatitude: number; 
   deliveryLongitude: number;
+  deliveryLocked: boolean;
+  deliveryCodeAttempts: number;
   pickupOrder: number | null;
   deliveryOrder: number | null;
   packageDescription: string;
@@ -102,4 +107,9 @@ export interface PageResponse<T> {
   };
 
   empty: boolean;
+}
+export interface DeliveryCodeStatusResponse {
+  shipmentId: string;
+  code: string;
+  expiresAt: string;
 }

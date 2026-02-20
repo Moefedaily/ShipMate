@@ -20,11 +20,12 @@ export class TripState {
   private bookingUpdatesSub?: Subscription;
   private currentBookingId?: string;
 
+  private shipmentSubs: Subscription[] = [];
+
   readonly booking = signal<BookingResponse | null>(null);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  // For buttons/UX: keep a per-shipment busy flag
   private readonly actingMap = signal<Record<string, boolean>>({});
 
   readonly status = computed(() => this.booking()?.status);
@@ -45,7 +46,6 @@ export class TripState {
   });
 
   readonly currentActionableShipment = computed(() => {
-    // MVP rule: first shipment that is not finished
     return this.sortedShipments().find(s =>
       s.status !== 'DELIVERED' && s.status !== 'CANCELLED'
     ) ?? null;
@@ -56,7 +56,6 @@ export class TripState {
   readonly isTripCancelled = computed(() => this.status() === 'CANCELLED');
 
   constructor() {
-    // Keep booking status live (COMPLETED can happen when last shipment delivered)
     effect(() => {
       const bookingId = this.booking()?.id;
 
@@ -66,6 +65,7 @@ export class TripState {
       }
 
       this.listenToBookingUpdates(bookingId);
+      this.listenToShipmentUpdates()
     });
   }
 
@@ -80,6 +80,7 @@ export class TripState {
       }),
       finalize(() => this.loading.set(false))
     ).subscribe(b => {
+      console.log('Booking response from backend:', b);
       this.booking.set(b);
     });
   }
@@ -92,8 +93,8 @@ export class TripState {
     this.runShipmentAction(shipmentId, 'inTransit');
   }
 
-  markDelivered(shipmentId: string): void {
-    this.runShipmentAction(shipmentId, 'deliver');
+  confirmDelivery(shipmentId: string, code: string) {
+    return this.shipmentService.confirmDelivery(shipmentId, code);
   }
 
   cancelShipment(shipmentId: string): void {
@@ -138,9 +139,10 @@ export class TripState {
           if (!b) return b;
 
           const nextShipments = (b.shipments ?? []).map(s =>
-            s.id === updatedShipment.id ? { ...s, status: updatedShipment.status } : s
+            s.id === updatedShipment.id
+              ? { ...s, ...updatedShipment }
+              : s
           );
-
           return { ...b, shipments: nextShipments };
         });
       }),
@@ -162,7 +164,9 @@ export class TripState {
 
   private clearUpdates(): void {
     this.bookingUpdatesSub?.unsubscribe();
+    this.shipmentSubs?.forEach(s => s.unsubscribe());
     this.bookingUpdatesSub = undefined;
+    this.shipmentSubs = [];
     this.currentBookingId = undefined;
   }
 
@@ -174,6 +178,7 @@ export class TripState {
     this.bookingUpdatesSub?.unsubscribe();
     this.bookingUpdatesSub =
       this.bookingWs.watchBooking(bookingId).subscribe(update => {
+        console.log('Shipment WS update:', update);
         this.booking.update(b => {
           if (!b) return b;
           if (b.status === update.status) return b;
@@ -181,4 +186,39 @@ export class TripState {
         });
       });
   }
+
+
+  private listenToShipmentUpdates() {
+    this.shipmentSubs.forEach(s => s.unsubscribe());
+    this.shipmentSubs = [];
+
+    for (const shipment of this.shipments()) {
+      const sub = this.bookingWs
+        .watchShipment(shipment.id)
+        .subscribe(update => {
+          this.booking.update(b => {
+            if (!b) return b;
+
+            return {
+              ...b,
+             shipments: b.shipments.map(s =>
+              s.id === update.shipmentId
+                ? {
+                    ...s,
+                    ...(update.status !== undefined && { status: update.status }),
+                    ...(update.deliveryLocked !== undefined && { deliveryLocked: update.deliveryLocked }),
+                    ...(update.deliveryCodeAttempts !== undefined && {
+                      deliveryCodeAttempts: update.deliveryCodeAttempts
+                    })
+                  }
+                : s
+            )
+            };
+          });
+        });
+
+      this.shipmentSubs.push(sub);
+    }
+  }
+
 }

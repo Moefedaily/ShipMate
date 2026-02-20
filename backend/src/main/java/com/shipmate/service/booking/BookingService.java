@@ -15,9 +15,12 @@ import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.shipment.ShipmentService;
+
 import org.springframework.context.ApplicationEventPublisher;
 import com.shipmate.listener.booking.BookingStatusChangedEvent;
-import com.shipmate.mapper.booking.BookingMapper;
+import com.shipmate.listener.payment.PaymentRequiredEvent;
+import com.shipmate.mapper.booking.BookingAssembler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,7 +45,8 @@ public class BookingService {
     private final ShipmentRepository shipmentRepository;
     private final UserRepository userRepository;
     private final DriverProfileRepository driverProfileRepository;
-    private final BookingMapper bookingMapper;
+    private final ShipmentService shipmentService;
+    private final BookingAssembler bookingAssembler;
     private final ApplicationEventPublisher eventPublisher;
 
     private static final Duration LOCATION_MAX_AGE = Duration.ofMinutes(60);
@@ -109,22 +113,47 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.CONFIRMED);
         publishStatusChange(booking, driverId);
+        for (Shipment shipment : booking.getShipments()) {
+
+        eventPublisher.publishEvent(
+            new PaymentRequiredEvent(
+                    shipment.getId(),
+                    shipment.getSender().getId()
+            )
+        );
+        }
+
         return booking;
     }
 
 
     public Booking start(UUID bookingId, UUID driverId) {
+
         Booking booking = loadDriverBooking(bookingId, driverId);
 
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new IllegalStateException("Only confirmed bookings can be started");
         }
 
+        // Move booking to IN_PROGRESS
         booking.setStatus(BookingStatus.IN_PROGRESS);
+
+        // Find first shipment that is ASSIGNED
+        Shipment firstShipment = booking.getShipments()
+                .stream()
+                .filter(s -> s.getStatus() == ShipmentStatus.ASSIGNED)
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalStateException("No shipment available to start")
+                );
+
+        // Delegate shipment transition to ShipmentService
+        shipmentService.markInTransit(firstShipment.getId(), driverId);
+
         publishStatusChange(booking, driverId);
+
         return booking;
     }
-
 
     public Booking complete(UUID bookingId, UUID driverId) {
         Booking booking = loadDriverBooking(bookingId, driverId);
@@ -371,7 +400,7 @@ public class BookingService {
             throw new AccessDeniedException("You are not allowed to access this booking");
         }
 
-        BookingResponse response = bookingMapper.toResponse(booking);
+        BookingResponse response = bookingAssembler.toResponse(booking);
 
         AssignedDriverResponse driver = buildAssignedDriver(booking.getDriver());
 

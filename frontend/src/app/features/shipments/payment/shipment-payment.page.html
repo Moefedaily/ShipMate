@@ -1,0 +1,97 @@
+<div class="payment-page">
+
+  @if (loading()) {
+    <p class="muted">
+      <mat-icon style="animation: spin 1s linear infinite; margin-right: 6px;">refresh</mat-icon>
+      Loading payment…
+    </p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (payment()) {
+
+    <div class="page-header">
+      <div>
+        <button class="btn btn--ghost" routerLink="../">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+
+        <h1>Secure Payment</h1>
+        <p class="subtitle">
+          Driver cannot start delivery until payment is secured.
+        </p>
+      </div>
+
+      <span class="badge" [ngClass]="statusBadgeClass()">
+        {{ status() }}
+      </span>
+    </div>
+
+    @if (!isAuthorized() && !isCaptured()) {
+
+      <section class="card">
+
+        <div id="payment-element"></div>
+
+        <div class="actions">
+         <button
+            class="btn btn--secondary"
+            (click)="startPayment()"
+            [disabled]="!canInitialize()"
+          >
+            <mat-icon>payment</mat-icon>
+            Initialize Payment
+          </button>
+
+          <button
+            class="btn btn--primary"
+            (click)="confirmPayment()"
+            [disabled]="!canConfirm()"
+          >
+            @if (isWaitingAuth()) {
+            <div class="processing-card">
+                <div class="processing-header">
+                <mat-icon>security</mat-icon>
+                <div>
+                    <strong>Finalizing Secure Payment</strong>
+                    <span>Verifying authorization with payment provider…</span>
+                </div>
+                </div>
+
+                <div class="processing-bar"></div>
+            </div>
+            }
+            @else {
+              <mat-icon>lock</mat-icon>
+              Confirm Payment
+            }
+          </button>
+        </div>
+
+      </section>
+
+    }
+
+    @if (isAuthorized()) {
+      <div class="success-card">
+        <mat-icon>check_circle</mat-icon>
+        Payment secured successfully.
+      </div>
+    }
+
+    @if (isCaptured()) {
+      <div class="success-card">
+        <mat-icon>verified</mat-icon>
+        Payment completed.
+      </div>
+    }
+
+  }
+
+</div>

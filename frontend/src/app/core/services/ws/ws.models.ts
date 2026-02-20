@@ -11,6 +11,14 @@ export interface UnreadCountWsDto {
   unreadCount: number;
 }
 
+
+export type ReferenceType =
+  | 'SHIPMENT'
+  | 'BOOKING'
+  | 'PAYMENT'
+  | 'MESSAGE'
+  | 'SYSTEM';
+
 export interface NotificationWsDto {
   id: string;
   title: string;
@@ -20,7 +28,20 @@ export interface NotificationWsDto {
       | 'DELIVERY_STATUS'
       | 'NEW_MESSAGE'
       | 'SYSTEM_ALERT';
+  referenceId?: string | null;
+  referenceType?: ReferenceType | null;
   createdAt: string;
+}
+
+export interface ShipmentUpdateWsDto {
+  shipmentId: string;
+  status: 'CREATED'
+      | 'ASSIGNED'
+      | 'IN_TRANSIT'
+      | 'DELIVERED'
+      | 'CANCELLED';
+  deliveryLocked: boolean;
+  deliveryCodeAttempts: number;
 }
 
 export interface MessageWsDto {
@@ -37,10 +58,16 @@ export interface ConversationUpdateWsDto {
   shipmentStatus: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
   lastMessagePreview: string;
   lastMessageAt: string;
+  deliveryLocked: boolean;
   unreadCount: number;
 }
 
 export interface TypingWsDto {
   userId: string;
   displayName: string;
+}
+export interface DeliveryCodeWsDto {
+  shipmentId: string;
+  code: string;
+  expiresAt?: string;
 }

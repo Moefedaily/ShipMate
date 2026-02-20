@@ -6,6 +6,7 @@ import com.shipmate.mapper.notification.NotificationMapper;
 import com.shipmate.mapper.ws.NotificationWsMapper;
 import com.shipmate.model.notification.Notification;
 import com.shipmate.model.notification.NotificationType;
+import com.shipmate.model.notification.ReferenceType;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.notification.NotificationRepository;
 import com.shipmate.repository.user.UserRepository;
@@ -49,12 +50,15 @@ public class NotificationService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Notification createAndDispatch(
-            UUID recipientUserId,
-            String title,
-            String message,
-            NotificationType type
-    ) {
+        public Notification createAndDispatch(
+                UUID recipientUserId,
+                String title,
+                String message,
+                NotificationType type,
+                UUID referenceId,
+                ReferenceType referenceType
+        ) {
+
         User recipient = loadUser(recipientUserId);
 
         Notification notification = Notification.builder()
@@ -62,6 +66,9 @@ public class NotificationService {
                 .title(title)
                 .message(message)
                 .notificationType(type)
+                .referenceId(referenceId)
+                .referenceType(referenceType)
+                .isRead(false)
                 .build();
 
         notificationRepository.saveAndFlush(notification);
@@ -80,7 +87,8 @@ public class NotificationService {
         );
 
         return notification;
-    }
+        }
+
     @Transactional
     public long markAllAsRead(UUID userId) {
         User user = loadUser(userId);

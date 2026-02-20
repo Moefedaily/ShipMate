@@ -85,10 +85,34 @@ public class Shipment {
     @Column(columnDefinition = "jsonb")
     private List<String> photos;
 
+    @Column(name = "delivery_code_hash")
+    private String deliveryCodeHash;
+
+    @Column(name = "delivery_code_salt")
+    private String deliveryCodeSalt;
+
+    @Column(name = "delivery_code_created_at")
+    private Instant deliveryCodeCreatedAt;
+
+    @Column(name = "delivery_code_verified_at")
+    private Instant deliveryCodeVerifiedAt;
+
+    @Column(name = "delivery_code_attempts")
+    private Integer deliveryCodeAttempts;
+
+    @Column(name = "delivery_code_enc")
+    private String deliveryCodeEnc;
+
+    @Column(name = "delivery_code_iv")
+    private String deliveryCodeIv;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private Booking booking;
+
+    @Column(name = "delivery_locked", nullable = false)
+    @Builder.Default
+    private boolean deliveryLocked = false;
 
 
     @CreationTimestamp

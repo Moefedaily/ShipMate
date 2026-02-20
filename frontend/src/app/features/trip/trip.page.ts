@@ -8,6 +8,7 @@ import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
 import { LeafletMapComponent } from '../../shared/components/map/leaflet-map.component';
 import { MapStop } from '../../shared/components/map/leaflet-map.types';
+import { ShipmentResponse } from '../../core/services/shipment/shipment.models';
 
 @Component({
   standalone: true,
@@ -18,22 +19,27 @@ import { MapStop } from '../../shared/components/map/leaflet-map.types';
   styleUrl: './trip.page.scss'
 })
 export class TripPage implements OnInit {
-  
-  /* ==================== Inject ==================== */
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly tripState = inject(TripState);
   private readonly loader = inject(LoaderService);
   private readonly toast = inject(ToastService);
 
-  /* ==================== State ==================== */
   readonly booking = this.tripState.booking;
   readonly shipments = this.tripState.sortedShipments;
   readonly loading = this.tripState.loading;
   readonly errorMessage = this.tripState.errorMessage;
   readonly status = this.tripState.status;
 
-  /* ==================== Lifecycle ==================== */
+  readonly confirmModalOpen = signal(false);
+  readonly activeShipmentId = signal<string | null>(null);
+  readonly deliveryCode = signal('');
+  readonly confirmLoading = signal(false);
+  readonly confirmError = signal<string | null>(null);
+
+  readonly maxAttempts = 5;
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -44,8 +50,6 @@ export class TripPage implements OnInit {
     this.tripState.load(id);
   }
 
-  /* ==================== Computed ==================== */
-  
   readonly statusBadgeClass = computed(() => {
     switch (this.status()) {
       case 'PENDING': return 'badge--warning';
@@ -65,7 +69,6 @@ export class TripPage implements OnInit {
     let order = 1;
 
     for (const shipment of this.shipments()) {
-      // Pickup stop
       stops.push({
         id: `${shipment.id}-pickup`,
         type: 'PICKUP',
@@ -82,7 +85,6 @@ export class TripPage implements OnInit {
         }]
       });
 
-      // Delivery stop
       stops.push({
         id: `${shipment.id}-delivery`,
         type: 'DELIVERY',
@@ -103,16 +105,122 @@ export class TripPage implements OnInit {
     return stops;
   });
 
-  /* ==================== Actions ==================== */
-  
+  readonly activeShipment = computed(() => {
+    const id = this.activeShipmentId();
+    if (!id) return null;
+    return this.shipments().find(s => s.id === id) ?? null;
+  });
+
+  readonly attemptsUsed = computed(() => {
+    return this.activeShipment()?.deliveryCodeAttempts ?? 0;
+  });
+
+  readonly attemptsRemaining = computed(() => {
+    return Math.max(0, this.maxAttempts - this.attemptsUsed());
+  });
+
+  readonly isLocked = computed(() => {
+    const s = this.activeShipment();
+    if (!s) return false;
+    const attempts = s.deliveryCodeAttempts ?? 0;
+    return s.deliveryLocked || attempts >= this.maxAttempts;
+  });
+
+  readonly attemptsProgressPercent = computed(() => {
+    return (this.attemptsUsed() / this.maxAttempts) * 100;
+  });
+
+  readonly attemptsSeverityClass = computed(() => {
+    const used = this.attemptsUsed();
+    if (used >= 5) return 'danger';
+    if (used >= 3) return 'warning';
+    return 'safe';
+  });
+
+  canConfirmShipment(shipment: ShipmentResponse): boolean {
+    const attempts = shipment.deliveryCodeAttempts ?? 0;
+
+    return (
+      shipment.status === 'IN_TRANSIT' &&
+      !shipment.deliveryLocked &&
+      attempts < this.maxAttempts &&
+      !this.isActing(shipment.id)
+    );
+  }
+
   markInTransit(id: string): void {
     this.tripState.markInTransit(id);
     this.toast.success('Shipment marked as in transit');
   }
 
-  markDelivered(id: string): void {
-    this.tripState.markDelivered(id);
-    this.toast.success('Shipment delivered');
+  openConfirmModal(id: string): void {
+    const shipment = this.shipments().find(s => s.id === id);
+    if (!shipment) return;
+
+    const attempts = shipment.deliveryCodeAttempts ?? 0;
+
+    // ✅ Hard guard even if button was clickable by mistake
+    if (shipment.deliveryLocked || attempts >= this.maxAttempts) {
+      this.toast.error('Delivery confirmation is locked');
+      return;
+    }
+
+    this.activeShipmentId.set(id);
+    this.deliveryCode.set('');
+    this.confirmError.set(null);
+    this.confirmModalOpen.set(true);
+  }
+
+  closeConfirmModal(): void {
+    this.confirmModalOpen.set(false);
+    this.activeShipmentId.set(null);
+    this.deliveryCode.set('');
+    this.confirmError.set(null);
+    this.confirmLoading.set(false);
+  }
+
+  confirmDelivery(): void {
+    const shipmentId = this.activeShipmentId();
+    const code = this.deliveryCode().trim();
+
+    if (!shipmentId) return;
+
+    if (!/^\d{6}$/.test(code)) {
+      this.confirmError.set('Please enter a valid 6-digit code');
+      return;
+    }
+
+    // ✅ If already locked, don’t call backend
+    if (this.isLocked()) {
+      this.confirmError.set('Delivery confirmation is locked');
+      return;
+    }
+
+    this.confirmLoading.set(true);
+    this.confirmError.set(null);
+
+    this.tripState.confirmDelivery(shipmentId, code).subscribe({
+      next: () => {
+        this.confirmLoading.set(false);
+        this.closeConfirmModal();
+        this.tripState.refresh(); // update UI with DELIVERED
+        this.toast.success('Delivery confirmed successfully');
+      },
+      error: err => {
+        this.confirmLoading.set(false);
+
+        const message = err.error?.message || 'Invalid confirmation code';
+        this.confirmError.set(message);
+
+        // ✅ THIS IS THE MAIN FIX: refresh after EVERY wrong attempt
+        this.tripState.refresh();
+
+        // If it became locked, close modal shortly after to show banner
+        if (message.toLowerCase().includes('locked') || message.toLowerCase().includes('maximum')) {
+          setTimeout(() => this.closeConfirmModal(), 1200);
+        }
+      }
+    });
   }
 
   cancelShipment(id: string): void {
@@ -127,8 +235,6 @@ export class TripPage implements OnInit {
     return this.tripState.isActing(id);
   }
 
-  /* ==================== Helpers ==================== */
-  
   getStatusIcon(): string {
     const statusIconMap: Record<string, string> = {
       'PENDING': 'schedule',
@@ -139,5 +245,12 @@ export class TripPage implements OnInit {
     };
 
     return statusIconMap[this.status() || ''] || 'help_outline';
+  }
+
+  onCodeInput(value: string): void {
+    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    this.deliveryCode.set(cleaned);
+
+    if (this.confirmError()) this.confirmError.set(null);
   }
 }

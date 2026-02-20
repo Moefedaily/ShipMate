@@ -149,4 +149,14 @@ export class BookingPage implements OnInit {
     });
   }
 
+  readonly canStartBooking = computed(() => {
+    const booking = this.booking();
+    if (!booking) return false;
+
+    return booking.shipments.every(s =>
+      s.paymentStatus === 'AUTHORIZED' ||
+      s.paymentStatus === 'CAPTURED'
+    );
+  });
+
 }

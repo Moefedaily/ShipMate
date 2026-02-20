@@ -1,18 +1,26 @@
 package com.shipmate.model.payment;
 
+import com.shipmate.model.shipment.Shipment;
+import com.shipmate.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.shipmate.model.booking.Booking;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payments")
+@Table(
+    name = "payments",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_payments_shipment", columnNames = "shipment_id"),
+        @UniqueConstraint(name = "uk_payments_stripe_intent", columnNames = "stripe_payment_intent_id")
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,26 +32,27 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "booking_id", nullable = false, unique = true)
-    private Booking booking;
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipment shipment;
 
-    @Column(name = "stripe_payment_intent_id", length = 255)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
+    @Column(name = "stripe_payment_intent_id", length = 255, unique = true)
     private String stripePaymentIntentId;
 
-    @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal amount;
+    @Column(name = "amount_total", precision = 10, scale = 2, nullable = false)
+    private BigDecimal amountTotal;
 
     @Column(length = 3, nullable = false)
     private String currency;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
-    private PaymentMethod paymentMethod;
 
     @Column(name = "failure_reason", columnDefinition = "TEXT")
     private String failureReason;

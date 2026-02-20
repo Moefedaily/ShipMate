@@ -2,6 +2,7 @@ package com.shipmate.dto.response.shipment;
 
 
 import com.shipmate.dto.response.driver.AssignedDriverResponse;
+import com.shipmate.model.payment.PaymentStatus;
 import com.shipmate.model.shipment.ShipmentStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +39,13 @@ public class ShipmentResponse {
     private Integer pickupOrder;
     private Integer deliveryOrder;
 
+    private Integer deliveryCodeAttempts;
+
+    private boolean deliveryLocked;
+
     private List<String> photos;
+    
+    private PaymentStatus paymentStatus;
 
     private ShipmentStatus status;
     private AssignedDriverResponse driver;
