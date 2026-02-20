@@ -212,10 +212,12 @@
                 <button
                   class="btn btn--success btn-action"
                   (click)="openConfirmModal(shipment.id)"
-                  [disabled]="isActing(shipment.id) || shipment.deliveryLocked"
+                  [disabled]="!canConfirmShipment(shipment)"
                 >
-                  <mat-icon>verified</mat-icon>
-                  Confirm Delivery
+                  <mat-icon>
+                    {{ (shipment.deliveryLocked || shipment.deliveryCodeAttempts >= maxAttempts) ? 'lock' : 'verified' }}
+                  </mat-icon>
+                  {{ (shipment.deliveryLocked || shipment.deliveryCodeAttempts  >= maxAttempts) ? 'Locked' : 'Confirm Delivery' }}
                 </button>
               }
 
@@ -279,7 +281,7 @@
             placeholder="000000"
             class="code-input"
             [class.error]="confirmError()"
-            [disabled]="activeShipment()?.deliveryLocked || confirmLoading()"
+            [disabled]="isLocked() || confirmLoading()"
             autofocus
           />
           <span class="code-hint">Please enter the 6-digit code</span>
@@ -287,27 +289,48 @@
 
         <!-- Attempts Indicator -->
         @if (!activeShipment()?.deliveryLocked) {
-          <div class="attempts-indicator">
-            <div class="attempts-label">
-              <mat-icon>{{ attemptsRemaining() > 2 ? 'info' : 'warning' }}</mat-icon>
-              <span>Verification Attempts</span>
+          <!-- Attempts Block -->
+          @if (!isLocked()) {
+            <div class="attempts-card" [ngClass]="attemptsSeverityClass()">
+              
+              <div class="attempts-header">
+                <div class="attempts-title">
+                  <mat-icon>security</mat-icon>
+                  <span>Verification Attempts</span>
+                </div>
+
+                <div class="attempts-count">
+                  {{ attemptsUsed() }} / {{ maxAttempts }}
+                </div>
+              </div>
+
+              <div class="attempts-progress">
+                <div 
+                  class="progress-bar"
+                  [style.width.%]="attemptsProgressPercent()"
+                ></div>
+              </div>
+
+              <div class="attempts-meta">
+                @if (attemptsRemaining() > 0) {
+                  <span>
+                    {{ attemptsRemaining() }} attempt{{ attemptsRemaining() > 1 ? 's' : '' }} remaining
+                  </span>
+                }
+              </div>
+
             </div>
-            <div class="attempts-dots">
-              @for (i of [1,2,3,4,5]; track i) {
-                <span 
-                  class="attempt-dot"
-                  [class.used]="i <= (activeShipment()?.deliveryCodeAttempts || 0)"
-                  [class.failed]="i <= (activeShipment()?.deliveryCodeAttempts || 0)"
-                ></span>
-              }
+          }
+
+          @if (isLocked()) {
+            <div class="attempts-locked-card">
+              <mat-icon>lock</mat-icon>
+              <div>
+                <strong>Verification Locked</strong>
+                <p>Maximum attempts reached. Please contact support to continue.</p>
+              </div>
             </div>
-            <span class="attempts-text">
-              {{ activeShipment()?.deliveryCodeAttempts || 0 }}/5 attempts used
-              @if (attemptsRemaining() > 0) {
-                <strong>({{ attemptsRemaining() }} remaining)</strong>
-              }
-            </span>
-          </div>
+          }        
         }
 
         <!-- Error Message -->
@@ -349,7 +372,7 @@
         <button
           class="btn btn--success"
           (click)="confirmDelivery()"
-          [disabled]="confirmLoading() || activeShipment()?.deliveryLocked || deliveryCode().length !== 6 || attemptsRemaining() === 0"
+          [disabled]="confirmLoading() || isLocked() || deliveryCode().length !== 6"
         >
           @if (confirmLoading()) {
             <mat-icon class="spin">refresh</mat-icon>

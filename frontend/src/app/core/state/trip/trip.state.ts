@@ -80,6 +80,7 @@ export class TripState {
       }),
       finalize(() => this.loading.set(false))
     ).subscribe(b => {
+      console.log('Booking response from backend:', b);
       this.booking.set(b);
     });
   }
@@ -138,9 +139,10 @@ export class TripState {
           if (!b) return b;
 
           const nextShipments = (b.shipments ?? []).map(s =>
-            s.id === updatedShipment.id ? { ...s, status: updatedShipment.status } : s
+            s.id === updatedShipment.id
+              ? { ...s, ...updatedShipment }
+              : s
           );
-
           return { ...b, shipments: nextShipments };
         });
       }),
@@ -176,6 +178,7 @@ export class TripState {
     this.bookingUpdatesSub?.unsubscribe();
     this.bookingUpdatesSub =
       this.bookingWs.watchBooking(bookingId).subscribe(update => {
+        console.log('Shipment WS update:', update);
         this.booking.update(b => {
           if (!b) return b;
           if (b.status === update.status) return b;
@@ -198,15 +201,18 @@ export class TripState {
 
             return {
               ...b,
-              shipments: b.shipments.map(s =>
-                s.id === update.shipmentId
-                  ? {
-                      ...s,
-                      status: update.status,
-                      deliveryLocked: update.deliveryLocked
-                    }
-                  : s
-              )
+             shipments: b.shipments.map(s =>
+              s.id === update.shipmentId
+                ? {
+                    ...s,
+                    ...(update.status !== undefined && { status: update.status }),
+                    ...(update.deliveryLocked !== undefined && { deliveryLocked: update.deliveryLocked }),
+                    ...(update.deliveryCodeAttempts !== undefined && {
+                      deliveryCodeAttempts: update.deliveryCodeAttempts
+                    })
+                  }
+                : s
+            )
             };
           });
         });

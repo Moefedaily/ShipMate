@@ -39,6 +39,10 @@ public class ShipmentResponse {
     private Integer pickupOrder;
     private Integer deliveryOrder;
 
+    private Integer deliveryCodeAttempts;
+
+    private boolean deliveryLocked;
+
     private List<String> photos;
     
     private PaymentStatus paymentStatus;

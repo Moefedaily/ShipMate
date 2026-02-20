@@ -41,6 +41,7 @@ export interface ShipmentUpdateWsDto {
       | 'DELIVERED'
       | 'CANCELLED';
   deliveryLocked: boolean;
+  deliveryCodeAttempts: number;
 }
 
 export interface MessageWsDto {
