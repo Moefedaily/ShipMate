@@ -43,6 +43,14 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
 
+    @Column(name = "reference_id")
+    private UUID referenceId;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "reference_type", columnDefinition = "reference_type")
+    private ReferenceType referenceType;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;

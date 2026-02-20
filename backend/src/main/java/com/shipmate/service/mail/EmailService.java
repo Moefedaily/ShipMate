@@ -12,6 +12,14 @@ import org.thymeleaf.context.Context;
 
 import jakarta.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.Year;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.UUID;
 
 @Profile("!test")
 @Service
@@ -30,6 +38,10 @@ public class EmailService implements MailService {
 
     @Value("${app.mail.base-url}")
     private String baseUrl;
+
+    @Value("${app.mail.support-email}")
+    private String supportEmail;
+
 
     @Override
     public void sendVerificationEmail(String toEmail, String verificationToken) {
@@ -117,5 +129,97 @@ public class EmailService implements MailService {
             html
         );
     }
+
+    @Override
+    public void sendPaymentRequiredEmail( String toEmail, UUID shipmentId, BigDecimal amount, String paymentLink ) {
+
+        String formattedAmount = amount.setScale(2, RoundingMode.HALF_UP).toString();
+
+        String currency = "EUR";
+
+        Context context = new Context();
+        context.setVariable("emailTitle", "Complete Your Payment");
+        context.setVariable("shipmentId", shipmentId.toString());
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("currency", currency);
+        context.setVariable("paymentLink", paymentLink);
+        context.setVariable("supportEmail", supportEmail);
+        context.setVariable("currentYear", Year.now().getValue());
+
+        String html = templateEngine.process(
+                "email/payment-required",
+                context
+        );
+
+        sendHtmlEmail(
+                toEmail,
+                "Complete your payment - ShipMate",
+                html
+        );
+
+        log.info("Payment required email sent to {}", toEmail);
+    }
+
+        @Override
+    public void sendPaymentReceiptEmail(String toEmail, UUID shipmentId, BigDecimal amount ) {
+
+        String formattedAmount = amount.setScale(2, RoundingMode.HALF_UP).toString();
+        String formattedDate = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+                .withLocale(Locale.ENGLISH)
+                .format(Instant.now().atZone(ZoneId.systemDefault()).toLocalDate());
+
+        String currency = "EUR";
+        Context context = new Context();
+        context.setVariable("shipmentId", shipmentId.toString());
+        context.setVariable("formattedAmount", formattedAmount);
+        context.setVariable("currency", currency);
+        context.setVariable("receiptDate", formattedDate);
+        context.setVariable("supportEmail", supportEmail);
+        context.setVariable("currentYear", Year.now().getValue());
+
+
+        String html = templateEngine.process(
+                "email/payment-receipt",
+                context
+        );
+
+        sendHtmlEmail(
+                toEmail,
+                "Payment receipt - ShipMate",
+                html
+        );
+
+        log.info("Payment receipt email sent to {}", toEmail);
+    }
+
+    @Override
+    public void sendPaymentRefundedEmail(String toEmail, UUID shipmentId, BigDecimal amount) {
+        String formattedDate = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+        .withLocale(Locale.ENGLISH)
+        .format(Instant.now().atZone(ZoneId.systemDefault()).toLocalDate());
+
+        String formattedAmount = amount.setScale(2, RoundingMode.HALF_UP).toString();
+
+        Context context = new Context();
+        context.setVariable("shipmentId", shipmentId);
+        context.setVariable("amount", amount);
+        context.setVariable("formattedAmount", formattedAmount);
+        context.setVariable("refundDate", formattedDate);
+        context.setVariable("supportEmail", supportEmail);
+        context.setVariable("currentYear", Year.now().getValue());
+        String html = templateEngine.process(
+                "email/payment-refunded",
+                context
+        );
+
+        sendHtmlEmail(
+                toEmail,
+                "Your payment has been refunded - ShipMate",
+                html
+        );
+
+        log.info("Refund email sent to {}", toEmail);
+    }
+
 
 }

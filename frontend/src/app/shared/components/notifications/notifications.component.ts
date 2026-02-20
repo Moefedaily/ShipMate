@@ -57,65 +57,90 @@ export class NotificationsComponent {
 
   
   handleNotificationClick(notification: NotificationResponse): void {
+
     if (!notification.isRead) {
       this.markOneRead(notification.id);
     }
 
-    // Handle navigation based on notification type
-    // You can customize this based on your notification types
-    // For now, we'll just close the panel
     this.close();
-    
-    // Example: Navigate based on type
-    // if (notification.notificationType === 'SHIPMENT_ASSIGNED') {
-    //   this.router.navigate(['/dashboard/shipments', notification.relatedId]);
-    // }
+
+    if (!notification.referenceId || !notification.referenceType) {
+      return;
+    }
+
+    if (
+      notification.notificationType === 'PAYMENT_STATUS' &&
+      notification.referenceType === 'SHIPMENT'
+    ) {
+      this.router.navigate([
+        '/dashboard/shipments',
+        notification.referenceId,
+        'payment'
+      ]);
+      return;
+    }
+
+    switch (notification.referenceType) {
+
+      case 'SHIPMENT':
+        this.router.navigate([
+          '/dashboard/shipments',
+          notification.referenceId
+        ]);
+        break;
+
+      case 'BOOKING':
+        this.router.navigate([
+          '/dashboard/bookings',
+          notification.referenceId
+        ]);
+        break;
+
+      case 'MESSAGE':
+        this.router.navigate([
+          '/dashboard/chat',
+          notification.referenceId
+        ]);
+        break;
+
+      default:
+        break;
+    }
   }
+
 
   viewAllNotifications(): void {
     this.close();
-    // Navigate to a notifications page if you have one
+    // Navigate to a notifications page
     // this.router.navigate(['/notifications']);
   }
 
   
   getNotificationIcon(type: string): string {
     const iconMap: Record<string, string> = {
-      'SHIPMENT_CREATED': 'add_circle',
-      'SHIPMENT_ASSIGNED': 'assignment_ind',
-      'SHIPMENT_IN_TRANSIT': 'local_shipping',
-      'SHIPMENT_DELIVERED': 'check_circle',
-      'SHIPMENT_CANCELLED': 'cancel',
-      'BOOKING_CONFIRMED': 'event_available',
-      'PAYMENT_RECEIVED': 'payments',
-      'PAYMENT_FAILED': 'error',
-      'MESSAGE_RECEIVED': 'message',
-      'DRIVER_ARRIVED': 'location_on',
-      'SYSTEM_UPDATE': 'info',
-      'DEFAULT': 'notifications'
+      'BOOKING_UPDATE': 'event',
+      'PAYMENT_STATUS': 'payments',
+      'DELIVERY_STATUS': 'local_shipping',
+      'NEW_MESSAGE': 'chat',
+      'SYSTEM_ALERT': 'info',
     };
 
-    return iconMap[type] || iconMap['DEFAULT'];
+    return iconMap[type] || 'notifications';
   }
+
 
   getNotificationIconClass(type: string): string {
     const classMap: Record<string, string> = {
-      'SHIPMENT_CREATED': 'icon-info',
-      'SHIPMENT_ASSIGNED': 'icon-primary',
-      'SHIPMENT_IN_TRANSIT': 'icon-warning',
-      'SHIPMENT_DELIVERED': 'icon-success',
-      'SHIPMENT_CANCELLED': 'icon-danger',
-      'BOOKING_CONFIRMED': 'icon-success',
-      'PAYMENT_RECEIVED': 'icon-success',
-      'PAYMENT_FAILED': 'icon-danger',
-      'MESSAGE_RECEIVED': 'icon-primary',
-      'DRIVER_ARRIVED': 'icon-info',
-      'SYSTEM_UPDATE': 'icon-info',
-      'DEFAULT': 'icon-default'
+      'BOOKING_UPDATE': 'icon-primary',
+      'PAYMENT_STATUS': 'icon-success',
+      'DELIVERY_STATUS': 'icon-warning',
+      'NEW_MESSAGE': 'icon-info',
+      'SYSTEM_ALERT': 'icon-neutral',
     };
 
-    return classMap[type] || classMap['DEFAULT'];
+    return classMap[type] || 'icon-default';
   }
+
 
   getRelativeTime(dateString: string): string {
     const date = new Date(dateString);

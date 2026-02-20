@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipmate.dto.response.payment.CreatePaymentIntentResponse;
 import com.shipmate.dto.response.payment.PaymentResponse;
 import com.shipmate.listener.delivery.DeliveryCodeEventPublisher;
+import com.shipmate.listener.payment.PaymentCapturedEvent;
+import com.shipmate.listener.payment.PaymentRefundedEvent;
 import com.shipmate.mapper.payment.PaymentMapper;
 import com.shipmate.model.payment.Payment;
 import com.shipmate.model.payment.PaymentStatus;
@@ -22,6 +24,8 @@ import com.stripe.param.RefundCreateParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +52,7 @@ public class PaymentService {
     private final ObjectMapper objectMapper;
     private final DeliveryCodeService deliveryCodeService;
     private final DeliveryCodeEventPublisher deliveryCodeEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     public CreatePaymentIntentResponse createPaymentIntent(UUID shipmentId, UUID senderId) {
 
@@ -402,6 +407,14 @@ public class PaymentService {
                         paymentRepository.save(payment);
 
                         driverEarningService.createIfAbsent(payment);
+                        eventPublisher.publishEvent(
+                            new PaymentCapturedEvent(
+                                    payment.getShipment().getId(),
+                                    payment.getSender().getId(),
+                                    payment.getAmountTotal()
+                            )
+                    );
+
 
                         log.info("[PAYMENT] Captured paymentIntentId={}", paymentIntentId);
                     });
@@ -455,6 +468,14 @@ public class PaymentService {
                         paymentRepository.save(payment);
 
                         driverEarningService.createRefundAdjustment(payment);
+                        eventPublisher.publishEvent(
+                        new PaymentRefundedEvent(
+                                payment.getShipment().getId(),
+                                payment.getSender().getId(),
+                                payment.getAmountTotal()
+                        )
+                );
+
 
                         log.info("[PAYMENT] Refunded paymentIntentId={}", paymentIntentId);
                     });

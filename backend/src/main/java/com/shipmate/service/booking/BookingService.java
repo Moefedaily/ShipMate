@@ -19,6 +19,7 @@ import com.shipmate.service.shipment.ShipmentService;
 
 import org.springframework.context.ApplicationEventPublisher;
 import com.shipmate.listener.booking.BookingStatusChangedEvent;
+import com.shipmate.listener.payment.PaymentRequiredEvent;
 import com.shipmate.mapper.booking.BookingAssembler;
 
 import lombok.RequiredArgsConstructor;
@@ -112,6 +113,16 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.CONFIRMED);
         publishStatusChange(booking, driverId);
+        for (Shipment shipment : booking.getShipments()) {
+
+        eventPublisher.publishEvent(
+            new PaymentRequiredEvent(
+                    shipment.getId(),
+                    shipment.getSender().getId()
+            )
+        );
+        }
+
         return booking;
     }
 
