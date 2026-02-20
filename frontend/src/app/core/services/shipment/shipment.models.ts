@@ -34,6 +34,8 @@ export interface ShipmentResponse {
   deliveryAddress: string;
   deliveryLatitude: number; 
   deliveryLongitude: number;
+  deliveryLocked: boolean;
+  deliveryCodeAttempts: number;
   pickupOrder: number | null;
   deliveryOrder: number | null;
   packageDescription: string;

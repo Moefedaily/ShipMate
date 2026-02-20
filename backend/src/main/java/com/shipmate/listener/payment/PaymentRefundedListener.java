@@ -36,13 +36,13 @@ public class PaymentRefundedListener {
         var sender = shipment.getSender();
 
         boolean alreadyNotified =
-                notificationRepository
-                        .existsByUserIdAndReferenceIdAndReferenceTypeAndNotificationType(
-                                sender.getId(),
-                                shipment.getId(),
-                                ReferenceType.SHIPMENT,
-                                NotificationType.PAYMENT_STATUS
-                        );
+        notificationRepository
+                .existsByUser_IdAndReferenceIdAndReferenceTypeAndTitle(
+                        sender.getId(),
+                        shipment.getId(),
+                        ReferenceType.SHIPMENT,
+                        "Payment Refunded"
+                );
 
         if (alreadyNotified) {
             log.info("[PAYMENT] Refund already processed shipmentId={}",

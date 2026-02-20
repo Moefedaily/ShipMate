@@ -110,6 +110,10 @@ public class Shipment {
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
+    @Column(name = "delivery_locked", nullable = false)
+    @Builder.Default
+    private boolean deliveryLocked = false;
+
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -76,7 +76,6 @@ export class ShipmentDetailPage implements OnInit {
         this.paymentState.load(s.id);
       }
       if (!this.hasFetchedCode && status === 'AUTHORIZED') {
-        this.hasFetchedCode = true;
         this.deliveryCodeState.checkActiveCode(s.id);
       }
     });
@@ -113,7 +112,7 @@ export class ShipmentDetailPage implements OnInit {
       .subscribe(shipment => {
         this.shipment.set(shipment);
 
-        if (shipment?.status === 'ASSIGNED') {
+        if (shipment && (shipment.status === 'ASSIGNED' || shipment.status === 'IN_TRANSIT')) {
           this.paymentState.load(shipment.id);
 
           this.deliveryCodeState.checkActiveCode(shipment.id);

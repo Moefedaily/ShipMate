@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -379,8 +379,12 @@ public class ShipmentService {
                 throw new IllegalStateException("Delivered shipment cannot be cancelled");
         }
 
-        if (shipment.getStatus() == ShipmentStatus.IN_TRANSIT) {
-                throw new IllegalStateException("Shipment already in transit cannot be cancelled");
+        Optional<Payment> paymentOpt = paymentRepository.findByShipment(shipment);
+
+        if (paymentOpt.isPresent() &&
+        paymentOpt.get().getPaymentStatus() == PaymentStatus.CAPTURED) {
+
+        throw new IllegalStateException("Captured shipment cannot be cancelled");
         }
 
         paymentService.handleCancellation(shipment);
@@ -397,8 +401,7 @@ public class ShipmentService {
         recalculateBookingStatus(shipment, actorId);
 
         return shipmentAssembler.toResponse(shipment);
-    }
-
+        }
     private void validateDriverAccess(Shipment shipment, UUID driverId) {
 
         if (shipment.getBooking().getDriver() == null ||

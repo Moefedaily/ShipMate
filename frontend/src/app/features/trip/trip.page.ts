@@ -19,27 +19,24 @@ import { MapStop } from '../../shared/components/map/leaflet-map.types';
 })
 export class TripPage implements OnInit {
   
-  /* ==================== Inject ==================== */
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly tripState = inject(TripState);
   private readonly loader = inject(LoaderService);
   private readonly toast = inject(ToastService);
 
-  /* ==================== State ==================== */
   readonly booking = this.tripState.booking;
   readonly shipments = this.tripState.sortedShipments;
   readonly loading = this.tripState.loading;
   readonly errorMessage = this.tripState.errorMessage;
   readonly status = this.tripState.status;
+  
   readonly confirmModalOpen = signal(false);
   readonly activeShipmentId = signal<string | null>(null);
   readonly deliveryCode = signal('');
   readonly confirmLoading = signal(false);
   readonly confirmError = signal<string | null>(null);
 
-
-  /* ==================== Lifecycle ==================== */
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -50,7 +47,6 @@ export class TripPage implements OnInit {
     this.tripState.load(id);
   }
 
-  /* ==================== Computed ==================== */
   
   readonly statusBadgeClass = computed(() => {
     switch (this.status()) {
@@ -71,7 +67,6 @@ export class TripPage implements OnInit {
     let order = 1;
 
     for (const shipment of this.shipments()) {
-      // Pickup stop
       stops.push({
         id: `${shipment.id}-pickup`,
         type: 'PICKUP',
@@ -88,7 +83,6 @@ export class TripPage implements OnInit {
         }]
       });
 
-      // Delivery stop
       stops.push({
         id: `${shipment.id}-delivery`,
         type: 'DELIVERY',
@@ -109,11 +103,36 @@ export class TripPage implements OnInit {
     return stops;
   });
 
-  /* ==================== Actions ==================== */
+  readonly activeShipment = computed(() => {
+    const id = this.activeShipmentId();
+    if (!id) return null;
+    return this.shipments().find(s => s.id === id) ?? null;
+  });
+
+  readonly attemptsRemaining = computed(() => {
+    const shipment = this.activeShipment();
+    if (!shipment) return 5;
+    return Math.max(0, 5 - (shipment.deliveryCodeAttempts || 0));
+  });
+
   
   markInTransit(id: string): void {
     this.tripState.markInTransit(id);
     this.toast.success('Shipment marked as in transit');
+  }
+
+  openConfirmModal(id: string): void {
+    this.activeShipmentId.set(id);
+    this.deliveryCode.set('');
+    this.confirmError.set(null);
+    this.confirmModalOpen.set(true);
+  }
+
+  closeConfirmModal(): void {
+    this.confirmModalOpen.set(false);
+    this.activeShipmentId.set(null);
+    this.deliveryCode.set('');
+    this.confirmError.set(null);
   }
 
   confirmDelivery(): void {
@@ -123,7 +142,7 @@ export class TripPage implements OnInit {
     if (!shipmentId) return;
 
     if (!/^\d{6}$/.test(code)) {
-      this.confirmError.set('Enter a valid 6-digit code');
+      this.confirmError.set('Please enter a valid 6-digit code');
       return;
     }
 
@@ -135,17 +154,22 @@ export class TripPage implements OnInit {
         this.confirmLoading.set(false);
         this.closeConfirmModal();
         this.tripState.refresh();
-        this.toast.success('Delivery confirmed');
+        this.toast.success('Delivery confirmed successfully');
       },
       error: err => {
         this.confirmLoading.set(false);
-        this.confirmError.set(
-          err.error?.message || 'Invalid confirmation code'
-        );
+        const message = err.error?.message || 'Invalid confirmation code';
+        this.confirmError.set(message);
+        
+        if (message.includes('locked') || message.includes('Maximum')) {
+          setTimeout(() => {
+            this.closeConfirmModal();
+            this.tripState.refresh();
+          }, 2000);
+        }
       }
     });
   }
-
 
   cancelShipment(id: string): void {
     const ok = confirm('Cancel this shipment?');
@@ -160,18 +184,6 @@ export class TripPage implements OnInit {
   }
 
 
-  openConfirmModal(id: string): void {
-    this.activeShipmentId.set(id);
-    this.deliveryCode.set('');
-    this.confirmError.set(null);
-    this.confirmModalOpen.set(true);
-  }
-
-  closeConfirmModal(): void {
-    this.confirmModalOpen.set(false);
-    this.activeShipmentId.set(null);
-  }
-
   getStatusIcon(): string {
     const statusIconMap: Record<string, string> = {
       'PENDING': 'schedule',
@@ -182,5 +194,14 @@ export class TripPage implements OnInit {
     };
 
     return statusIconMap[this.status() || ''] || 'help_outline';
+  }
+
+  onCodeInput(value: string): void {
+    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    this.deliveryCode.set(cleaned);
+    
+    if (this.confirmError()) {
+      this.confirmError.set(null);
+    }
   }
 }

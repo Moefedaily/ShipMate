@@ -1,6 +1,7 @@
 package com.shipmate.service.delivery;
 
 import com.shipmate.dto.response.delivery.DeliveryCodeStatusResponse;
+import com.shipmate.listener.delivery.DeliveryUnlockedEvent;
 import com.shipmate.model.payment.Payment;
 import com.shipmate.model.payment.PaymentStatus;
 import com.shipmate.model.shipment.Shipment;
@@ -9,8 +10,10 @@ import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -29,6 +33,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeliveryCodeService {
 
     @Value("${app.delivery.secret}")
@@ -42,6 +47,7 @@ public class DeliveryCodeService {
 
     private final ShipmentRepository shipmentRepository;
     private final PaymentRepository paymentRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final DeliveryCodeAttemptService attemptService;
 
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -89,12 +95,18 @@ public class DeliveryCodeService {
         return code;
     }
 
-    @Transactional
+   @Transactional
     public void verify(Shipment shipment, String plainCode) {
 
         if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
             throw new IllegalStateException(
                     "Shipment not in correct state for delivery confirmation"
+            );
+        }
+
+        if (shipment.isDeliveryLocked()) {
+            throw new IllegalStateException(
+                    "Delivery confirmation is locked. Please contact support."
             );
         }
 
@@ -110,28 +122,32 @@ public class DeliveryCodeService {
             throw new IllegalStateException("Delivery already confirmed");
         }
 
-        Integer attempts = shipment.getDeliveryCodeAttempts();
-        if (attempts != null && attempts >= MAX_ATTEMPTS) {
-            throw new IllegalStateException("Too many invalid attempts");
-        }
-
         String providedHash =
                 hash(plainCode, shipment.getDeliveryCodeSalt());
 
-        boolean matches = java.security.MessageDigest.isEqual(
+        boolean matches = MessageDigest.isEqual(
                 shipment.getDeliveryCodeHash().getBytes(StandardCharsets.UTF_8),
                 providedHash.getBytes(StandardCharsets.UTF_8)
         );
 
         if (!matches) {
-            attemptService.incrementAttempts(shipment.getId());
+
+            int newAttempts = attemptService
+                    .incrementAttemptsAndLockIfNeeded(
+                            shipment.getId(),
+                            MAX_ATTEMPTS
+                    );
+
+            if (newAttempts >= MAX_ATTEMPTS) {
+                throw new IllegalStateException(
+                        "Maximum delivery attempts reached. Delivery locked."
+                );
+            }
             throw new IllegalArgumentException("Invalid delivery code");
         }
 
-
         shipment.setDeliveryCodeVerifiedAt(Instant.now());
         shipment.setDeliveryCodeAttempts(0);
-
         shipmentRepository.save(shipment);
     }
 
@@ -291,6 +307,32 @@ public class DeliveryCodeService {
         } catch (Exception e) {
             throw new IllegalStateException("Encryption failed", e);
         }
+    }
+
+    @Transactional
+    public void unlockByAdmin(UUID shipmentId) {
+
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        if (!shipment.isDeliveryLocked()) {
+            throw new IllegalStateException("Shipment is not locked");
+        }
+
+        shipment.setDeliveryLocked(false);
+        shipment.setDeliveryCodeAttempts(0);
+
+        shipmentRepository.save(shipment);
+
+        eventPublisher.publishEvent(
+                new DeliveryUnlockedEvent(
+                        shipment.getId(),
+                        shipment.getSender().getId(),
+                        shipment.getBooking().getDriver().getId()
+                )
+        );
+
+        log.info("[ADMIN] Delivery unlocked shipmentId={}", shipmentId);
     }
 
     private String decrypt(String cipherTextBase64, String ivBase64) {

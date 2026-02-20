@@ -11,6 +11,7 @@ export interface UnreadCountWsDto {
   unreadCount: number;
 }
 
+
 export type ReferenceType =
   | 'SHIPMENT'
   | 'BOOKING'
@@ -32,6 +33,15 @@ export interface NotificationWsDto {
   createdAt: string;
 }
 
+export interface ShipmentUpdateWsDto {
+  shipmentId: string;
+  status: 'CREATED'
+      | 'ASSIGNED'
+      | 'IN_TRANSIT'
+      | 'DELIVERED'
+      | 'CANCELLED';
+  deliveryLocked: boolean;
+}
 
 export interface MessageWsDto {
   id: number;
@@ -47,6 +57,7 @@ export interface ConversationUpdateWsDto {
   shipmentStatus: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
   lastMessagePreview: string;
   lastMessageAt: string;
+  deliveryLocked: boolean;
   unreadCount: number;
 }
 

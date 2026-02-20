@@ -522,16 +522,9 @@ public class PaymentService {
                             paymentRepository.save(payment);
                         }
 
-                        case PROCESSING -> {
-                            cancelStripeIntentIfExists(payment);
-                            payment.setPaymentStatus(PaymentStatus.CANCELLED);
-                            paymentRepository.save(payment);
-                        }
-
-                        case AUTHORIZED -> {
-                            cancelStripeIntentIfExists(payment);
-                            payment.setPaymentStatus(PaymentStatus.CANCELLED);
-                            paymentRepository.save(payment);
+                        case PROCESSING,
+                            AUTHORIZED -> {
+                            cancelStripeIntentOrThrow(payment);
                         }
 
                         case CAPTURED -> {
@@ -543,17 +536,16 @@ public class PaymentService {
                             paymentRepository.save(payment);
                         }
 
-                        default -> {
-                            // CANCELLED / REFUNDED → nothing
+                        case CANCELLED,
+                            REFUNDED -> {
                         }
                     }
 
-                    log.info("[PAYMENT] Cancellation handled shipmentId={} paymentStatus={}",
+                    log.info("[PAYMENT] Cancellation requested shipmentId={} paymentStatus={}",
                             shipment.getId(),
                             payment.getPaymentStatus());
                 });
     }
-
     @Transactional
     public void handleStripeCanceled(String payload) {
 
@@ -598,7 +590,7 @@ public class PaymentService {
         }
     }
 
-    private void cancelStripeIntentIfExists(Payment payment) {
+    private void cancelStripeIntentOrThrow(Payment payment) {
 
         if (payment.getStripePaymentIntentId() == null ||
             payment.getStripePaymentIntentId().isBlank()) {
@@ -613,16 +605,17 @@ public class PaymentService {
 
             intent.cancel();
 
-            log.info("[PAYMENT] Stripe intent cancelled intentId={}",
+            log.info("[PAYMENT] Stripe intent cancel requested intentId={}",
                     payment.getStripePaymentIntentId());
 
         } catch (Exception e) {
 
             log.error("[PAYMENT] Failed to cancel Stripe intent intentId={}",
                     payment.getStripePaymentIntentId(), e);
+
+            throw new IllegalStateException("Stripe cancellation failed", e);
         }
     }
-
 
     private void refundPayment(Payment payment) {
 
@@ -647,6 +640,26 @@ public class PaymentService {
     private boolean isPaymentTerminal(PaymentStatus status) {
         return status == PaymentStatus.CANCELLED ||
             status == PaymentStatus.REFUNDED;
+    }
+
+    @Transactional
+    public void refundByAdmin(UUID paymentId) {
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
+        if (payment.getPaymentStatus() != PaymentStatus.CAPTURED) {
+            throw new IllegalStateException("Only captured payments can be refunded");
+        }
+
+        if (payment.getStripePaymentIntentId() == null ||
+            payment.getStripePaymentIntentId().isBlank()) {
+            throw new IllegalStateException("Stripe payment reference missing");
+        }
+
+        refundPayment(payment);
+
+        log.info("[ADMIN] Refund requested paymentId={}", paymentId);
     }
 
     private boolean isValidTransition(PaymentStatus from, PaymentStatus to) {

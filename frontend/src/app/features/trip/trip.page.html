@@ -1,5 +1,6 @@
 <div class="trip-page">
   
+  <!-- HEADER -->
   <div class="dashboard-hero page-header">
     <div class="header-content">
       <div class="header-left">
@@ -22,6 +23,7 @@
     </div>
   </div>
 
+  <!-- LOADING STATE -->
   @if (loading()) {
     <div class="loading-state">
       <mat-icon class="spin">refresh</mat-icon>
@@ -29,6 +31,7 @@
     </div>
   }
 
+  <!-- ERROR STATE -->
   @else if (errorMessage()) {
     <div class="card error-banner">
       <mat-icon>error_outline</mat-icon>
@@ -43,8 +46,10 @@
     </div>
   }
 
+  <!-- MAIN CONTENT -->
   @else if (booking()) {
     
+    <!-- TRIP OVERVIEW CARDS -->
     <section class="trip-overview">
       <div class="overview-card">
         <div class="overview-icon">
@@ -176,15 +181,22 @@
               }
             </div>
 
+            <!-- DELIVERY LOCKED BANNER -->
+            @if (shipment.deliveryLocked) {
+              <div class="delivery-locked-banner">
+                <mat-icon>lock</mat-icon>
+                <div class="locked-content">
+                  <strong>Delivery Confirmation Locked</strong>
+                  <p>Maximum verification attempts reached. Please contact support to unlock.</p>
+                </div>
+              </div>
+            }
+
             <!-- SHIPMENT ACTIONS -->
             <div class="shipment-actions">
-                @if ( shipment.status === 'ASSIGNED' && status() === 'IN_PROGRESS' &&
-                (shipment.paymentStatus === 'AUTHORIZED' || shipment.paymentStatus === 'CAPTURED') )
-                {
-                  <div class="info-banner">
-                    Waiting for sender payment...
-                  </div>
-    
+              
+              <!-- Start Delivery Button -->
+              @if (shipment.status === 'ASSIGNED' && status() === 'IN_PROGRESS') {
                 <button
                   class="btn btn--primary btn-action"
                   (click)="markInTransit(shipment.id)"
@@ -195,16 +207,19 @@
                 </button>
               }
 
-            @if (shipment.status === 'IN_TRANSIT') {
-              <button
-                class="btn btn--success btn-action"
-                (click)="openConfirmModal(shipment.id)"
-                [disabled]="isActing(shipment.id)"
-              >
-                <mat-icon>verified</mat-icon>
-                Confirm Delivery
-              </button>
-            }
+              <!-- Confirm Delivery Button -->
+              @if (shipment.status === 'IN_TRANSIT') {
+                <button
+                  class="btn btn--success btn-action"
+                  (click)="openConfirmModal(shipment.id)"
+                  [disabled]="isActing(shipment.id) || shipment.deliveryLocked"
+                >
+                  <mat-icon>verified</mat-icon>
+                  Confirm Delivery
+                </button>
+              }
+
+              <!-- Completed Badge -->
               @if (shipment.status === 'DELIVERED') {
                 <div class="completed-badge">
                   <mat-icon>check_circle</mat-icon>
@@ -212,6 +227,7 @@
                 </div>
               }
 
+              <!-- Cancel Button -->
               @if (shipment.status !== 'DELIVERED' && shipment.status !== 'CANCELLED') {
                 <button
                   class="btn btn--ghost btn-cancel"
@@ -232,48 +248,116 @@
   }
 
 </div>
+
+<!-- DELIVERY CONFIRMATION MODAL -->
 @if (confirmModalOpen()) {
-  <div class="modal-overlay">
-    <div class="modal-card">
-
-      <h3>
-        <mat-icon>lock</mat-icon>
-        Confirm Delivery
-      </h3>
-
-      <p>Enter the 6-digit delivery code provided by the sender.</p>
-
-      <input
-        type="text"
-        maxlength="6"
-        inputmode="numeric"
-        [value]="deliveryCode()"
-        (input)="deliveryCode.set($any($event.target).value)"
-        placeholder="______"
-        class="code-input"
-      />
-
-      @if (confirmError()) {
-        <div class="error-text">
-          <mat-icon>error</mat-icon>
-          {{ confirmError() }}
+  <div class="modal-overlay" (click)="closeConfirmModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-icon">
+          <mat-icon>verified_user</mat-icon>
         </div>
-      }
+        <h3>Confirm Delivery</h3>
+        <p>Enter the 6-digit code provided by the sender</p>
+      </div>
 
-      <div class="modal-actions">
-        <button class="btn btn--ghost" (click)="closeConfirmModal()">
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Code Input -->
+        <div class="code-input-group">
+          <label>Delivery Code</label>
+          <input
+            type="text"
+            maxlength="6"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            [value]="deliveryCode()"
+            (input)="onCodeInput($any($event.target).value)"
+            placeholder="000000"
+            class="code-input"
+            [class.error]="confirmError()"
+            [disabled]="activeShipment()?.deliveryLocked || confirmLoading()"
+            autofocus
+          />
+          <span class="code-hint">Please enter the 6-digit code</span>
+        </div>
+
+        <!-- Attempts Indicator -->
+        @if (!activeShipment()?.deliveryLocked) {
+          <div class="attempts-indicator">
+            <div class="attempts-label">
+              <mat-icon>{{ attemptsRemaining() > 2 ? 'info' : 'warning' }}</mat-icon>
+              <span>Verification Attempts</span>
+            </div>
+            <div class="attempts-dots">
+              @for (i of [1,2,3,4,5]; track i) {
+                <span 
+                  class="attempt-dot"
+                  [class.used]="i <= (activeShipment()?.deliveryCodeAttempts || 0)"
+                  [class.failed]="i <= (activeShipment()?.deliveryCodeAttempts || 0)"
+                ></span>
+              }
+            </div>
+            <span class="attempts-text">
+              {{ activeShipment()?.deliveryCodeAttempts || 0 }}/5 attempts used
+              @if (attemptsRemaining() > 0) {
+                <strong>({{ attemptsRemaining() }} remaining)</strong>
+              }
+            </span>
+          </div>
+        }
+
+        <!-- Error Message -->
+        @if (confirmError()) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ confirmError() }}</span>
+          </div>
+        }
+
+        <!-- Locked Message -->
+        @if (activeShipment()?.deliveryLocked) {
+          <div class="locked-message">
+            <mat-icon>lock</mat-icon>
+            <div>
+              <strong>Delivery Locked</strong>
+              <p>Maximum attempts reached. Please contact support for assistance.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Security Note -->
+        <div class="security-note">
+          <mat-icon>info</mat-icon>
+          <p>The sender will provide this code upon successful delivery. Each incorrect attempt is logged for security.</p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button 
+          class="btn btn--ghost" 
+          (click)="closeConfirmModal()"
+          [disabled]="confirmLoading()"
+        >
           Cancel
         </button>
-
         <button
           class="btn btn--success"
           (click)="confirmDelivery()"
-          [disabled]="confirmLoading()"
+          [disabled]="confirmLoading() || activeShipment()?.deliveryLocked || deliveryCode().length !== 6 || attemptsRemaining() === 0"
         >
           @if (confirmLoading()) {
             <mat-icon class="spin">refresh</mat-icon>
+            Verifying...
+          } @else {
+            <mat-icon>check_circle</mat-icon>
+            Confirm
           }
-          Confirm
         </button>
       </div>
 
