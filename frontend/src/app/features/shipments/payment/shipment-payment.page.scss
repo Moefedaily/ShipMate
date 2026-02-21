@@ -5,112 +5,309 @@
   display: block;
 }
 
+/* =====================================================
+   PAYMENT PAGE
+   ===================================================== */
+
 .payment-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
+  padding: 0;
+}
+
+/* =====================================================
+   LOADING STATE
+   ===================================================== */
+
+.loading-state {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: $color-primary;
+  }
+
+  p {
+    font-size: $text-size-label;
+    font-weight: $font-weight-medium;
+    color: $text-muted;
+    margin: 0;
+  }
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* =====================================================
+   ERROR BANNER
+   ===================================================== */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  background: rgba($color-danger, 0.06);
+  border: 1px solid rgba($color-danger, 0.2);
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: $color-danger;
+    flex-shrink: 0;
+  }
+
+  div {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: $text-size-label;
+      font-weight: $font-weight-bold;
+      color: $text-primary;
+      margin-bottom: 0.25rem;
+    }
+
+    p {
+      font-size: $text-size-caption;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+/* =====================================================
+   PAGE HEADER
+   ===================================================== */
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: $font-weight-bold;
-    color: $text-primary;
-  }
-
-  .subtitle {
-    margin-top: 0.5rem;
-    font-size: $text-size-label;
-    color: $text-muted;
-  }
-}
-
-.badge {
-  padding: 0.6rem 1.1rem;
-  border-radius: 24px;
-  font-size: $text-size-caption;
-  font-weight: $font-weight-bold;
-  text-transform: uppercase;
-}
-
-.processing-card {
-  position: relative;
-  padding: 1.75rem;
-  border-radius: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba($color-primary, 0.05) 0%,
-    rgba($bg-surface, 1) 100%
-  );
-  border: 1px solid rgba($color-primary, 0.2);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-
-  .processing-header {
+  .header-content {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    font-weight: $font-weight-semibold;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 
     mat-icon {
-      font-size: 28px;
-      color: $color-primary;
-      animation: pulse-icon 2s ease-in-out infinite;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
-    strong {
-      display: block;
-      font-size: 1.05rem;
+    &:hover {
+      background: $bg-surface;
+      transform: translateX(-3px);
+    }
+  }
+
+  .header-text {
+    h1 {
+      font-size: 1.75rem;
       font-weight: $font-weight-bold;
       color: $text-primary;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
     }
 
-    span {
-      display: block;
-      margin-top: 0.25rem;
+    .subtitle {
       font-size: $text-size-label;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.15rem;
+    border-radius: 24px;
+    font-size: $text-size-caption;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    &.badge-required {
+      background: rgba(#6b7280, 0.12);
+      border: 1px solid rgba(#6b7280, 0.3);
+      color: #6b7280;
+    }
+
+    &.badge-processing {
+      background: rgba(#f59e0b, 0.12);
+      border: 1px solid rgba(#f59e0b, 0.3);
+      color: #d97706;
+
+      .badge-dot {
+        animation: pulse-fast 1s ease-in-out infinite;
+      }
+    }
+
+    &.badge-authorized {
+      background: rgba($color-primary, 0.12);
+      border: 1px solid rgba($color-primary, 0.3);
+      color: $color-primary;
+    }
+
+    &.badge-captured {
+      background: rgba($color-success, 0.12);
+      border: 1px solid rgba($color-success, 0.3);
+      color: $color-success;
+    }
+
+    &.badge-failed {
+      background: rgba($color-danger, 0.12);
+      border: 1px solid rgba($color-danger, 0.3);
+      color: $color-danger;
+    }
+
+    &.badge-refunded,
+    &.badge-cancelled {
+      background: rgba($text-muted, 0.12);
+      border: 1px solid rgba($text-muted, 0.3);
       color: $text-muted;
     }
   }
 }
 
-
-.processing-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  background: rgba($color-primary, 0.1);
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: -40%;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      $color-primary,
-      transparent
-    );
-    animation: sweep 1.6s linear infinite;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
   }
 }
 
+@keyframes pulse-fast {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+}
 
-@keyframes pulse-icon {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.75; transform: scale(0.95); }
+/* =====================================================
+   PROCESSING CARD
+   ===================================================== */
+
+.processing-card {
+  position: relative;
+  padding: 2rem 2.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba($color-primary, 0.06) 0%, rgba($color-primary, 0.02) 100%);
+  border: 1px solid rgba($color-primary, 0.2);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+
+  .processing-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: $color-primary;
+      flex-shrink: 0;
+    }
+
+    strong {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: $font-weight-bold;
+      color: $text-primary;
+      margin-bottom: 0.35rem;
+    }
+
+    span {
+      display: block;
+      font-size: $text-size-label;
+      color: $text-muted;
+    }
+  }
+
+  .processing-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background: rgba($color-primary, 0.1);
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -40%;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, $color-primary, transparent);
+      animation: sweep 1.6s linear infinite;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes sweep {
@@ -118,66 +315,217 @@
   100% { left: 100%; }
 }
 
-
-.badge-required {
-  background: rgba($border-default, 0.2);
-  color: $text-muted;
-}
-
-.badge-processing {
-  background: rgba(#f59e0b, 0.12);
-  color: #d97706;
-}
-
-.badge-authorized {
-  background: rgba($color-primary, 0.12);
-  color: $color-primary;
-}
-
-.badge-captured {
-  background: rgba($color-success, 0.12);
-  color: $color-success;
-}
-
-.badge-failed {
-  background: rgba($color-danger, 0.12);
-  color: $color-danger;
-}
-
-.badge-refunded {
-  background: rgba($color-danger, 0.08);
-  color: $color-danger;
-}
-
-.badge-cancelled {
-  background: rgba($text-muted, 0.1);
-  color: $text-muted;
-}
+/* =====================================================
+   PAYMENT CARD
+   ===================================================== */
 
 .card {
-  padding: 2rem;
-  border-radius: 20px;
+  background: $bg-card;
   border: 1px solid $border-default;
-  background: $bg-surface;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
+
+/* =====================================================
+   PAYMENT SUMMARY
+   ===================================================== */
+
+.payment-summary {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $border-default;
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    span {
+      font-size: $text-size-label;
+      color: $text-muted;
+      font-weight: $font-weight-medium;
+    }
+
+    strong {
+      font-size: $text-size-label;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+    }
+
+    &.total {
+      margin-top: 0.5rem;
+      padding-top: 1.25rem;
+      border-top: 2px solid $border-default;
+      border-bottom: none;
+
+      span {
+        font-size: 1.05rem;
+        font-weight: $font-weight-bold;
+        color: $text-primary;
+      }
+
+      strong {
+        font-size: 1.5rem;
+        font-weight: $font-weight-bold;
+        color: $color-primary;
+        letter-spacing: -0.02em;
+      }
+    }
+  }
+}
+
+/* =====================================================
+   STRIPE ELEMENT CONTAINER
+   ===================================================== */
+
+.payment-element-container {
+  margin-bottom: 2rem;
+
+  #payment-element {
+    min-height: 40px;
+  }
+}
+
+/* =====================================================
+   ACTIONS
+   ===================================================== */
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+
+  .btn {
+    min-width: 180px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+/* =====================================================
+   SECURITY NOTICE
+   ===================================================== */
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  background: rgba($color-success, 0.06);
+  border: 1px solid rgba($color-success, 0.2);
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: #15803d;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $color-success;
+  }
+}
+
+/* =====================================================
+   SUCCESS CARD
+   ===================================================== */
 
 .success-card {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  border-radius: 16px;
-  background: rgba($color-success, 0.08);
-  color: $color-success;
-  font-weight: $font-weight-semibold;
+  gap: 1.5rem;
+  padding: 2rem 2.25rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba($color-success, 0.08) 0%, rgba($color-success, 0.02) 100%);
+  border: 1px solid rgba($color-success, 0.25);
+  animation: fadeIn 0.4s ease-out;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $color-success;
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: $font-weight-bold;
+    color: $color-success;
+    margin-bottom: 0.35rem;
+  }
+
+  span {
+    display: block;
+    font-size: $text-size-label;
+    color: #374151;
+  }
 }
 
-.actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
 
-  .btn {
-    min-width: 200px;
+@media (max-width: 968px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  .processing-card .processing-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .success-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header .header-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+      min-width: unset;
+    }
+  }
+
+  .processing-card,
+  .success-card {
+    padding: 1.75rem 1.5rem;
   }
 }

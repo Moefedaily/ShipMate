@@ -4,7 +4,8 @@ import {
   OnDestroy,
   inject,
   computed,
-  effect
+  effect,
+  signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,6 +14,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { PaymentState } from '../../../core/state/payment/payment.state';
 import { StripeService } from '../../../core/services/stripe/stripe.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
+import { ShipmentService } from '../../../core/services/shipment/shipment.service';
+import { ShipmentResponse } from '../../../core/services/shipment/shipment.models';
 
 @Component({
   standalone: true,
@@ -29,6 +32,7 @@ export class ShipmentPaymentPage implements OnInit, OnDestroy {
   private readonly paymentState = inject(PaymentState);
   private readonly stripeService = inject(StripeService);
   private readonly toast = inject(ToastService);
+  private readonly shipmentService = inject(ShipmentService);
 
   readonly loading = computed(() => this.paymentState.loading());
   readonly payment = this.paymentState.payment;
@@ -37,7 +41,10 @@ export class ShipmentPaymentPage implements OnInit, OnDestroy {
   readonly isAuthorized = this.paymentState.isAuthorized;
   readonly isCaptured = this.paymentState.isCaptured;
   readonly isWaitingAuth = this.paymentState.isWaitingAuth;
-  private destroyed = false;
+  readonly shipment = signal<ShipmentResponse | null>(null);
+  readonly shipmentLoading = signal(false);
+  readonly shipmentError = signal<string | null>(null);
+    private destroyed = false;
 
   readonly statusBadgeClass = computed(() => {
     switch (this.status()) {
@@ -68,7 +75,6 @@ export class ShipmentPaymentPage implements OnInit, OnDestroy {
   private elements: any = null;
   private paymentElement: any = null;
 
-  // Track which secret we mounted (so we can remount when it changes)
   private mountedClientSecret: string | null = null;
 
   private _stripeMountEffect = effect(() => {
@@ -110,6 +116,7 @@ export class ShipmentPaymentPage implements OnInit, OnDestroy {
 
     this.shipmentId = id;
     this.paymentState.load(id);
+    this.loadShipment(id);
   }
 
 
@@ -147,6 +154,23 @@ export class ShipmentPaymentPage implements OnInit, OnDestroy {
     this.paymentState.onStripeConfirmSuccess(this.shipmentId);
   }
 
+  private loadShipment(id: string): void {
+    this.shipmentLoading.set(true);
+    this.shipmentError.set(null);
+
+    this.shipmentService.getMyShipment(id).subscribe({
+      next: shipment => {
+        this.shipment.set(shipment);
+        this.shipmentLoading.set(false);
+      },
+      error: err => {
+        this.shipmentError.set(
+          err.error?.message || 'Failed to load shipment'
+        );
+        this.shipmentLoading.set(false);
+      }
+    });
+  }
   private unmountStripeElement(): void {
     try {
       if (this.paymentElement) {
