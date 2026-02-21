@@ -91,6 +91,15 @@
         }
       </div>
 
+      @if (notifications().length > 0) {
+        <div class="panel-footer">
+          <button class="view-all-btn" (click)="viewAllNotifications()">
+            View all notifications
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      }
+
     </div>
   }
 
