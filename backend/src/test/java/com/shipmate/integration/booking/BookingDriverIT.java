@@ -176,22 +176,26 @@ class BookingDriverIT extends AbstractIntegrationTest {
         userRepository.saveAndFlush(sender);
 
         Shipment shipment = Shipment.builder()
-                .sender(sender)
-                .pickupAddress("Paris")
-                .pickupLatitude(BigDecimal.valueOf(48.8566))
-                .pickupLongitude(BigDecimal.valueOf(2.3522))
-                .deliveryAddress("Lyon")
-                .deliveryLatitude(BigDecimal.valueOf(45.7640))
-                .deliveryLongitude(BigDecimal.valueOf(4.8357))
-                .packageWeight(BigDecimal.valueOf(2.5))
-                .packageValue(BigDecimal.valueOf(100))
-                .requestedPickupDate(LocalDate.now())
-                .requestedDeliveryDate(LocalDate.now().plusDays(1))
-                .status(ShipmentStatus.CREATED)
-                .basePrice(BigDecimal.valueOf(20))
-                .extraInsuranceFee(BigDecimal.ZERO)
-                .build();
-
+        .sender(sender)
+        .pickupAddress("Paris")
+        .pickupLatitude(BigDecimal.valueOf(48.8566))
+        .pickupLongitude(BigDecimal.valueOf(2.3522))
+        .deliveryAddress("Lyon")
+        .deliveryLatitude(BigDecimal.valueOf(45.7640))
+        .deliveryLongitude(BigDecimal.valueOf(4.8357))
+        .packageWeight(BigDecimal.valueOf(2.50).setScale(2))
+        .packageValue(BigDecimal.valueOf(100.00).setScale(2))
+        .requestedPickupDate(LocalDate.now())
+        .requestedDeliveryDate(LocalDate.now().plusDays(1))
+        .status(ShipmentStatus.CREATED)
+        .basePrice(BigDecimal.valueOf(20.00).setScale(2))
+        .insuranceSelected(false)
+        .insuranceFee(BigDecimal.ZERO.setScale(2))
+        .declaredValue(null)
+        .insuranceCoverageAmount(null)
+        .insuranceDeductibleRate(null)
+        .deliveryLocked(false)
+        .build();
         return shipmentRepository.saveAndFlush(shipment).getId();
     }
 }

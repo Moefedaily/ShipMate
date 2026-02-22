@@ -53,4 +53,8 @@ public class CreateShipmentRequest {
     @NotNull
     private LocalDate requestedDeliveryDate;
 
+    private boolean insuranceSelected;
+    
+    private BigDecimal declaredValue;
+
 }

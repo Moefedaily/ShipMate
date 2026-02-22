@@ -37,7 +37,8 @@ public class ShipmentSystemMessageListener {
 
         if (event.status() != ShipmentStatus.IN_TRANSIT &&
             event.status() != ShipmentStatus.DELIVERED &&
-            event.status() != ShipmentStatus.CANCELLED) {
+            event.status() != ShipmentStatus.CANCELLED &&
+            event.status() != ShipmentStatus.LOST) {
             return;
         }
 
@@ -65,6 +66,7 @@ public class ShipmentSystemMessageListener {
             case IN_TRANSIT -> "Your shipment is now in transit";
             case DELIVERED -> "Your shipment has been delivered";
             case CANCELLED -> "Your shipment was cancelled";
+            case LOST -> "This shipment has been declared lost. Our support team will assist you if an insurance claim was submitted.";
             default -> "Shipment updated";
         };
     }

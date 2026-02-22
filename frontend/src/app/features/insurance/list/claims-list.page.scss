@@ -1,0 +1,361 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+.claims-page {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.dashboard-hero {
+  margin-bottom: 1.75rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: $font-weight-semibold;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: $bg-surface;
+    transform: translateX(-3px);
+  }
+}
+
+.header-text {
+  h1 {
+    font-size: 1.6rem;
+    font-weight: $font-weight-bold;
+    margin: 0 0 0.2rem;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+
+  mat-icon {
+    font-size: 44px;
+    width: 44px;
+    height: 44px;
+    color: $color-primary;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 5rem 2rem;
+  text-align: center;
+
+  strong {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  p {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    color: $text-muted;
+    opacity: 0.5;
+  }
+}
+
+.claims-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.claim-card {
+  position: relative;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  background: $bg-card;
+  border: 1px solid $border-default;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  &:hover {
+    border-color: rgba($color-primary, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+
+    .claim-card-arrow {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+  }
+}
+
+.claim-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.reason-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &--lost {
+    background: rgba(#7c3aed, 0.08);
+    border: 1px solid rgba(#7c3aed, 0.2);
+    color: #7c3aed;
+  }
+
+  &--damaged {
+    background: rgba($color-danger, 0.07);
+    border: 1px solid rgba($color-danger, 0.18);
+    color: $color-danger;
+  }
+
+  &--other {
+    background: rgba(#6b7280, 0.08);
+    border: 1px solid rgba(#6b7280, 0.18);
+    color: #6b7280;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  &--submitted {
+    background: rgba($color-primary, 0.1);
+    border: 1px solid rgba($color-primary, 0.22);
+    color: $color-primary;
+  }
+
+  &--under_review {
+    background: rgba(#f59e0b, 0.1);
+    border: 1px solid rgba(#f59e0b, 0.25);
+    color: #d97706;
+  }
+
+  &--approved {
+    background: rgba($color-success, 0.1);
+    border: 1px solid rgba($color-success, 0.22);
+    color: $color-success;
+  }
+
+  &--rejected {
+    background: rgba($color-danger, 0.1);
+    border: 1px solid rgba($color-danger, 0.22);
+    color: $color-danger;
+
+    .dot { animation: none; }
+  }
+
+  &--paid {
+    background: rgba(#059669, 0.1);
+    border: 1px solid rgba(#059669, 0.22);
+    color: #059669;
+
+    .dot { animation: none; }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.claim-card-body {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: $bg-surface;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.claim-meta-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.claim-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+}
+
+.meta-value {
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+
+  &.mono {
+    font-family: monospace;
+    font-size: 13px;
+    color: $text-secondary;
+  }
+}
+
+.claim-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba($color-success, 0.05);
+  border: 1px solid rgba($color-success, 0.15);
+}
+
+.compensation-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: $color-success;
+  }
+}
+
+.compensation-amount {
+  font-size: $text-size-label;
+  font-weight: 700;
+  color: $color-success;
+}
+
+.claim-card-arrow {
+  position: absolute;
+  top: 50%;
+  right: 1.25rem;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  color: $text-muted;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .claim-meta-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .claim-card {
+    padding: 1rem 1.25rem;
+  }
+}

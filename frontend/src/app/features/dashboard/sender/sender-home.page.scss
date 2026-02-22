@@ -36,11 +36,11 @@
 
   border-radius: 20px;
   background: linear-gradient(135deg, rgba($color-primary, 0.04) 0%, $bg-card 100%);
-  
+
   overflow: hidden;
-  
+
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     border-color: rgba($color-primary, 0.25);
@@ -95,7 +95,7 @@
     height: 28px;
     color: $color-primary;
   }
-  
+
   .create-shipment:hover & {
     transform: rotate(90deg);
     background: linear-gradient(135deg, rgba($color-primary, 0.2) 0%, rgba($color-primary, 0.15) 100%);
@@ -129,6 +129,66 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+.pill--insurance {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba($color-success, 0.1);
+  border-color: rgba($color-success, 0.3);
+  color: $color-success;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.insurance-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0.25rem 0 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba($color-success, 0.18);
+  background: rgba($color-success, 0.04);
+  overflow: hidden;
+}
+
+.insurance-row-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0.5rem 0.75rem;
+  flex: 1;
+
+  & + & {
+    border-left: 1px solid rgba($color-success, 0.14);
+  }
+}
+
+.insurance-total-row {
+  background: rgba($color-success, 0.07);
+}
+
+.insurance-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+}
+
+.insurance-value {
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+}
+
+.insurance-total {
+  color: $color-success;
+  font-weight: 700;
+}
 
 
 .assigned-driver {
@@ -242,7 +302,7 @@
 .create-shipment .btn {
   flex-shrink: 0;
   min-width: 180px;
-  
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -250,13 +310,14 @@
 
   padding: 0.85rem 1.75rem;
   font-size: $text-size-label;
-  font-weight: $font-weight-semibold;  
+  font-weight: $font-weight-semibold;
+
   mat-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
   }
-  
+
   &:hover {
     transform: translateY(-2px);
   }
@@ -324,14 +385,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
-  
+
   @media (min-width: 1200px) {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   &.single {
     grid-template-columns: minmax(320px, 380px);
-    
+
     @media (min-width: 769px) {
       .shipment-card {
         max-width: 380px;
@@ -376,16 +437,22 @@
     top: 14px;
     left: 14px;
     z-index: 10;
-    
+
     font-size: 10px;
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 0.4rem 0.75rem;
     border-radius: 20px;
-    
+
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(8px);
+  }
+
+  .badge--lost {
+    background: rgba(#7c3aed, 0.15);
+    color: #7c3aed;
+    border: 1px solid rgba(#7c3aed, 0.3);
   }
 }
 
@@ -393,7 +460,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  
+
   padding: 1.25rem 1.5rem 1.35rem;
 
   h4 {
@@ -434,11 +501,11 @@
     height: 16px;
     color: $color-primary;
     flex-shrink: 0;
-    
+
     &:first-child {
       color: $color-success;
     }
-    
+
     &:last-of-type {
       color: #3b82f6;
     }
@@ -452,7 +519,7 @@
     opacity: 0.6;
     flex-shrink: 0;
   }
-  
+
   span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -488,7 +555,7 @@
     font-size: $text-size-caption;
     font-weight: $font-weight-semibold;
     border-radius: 10px;
-    
+
     &:hover {
       background: rgba($color-primary, 0.08);
       color: $color-primary;
@@ -499,20 +566,20 @@
 
 .empty-state {
   grid-column: 1 / -1;
-  
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  
+
   padding: 3rem 2rem;
   border-radius: 20px;
   text-align: center;
-  
+
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
   border: 2px dashed $border-default;
-  
+
   mat-icon {
     font-size: 56px;
     width: 56px;
@@ -520,7 +587,7 @@
     color: $text-muted;
     opacity: 0.4;
   }
-  
+
   p {
     font-size: $text-size-label;
     font-weight: $font-weight-semibold;
@@ -563,9 +630,9 @@
   padding: 1.5rem 1.75rem;
   border-radius: 16px;
 
-  background: $bg-card;  
+  background: $bg-card;
   transition: all 0.2s ease;
-  
+
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
@@ -579,7 +646,7 @@
     color: $color-primary;
     margin-top: 0.15rem;
     flex-shrink: 0;
-    
+
     padding: 0.6rem;
     border-radius: 12px;
     background: rgba($color-primary, 0.1);
@@ -601,17 +668,13 @@
   }
 }
 
-/* =====================================================
-   RESPONSIVE DESIGN
-   ===================================================== */
-
 @media (max-width: 768px) {
   .dashboard-hero {
     h1 {
       font-size: 1.5rem;
     }
   }
-  
+
   .card.create-shipment {
     flex-direction: column;
     align-items: flex-start;
@@ -621,16 +684,16 @@
 
   .create-left {
     gap: 1rem;
-    
+
     h3 {
       font-size: 1.1rem;
     }
   }
-  
+
   .icon-circle {
     width: 48px;
     height: 48px;
-    
+
     mat-icon {
       font-size: 24px;
       width: 24px;
@@ -642,37 +705,41 @@
     width: 100% !important;
     min-width: unset;
   }
-  
+
   .shipment-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
-    
+
     &.single {
       grid-template-columns: 1fr;
     }
   }
-  
+
   .shipment-card {
     min-height: 480px;
-    
+
     img {
       height: 160px;
     }
   }
-  
+
   .route {
     flex-wrap: wrap;
     font-size: 11px;
     padding: 0.75rem 0.85rem;
     min-height: 48px;
-    
+
     span {
       white-space: normal;
     }
   }
-  
+
   .tips-grid {
     grid-template-columns: 1fr;
+  }
+
+  .insurance-row {
+    flex-wrap: wrap;
   }
 }
 
@@ -681,28 +748,28 @@
     h1 {
       font-size: 1.35rem;
     }
-    
+
     p {
       font-size: $text-size-caption;
     }
   }
-  
+
   .shipments-title {
     h2 {
       font-size: 1rem;
     }
-    
+
     mat-icon {
       font-size: 20px;
       width: 20px;
       height: 20px;
     }
   }
-  
+
   .shipments-header .link {
     font-size: $text-size-caption;
   }
-  
+
   .shipment-body {
     padding: 1rem 1.25rem;
   }

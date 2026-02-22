@@ -96,6 +96,9 @@ export class DashboardLayoutComponent implements OnInit {
       case 'earnings':
         this.router.navigate(['/dashboard/earnings']);
         break;
+       case 'claims':
+        this.router.navigate(['/dashboard/claims']);
+        break; 
 
       case 'logout':
         this.onLogout();

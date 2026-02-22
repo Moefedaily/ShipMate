@@ -1,0 +1,526 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+.claim-details-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.create-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.75rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-text {
+  h1 {
+    font-size: 1.6rem;
+    font-weight: $font-weight-bold;
+    margin: 0 0 0.2rem;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: $font-weight-semibold;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: $bg-surface;
+    transform: translateX(-3px);
+  }
+}
+
+.claim-details-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.status-sidebar {
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.status-hero {
+  border-radius: 16px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  border: 1px solid transparent;
+
+  &[data-status='SUBMITTED'] {
+    background: rgba($color-primary, 0.06);
+    border-color: rgba($color-primary, 0.15);
+
+    .status-icon-wrap { background: rgba($color-primary, 0.12); color: $color-primary; }
+    .status-tag { background: rgba($color-primary, 0.1); color: $color-primary; }
+  }
+
+  &[data-status='UNDER_REVIEW'] {
+    background: rgba(245, 158, 11, 0.06);
+    border-color: rgba(245, 158, 11, 0.2);
+
+    .status-icon-wrap { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    .status-tag { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+  }
+
+  &[data-status='APPROVED'] {
+    background: rgba($color-success, 0.06);
+    border-color: rgba($color-success, 0.2);
+
+    .status-icon-wrap { background: rgba($color-success, 0.12); color: $color-success; }
+    .status-tag { background: rgba($color-success, 0.1); color: $color-success; }
+  }
+
+  &[data-status='REJECTED'] {
+    background: rgba($color-danger, 0.05);
+    border-color: rgba($color-danger, 0.15);
+
+    .status-icon-wrap { background: rgba($color-danger, 0.1); color: $color-danger; }
+    .status-tag { background: rgba($color-danger, 0.08); color: $color-danger; }
+  }
+
+  &[data-status='PAID'] {
+    background: rgba($color-success, 0.08);
+    border-color: rgba($color-success, 0.25);
+
+    .status-icon-wrap { background: rgba($color-success, 0.15); color: $color-success; }
+    .status-tag { background: rgba($color-success, 0.12); color: $color-success; }
+  }
+}
+
+.status-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.status-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.status-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.status-desc {
+  font-size: $text-size-caption;
+  color: $text-muted;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.timeline {
+  background: $bg-card;
+  border: 1px solid $border-default;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-step {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: $border-default;
+    border: 2px solid $border-default;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .step-label {
+    font-size: $text-size-caption;
+    font-weight: $font-weight-medium;
+    color: $text-muted;
+    transition: color 0.2s;
+  }
+
+  &.done {
+    .step-dot {
+      background: $color-success;
+      border-color: $color-success;
+    }
+
+    .step-label {
+      color: $color-success;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.active {
+    .step-dot {
+      background: $color-primary;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+    }
+
+    .step-label {
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.timeline-connector {
+  width: 2px;
+  height: 18px;
+  background: $border-default;
+  margin-left: 4px;
+}
+
+.meta-dates {
+  background: $bg-card;
+  border: 1px solid $border-default;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.meta-date-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta-date-label {
+  font-size: $text-size-caption;
+  color: $text-muted;
+  font-weight: $font-weight-medium;
+}
+
+.meta-date-value {
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+.claim-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.financial-card {
+  border-radius: 16px;
+  border: 1px solid $border-default;
+  background: $bg-card;
+  overflow: hidden;
+}
+
+.financial-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  background: $bg-surface;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $color-primary;
+  }
+}
+
+.financial-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.financial-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 1.25rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &.highlight {
+    background: rgba($color-success, 0.04);
+  }
+}
+
+.financial-label {
+  font-size: $text-size-caption;
+  color: $text-muted;
+  font-weight: $font-weight-medium;
+}
+
+.financial-value {
+  font-size: 1rem;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.compensation {
+  color: $color-success;
+}
+
+.detail-card {
+  border-radius: 16px;
+  border: 1px solid $border-default;
+  background: $bg-card;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.detail-section {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: $color-primary;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  &.stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
+.detail-key {
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.detail-text {
+  font-size: $text-size-label;
+  color: $text-secondary;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.reason-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &--lost {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+  }
+
+  &--damaged {
+    background: rgba($color-danger, 0.08);
+    color: $color-danger;
+    border: 1px solid rgba($color-danger, 0.2);
+  }
+
+  &--other {
+    background: $bg-surface;
+    color: $text-secondary;
+    border: 1px solid $border-default;
+  }
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+
+  img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid $border-default;
+    display: block;
+  }
+}
+
+.admin-notes {
+  display: flex;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  background: rgba($color-danger, 0.05);
+  border: 1px solid rgba($color-danger, 0.15);
+  margin-top: 0.5rem;
+
+  strong {
+    display: block;
+    font-size: $text-size-caption;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $color-danger;
+    margin-bottom: 0.3rem;
+  }
+
+  p {
+    font-size: $text-size-label;
+    color: $text-secondary;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.admin-notes-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba($color-danger, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $color-danger;
+  }
+}
+
+@media (max-width: 860px) {
+  .claim-details-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .status-sidebar {
+    position: static;
+  }
+
+  .financial-grid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .financial-item {
+      &:nth-child(2) { border-right: none; }
+      &:nth-child(1), &:nth-child(2) { border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .financial-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

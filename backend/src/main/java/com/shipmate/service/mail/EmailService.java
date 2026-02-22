@@ -221,5 +221,21 @@ public class EmailService implements MailService {
         log.info("Refund email sent to {}", toEmail);
     }
 
+    @Override
+    public void sendDriverReactivatedEmail(String toEmail) {
+
+        Context context = new Context();
+
+        String html = templateEngine.process(
+            "email/driver-reactivated",
+            context
+        );
+
+        sendHtmlEmail(
+            toEmail,
+            "Your driver account has been restored",
+            html
+        );
+    }
 
 }

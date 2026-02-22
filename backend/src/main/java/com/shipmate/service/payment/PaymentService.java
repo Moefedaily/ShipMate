@@ -179,8 +179,8 @@ public class PaymentService {
                         .amountTotal(
                             shipment.getBasePrice()
                                 .add(
-                                    shipment.getExtraInsuranceFee() != null
-                                        ? shipment.getExtraInsuranceFee()
+                                    shipment.getInsuranceFee() != null
+                                        ? shipment.getInsuranceFee()
                                         : BigDecimal.ZERO
                                 )
                         )
@@ -193,8 +193,8 @@ public class PaymentService {
     private Payment createPaymentEntity(Shipment shipment) {
 
         BigDecimal total = shipment.getBasePrice()
-                .add(shipment.getExtraInsuranceFee() != null
-                        ? shipment.getExtraInsuranceFee()
+                .add(shipment.getInsuranceFee() != null
+                        ? shipment.getInsuranceFee()
                         : BigDecimal.ZERO);
 
         Payment payment = Payment.builder()
@@ -390,6 +390,10 @@ public class PaymentService {
                             return;
                         }
 
+                        if (shipment.getStatus() == ShipmentStatus.LOST) {
+                        log.warn("[PAYMENT][WEBHOOK] Ignored CAPTURED - shipment LOST shipmentId={}", shipment.getId());
+                        return;
+                        }
                         // Transition guard
                         if (payment.getPaymentStatus() == PaymentStatus.CAPTURED) {
                             return; // idempotent

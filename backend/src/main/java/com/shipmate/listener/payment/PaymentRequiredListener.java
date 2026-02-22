@@ -58,11 +58,10 @@ public class PaymentRequiredListener {
         }
 
         BigDecimal totalAmount =
-                shipment.getBasePrice().add(
-                        shipment.getExtraInsuranceFee() != null
-                                ? shipment.getExtraInsuranceFee()
-                                : BigDecimal.ZERO
-                );
+                shipment.getBasePrice()
+                .add(shipment.getInsuranceFee() != null
+                ? shipment.getInsuranceFee()
+                : BigDecimal.ZERO);
 
         String paymentLink =
                 frontendBaseUrl +

@@ -1,0 +1,2 @@
+ALTER TABLE driver_profiles
+ADD COLUMN strike_count INTEGER NOT NULL DEFAULT 0;

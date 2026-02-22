@@ -65,7 +65,10 @@ export class DashboardHeaderComponent {
 
   showDriverWallet(): boolean {
   return this.activeRole === 'DRIVER';
-}
+  }
+  showSenderClaims(): boolean {
+    return this.activeRole === 'SENDER';
+  }
   onMenu(action: string): void {
     this.menuAction.emit(action);
   }

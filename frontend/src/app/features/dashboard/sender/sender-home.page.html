@@ -37,12 +37,8 @@
     </a>
   </div>
 
-  <div
-    class="shipment-grid"
-    [class.single]="activeShipments().length === 1"
-  >
+  <div class="shipment-grid" [class.single]="activeShipments().length === 1">
 
-    <!-- Loading -->
     @if (loading()) {
       <p class="muted">
         <mat-icon class="spin">refresh</mat-icon>
@@ -50,7 +46,6 @@
       </p>
     }
 
-    <!-- Empty -->
     @else if (activeShipments().length === 0) {
       <div class="card empty-state">
         <mat-icon>inventory_2</mat-icon>
@@ -58,7 +53,6 @@
       </div>
     }
 
-    <!-- Cards -->
     @else {
       @for (s of activeShipments(); track s.id) {
         <article
@@ -66,12 +60,11 @@
           [routerLink]="['/dashboard/shipments', s.id]"
         >
 
-          <!-- IMAGE -->
           <img
             [src]="s.photos && s.photos.length ? s.photos[0] : 'assets/images/box.jpg'"
             [alt]="s.packageDescription || 'Shipment'"
           />
-          <!-- STATUS -->
+
           <span
             class="badge"
             [ngClass]="{
@@ -79,7 +72,8 @@
               'badge--info': s.status === 'ASSIGNED',
               'badge--success': s.status === 'IN_TRANSIT',
               'badge--neutral': s.status === 'DELIVERED',
-              'badge--danger': s.status === 'CANCELLED'
+              'badge--danger': s.status === 'CANCELLED',
+              'badge--lost': s.status === 'LOST'
             }"
           >
             {{ s.status }}
@@ -90,36 +84,53 @@
             <h4>{{ s.packageDescription || 'Shipment' }}</h4>
             <small>ID: {{ s.id | slice:0:8 }}</small>
 
-            <!-- ROUTE -->
             <div class="route">
               <mat-icon class="route-icon start">place</mat-icon>
               <span>{{ s.pickupAddress }}</span>
-
               <mat-icon class="arrow">arrow_forward</mat-icon>
-
               <mat-icon class="route-icon end">flag</mat-icon>
               <span>{{ s.deliveryAddress }}</span>
             </div>
 
-            <!-- META -->
             <div class="meta-row">
               <span class="pill">{{ s.packageWeight }} kg</span>
-              <span class="pill pill--accent">
-                {{ s.basePrice | currency }}
-              </span>
+              <span class="pill pill--accent">{{ s.basePrice | currency }}</span>
+              @if (s.insuranceSelected) {
+                <span class="pill pill--insurance">
+                  <mat-icon>verified_user</mat-icon>
+                  Insured
+                </span>
+              }
             </div>
+
+            @if (s.insuranceSelected && s.insuranceFee) {
+              <div class="insurance-row">
+                <div class="insurance-row-item">
+                  <span class="insurance-label">Insurance</span>
+                  <span class="insurance-value">+ {{ s.insuranceFee | currency }}</span>
+                </div>
+                @if (s.declaredValue) {
+                  <div class="insurance-row-item">
+                    <span class="insurance-label">Declared</span>
+                    <span class="insurance-value">{{ s.declaredValue | currency }}</span>
+                  </div>
+                }
+                <div class="insurance-row-item insurance-total-row">
+                  <span class="insurance-label">Total</span>
+                  <span class="insurance-value insurance-total">{{ (s.basePrice + s.insuranceFee) | currency }}</span>
+                </div>
+              </div>
+            }
 
             <div class="driver-section">
               @if (s.driver) {
                 <div class="assigned-driver">
-
                   <div class="driver-avatar">
-                    <img
-                      *ngIf="s.driver.avatarUrl"
-                      [src]="s.driver.avatarUrl"
-                      alt="Driver avatar"
-                    />
-                    <mat-icon *ngIf="!s.driver.avatarUrl">person</mat-icon>
+                    @if (s.driver.avatarUrl) {
+                      <img [src]="s.driver.avatarUrl" alt="Driver avatar" />
+                    } @else {
+                      <mat-icon>person</mat-icon>
+                    }
                   </div>
 
                   <div class="driver-info">
@@ -131,14 +142,11 @@
                     <mat-icon>directions_car</mat-icon>
                     <span>{{ s.driver.vehicleType }}</span>
                   </div>
-
                 </div>
               }
             </div>
 
-            <!-- FOOTER - PUSHED TO BOTTOM -->
             <div class="shipment-footer">
-
               @if (s.status === 'CREATED') {
                 <button
                   class="btn btn--ghost"
@@ -156,7 +164,6 @@
               >
                 Details
               </button>
-
             </div>
 
           </div>
@@ -197,7 +204,6 @@
     </div>
   </div>
 </section>
-
 
 <style>
 @keyframes spin {

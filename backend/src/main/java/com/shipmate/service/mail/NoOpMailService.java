@@ -51,4 +51,9 @@ public class NoOpMailService implements MailService {
     public void sendPaymentRequiredEmail( String toEmail, UUID shipmentId, BigDecimal amount, String paymentLink ) {
         log.info("[TEST] Payment required email skipped. to={}, shipmentId={}, amount={}, currency={}, paymentLink={}", toEmail, shipmentId, amount, paymentLink);
     }
+
+    @Override
+    public void sendDriverReactivatedEmail(String toEmail) {
+        log.info("[TEST] Driver reactivated email skipped. to={}", toEmail);
+    }
 }

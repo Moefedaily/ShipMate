@@ -30,6 +30,7 @@ class ShipmentPersistenceIT extends AbstractIntegrationTest {
 
     @Test
     void create_shouldPersistDefaults_andLinkSender() {
+
         User user = createVerifiedUser("persist-" + UUID.randomUUID() + "@shipmate.com");
 
         var created = shipmentService.create(user.getId(), createRequest());
@@ -38,10 +39,16 @@ class ShipmentPersistenceIT extends AbstractIntegrationTest {
 
         assertThat(stored.getSender().getId()).isEqualTo(user.getId());
         assertThat(stored.getStatus()).isEqualTo(ShipmentStatus.CREATED);
-        assertThat(stored.getExtraInsuranceFee()).isEqualByComparingTo(BigDecimal.ZERO);
+
+        assertThat(stored.isInsuranceSelected()).isFalse();
+        assertThat(stored.getInsuranceFee())
+                .isEqualByComparingTo(BigDecimal.ZERO.setScale(2));
+        assertThat(stored.getDeclaredValue()).isNull();
+        assertThat(stored.getInsuranceCoverageAmount()).isNull();
+        assertThat(stored.getInsuranceDeductibleRate()).isNull();
+
         assertThat(stored.getCreatedAt()).isNotNull();
     }
-
     @Test
     void findByIdAndSender_shouldNotReturnOtherUsersShipment() {
         User owner = createVerifiedUser("owner-" + UUID.randomUUID() + "@shipmate.com");

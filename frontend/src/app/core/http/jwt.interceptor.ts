@@ -61,13 +61,20 @@ export const jwtInterceptor: HttpInterceptorFn = ( req: HttpRequest<any>, next: 
       if (error.status === 401 && skipRefresh) {
         return throwError(() => error);
       }
+
+      if (
+        error.status === 404 &&
+        req.url.includes('/insurance/shipments')
+      ) {
+        return throwError(() => error);
+      }
+
       if (
         error.status === 404 &&
         req.url.includes('/drivers/me')
       ) {
         return throwError(() => error);
       }
-      // Refresh only when allowed
       if (
         error.status === 401 &&
         !skipRefresh &&

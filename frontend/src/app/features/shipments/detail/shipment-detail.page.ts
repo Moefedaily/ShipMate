@@ -13,6 +13,7 @@ import { LoaderService } from '../../../core/ui/loader/loader.service';
 import { PaymentState } from '../../../core/state/payment/payment.state';
 import { DeliveryCodeState } from '../../../core/state/delivery-code/delivery-code.state';
 import { DeliveryCodeWsService } from '../../../core/services/ws/delivery-code-ws.service';
+import { InsuranceState } from '../../../core/state/insurance/InsuranceState';
 
 
 @Component({
@@ -28,7 +29,6 @@ import { DeliveryCodeWsService } from '../../../core/services/ws/delivery-code-w
 })
 export class ShipmentDetailPage implements OnInit {
   
-  /* ==================== Inject ==================== */
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly shipmentService = inject(ShipmentService);
@@ -36,8 +36,8 @@ export class ShipmentDetailPage implements OnInit {
   private readonly loader = inject(LoaderService);
   private readonly paymentState = inject(PaymentState);
   readonly deliveryCodeState = inject(DeliveryCodeState);
+  private readonly insuranceState = inject(InsuranceState);
 
-  /* ==================== State ==================== */
   readonly shipment = signal<ShipmentResponse | null>(null);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
@@ -60,6 +60,10 @@ export class ShipmentDetailPage implements OnInit {
   readonly isRefunded = computed(() =>
     this.paymentStatus() === 'REFUNDED'
   );
+
+  readonly claimExists = this.insuranceState.claimExists;
+  readonly claimLoading = this.insuranceState.loading;
+  
 
   private hasFetchedCode = false;
   private loadedPaymentForShipmentId: string | null = null;
@@ -111,7 +115,9 @@ export class ShipmentDetailPage implements OnInit {
       )
       .subscribe(shipment => {
         this.shipment.set(shipment);
-
+        if (shipment) {
+          this.insuranceState.loadClaim(shipment.id);
+        }
         if (shipment && (shipment.status === 'ASSIGNED' || shipment.status === 'IN_TRANSIT')) {
           this.paymentState.load(shipment.id);
 
@@ -192,4 +198,32 @@ export class ShipmentDetailPage implements OnInit {
     this.router.navigate(['/dashboard/shipments', s.id, 'payment']);
   }
 
+  
+  readonly canFileClaim = computed(() => {
+    const s = this.shipment();
+
+    if (!s) return false;
+
+    const insured =
+      s.insuranceSelected === true &&
+      s.insuranceFee != null &&
+      s.insuranceFee > 0;
+
+    const statusValid =
+      s.status === 'IN_TRANSIT' ||
+      s.status === 'DELIVERED' ||
+      s.status === 'LOST';
+
+    return insured && statusValid && !this.claimExists();
+  });
+    goToClaim(): void {
+      const s = this.shipment();
+      if (!s) return;
+
+      this.router.navigate([
+        '/dashboard/shipments',
+        s.id,
+        'claim'
+      ]);
+    }
 }

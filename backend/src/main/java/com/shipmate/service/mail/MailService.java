@@ -12,5 +12,6 @@ public interface MailService {
     void sendPaymentReceiptEmail( String toEmail, UUID shipmentId, BigDecimal amount );
     void sendPaymentRefundedEmail( String toEmail, UUID shipmentId, BigDecimal amount);
     void sendPaymentRequiredEmail( String toEmail, UUID shipmentId, BigDecimal amount, String paymentLink );
+    void sendDriverReactivatedEmail(String toEmail);
 
 }

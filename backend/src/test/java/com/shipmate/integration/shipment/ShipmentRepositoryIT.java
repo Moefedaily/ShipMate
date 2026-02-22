@@ -3,6 +3,7 @@ package com.shipmate.integration.shipment;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -50,7 +51,12 @@ class ShipmentRepositoryIT extends AbstractIntegrationTest {
                 .requestedDeliveryDate(LocalDate.now().plusDays(1))
                 .status(ShipmentStatus.CREATED)
                 .basePrice(BigDecimal.valueOf(20))
-                .extraInsuranceFee(BigDecimal.ZERO)
+                .insuranceSelected(false)
+                .insuranceFee(BigDecimal.ZERO.setScale(2))
+                .declaredValue(null)
+                .insuranceCoverageAmount(null)
+                .insuranceDeductibleRate(null)
+                .deliveredAt(Instant.now())
                 .build();
 
         Shipment saved = shipmentRepository.saveAndFlush(shipment);
@@ -82,7 +88,12 @@ class ShipmentRepositoryIT extends AbstractIntegrationTest {
                 .requestedDeliveryDate(LocalDate.now().plusDays(1))
                 .status(ShipmentStatus.CREATED)
                 .basePrice(BigDecimal.valueOf(20))
-                .extraInsuranceFee(BigDecimal.ZERO)
+                .insuranceSelected(false)
+                .insuranceFee(BigDecimal.ZERO.setScale(2))
+                .declaredValue(null)
+                .insuranceCoverageAmount(null)
+                .insuranceDeductibleRate(null)
+                .deliveredAt(Instant.now())
                 .build();
 
         assertThatThrownBy(() -> shipmentRepository.saveAndFlush(shipment))
@@ -107,7 +118,12 @@ class ShipmentRepositoryIT extends AbstractIntegrationTest {
                 .requestedDeliveryDate(LocalDate.now())
                 .status(ShipmentStatus.CREATED)
                 .basePrice(BigDecimal.valueOf(20))
-                .extraInsuranceFee(BigDecimal.ZERO)
+                .insuranceSelected(false)
+                .insuranceFee(BigDecimal.ZERO.setScale(2))
+                .declaredValue(null)
+                .insuranceCoverageAmount(null)
+                .insuranceDeductibleRate(null)
+                .deliveredAt(Instant.now())
                 .build();
 
         assertThatThrownBy(() -> shipmentRepository.saveAndFlush(shipment))
@@ -177,7 +193,12 @@ class ShipmentRepositoryIT extends AbstractIntegrationTest {
                 .requestedDeliveryDate(LocalDate.now().plusDays(1))
                 .status(ShipmentStatus.CREATED)
                 .basePrice(BigDecimal.valueOf(20))
-                .extraInsuranceFee(BigDecimal.ZERO)
+                .insuranceSelected(false)
+                .insuranceFee(BigDecimal.ZERO.setScale(2))
+                .declaredValue(null)
+                .insuranceCoverageAmount(null)
+                .insuranceDeductibleRate(null)
+                .deliveredAt(Instant.now())
                 .build();
     }
 }

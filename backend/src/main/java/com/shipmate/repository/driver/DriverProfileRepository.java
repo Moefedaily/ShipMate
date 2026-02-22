@@ -19,4 +19,5 @@ public interface DriverProfileRepository extends JpaRepository<DriverProfile, UU
     List<DriverProfile> findByStatus(DriverStatus status);
 
     Optional<DriverProfile> findByUser_Id(UUID userId);
+    List<DriverProfile> findByStrikeCountGreaterThan(int strikeCount);
 }

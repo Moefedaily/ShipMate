@@ -108,6 +108,30 @@ export const routes: Routes = [
             .then(m => m.ShipmentPaymentPage)
       },
       {
+        path: 'shipments/:id/claim',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/insurance/new/claim-create.page')
+            .then(m => m.ClaimCreatePage)
+      },
+      {
+        path: 'shipments/:id/claim/details',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/insurance/detail/claim-details.page')
+            .then(m => m.ClaimDetailsPage)
+      },
+      {
+        path: 'claims',
+        canActivate: [senderGuard],
+        data: { dashboardRole: 'SENDER' },
+        loadComponent: () =>
+          import('./features/insurance/list/claims-list.page')
+            .then(m => m.ClaimsListPage)
+      },
+      {
         path: 'driver',
         canActivate: [driverGuard],
         resolve: { state: driverDashboardResolver },

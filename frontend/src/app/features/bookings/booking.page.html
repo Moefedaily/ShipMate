@@ -1,165 +1,197 @@
 <div class="booking-page">
-  
+
   @if (loading()) {
-    <p class="muted">
-      <mat-icon style="animation: spin 1s linear infinite; vertical-align: middle; margin-right: 8px;">refresh</mat-icon>
-      Loading booking details…
-    </p>
-  }
-  
-  @if (errorMessage()) {
-    <div class="error-banner" role="alert">
-      {{ errorMessage() }}
+    <div class="loading-state">
+      <mat-icon class="spin">refresh</mat-icon>
+      <p>Loading booking details…</p>
     </div>
   }
-  
-  @if (booking()) {
-    
-    <div class="page-header">
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
       <div>
-      <button class="btn btn--ghost back-btn" routerLink="/dashboard/driver">
+        <strong>Something went wrong</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    </div>
+  }
+
+  @if (booking()) {
+
+    <div class="page-header">
+      <div class="header-left">
+        <button class="btn btn--ghost back-btn" routerLink="/dashboard/driver">
           <mat-icon>arrow_back</mat-icon>
           Back
         </button>
-         <h1>Current Delivery</h1>
-        <p class="subtitle">
-          Track and manage your active booking with real-time updates
-        </p>
+        <div class="header-text">
+          <h1>Current Delivery</h1>
+          <p class="subtitle">Track and manage your active booking</p>
+        </div>
       </div>
-      <span class="badge" [ngClass]="statusBadgeClass()">
+      <span class="status-badge" [ngClass]="statusBadgeClass()">
+        <span class="dot"></span>
         {{ status() }}
       </span>
     </div>
-    
-    <section class="card booking-map">
-      <app-leaflet-map
-        mode="route"
-        [stops]="mapStops()"
-      />
+
+    <section class="booking-map">
+      <app-leaflet-map mode="route" [stops]="mapStops()" />
     </section>
-    
-    <section class="card booking-details">
-      
-      <!-- Route Stops Section -->
-      <div class="details-section">
-        <h2 class="section-title">Route Stops</h2>
-        
-        <ul class="stops">
-          @for (shipment of shipments(); track shipment.id; let i = $index) {
-            <li>
-              <!-- Pickup -->
-              <div class="stop-row">
-                <span class="stop-label pickup">
-                  <mat-icon>store</mat-icon>
-                  Pickup
-                </span>
-                <span class="stop-address">{{ shipment.pickupAddress }}</span>
-              </div>
-              
-              <!-- Delivery -->
-              <div class="stop-row">
-                <span class="stop-label delivery">
-                  <mat-icon>local_shipping</mat-icon>
-                  Delivery
-                </span>
-                <span class="stop-address">{{ shipment.deliveryAddress }}</span>
-              </div>
-            </li>
-          }
-        </ul>
-      </div>
-      
-      <div class="details-divider"></div>
-      
-      <!-- Earnings Section -->
-      <div class="details-section">
-        <h2 class="section-title">Earnings Breakdown</h2>
-        
-        <div class="earnings-grid">
-          <div class="earning-card">
-            <span class="label">Your Earnings</span>
-            <strong>€{{ driverEarnings() }}</strong>
+
+    <div class="booking-body">
+
+      <section class="card booking-details">
+
+        <div class="details-section">
+          <div class="section-label">
+            <span class="section-number">01</span>
+            <span>Route stops</span>
           </div>
-          
-          <div class="earning-card">
-            <span class="label">Platform Fee</span>
-            <strong>€{{ platformCommission() }}</strong>
+
+          <ul class="stops">
+            @for (shipment of shipments(); track shipment.id) {
+              <li class="stop-card">
+
+                <div class="stop-row">
+                  <span class="stop-label pickup">
+                    <mat-icon>store</mat-icon>
+                    Pickup
+                  </span>
+                  <span class="stop-address">{{ shipment.pickupAddress }}</span>
+                </div>
+
+                <div class="stop-connector"></div>
+
+                <div class="stop-row">
+                  <span class="stop-label delivery">
+                    <mat-icon>local_shipping</mat-icon>
+                    Delivery
+                  </span>
+                  <span class="stop-address">{{ shipment.deliveryAddress }}</span>
+                </div>
+
+                <div class="stop-meta">
+                  <span class="pill">{{ shipment.packageWeight }} kg</span>
+                  <span class="pill pill--accent">{{ shipment.basePrice | currency }}</span>
+                  @if (shipment.insuranceSelected) {
+                    <span class="pill pill--insurance">
+                      <mat-icon>verified_user</mat-icon>
+                      Insured
+                    </span>
+                  }
+                </div>
+
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="details-divider"></div>
+
+        <div class="details-section">
+          <div class="section-label">
+            <span class="section-number">02</span>
+            <span>Earnings breakdown</span>
           </div>
-          
-          <div class="earning-card">
-            <span class="label">Total Value</span>
-            <strong>€{{ totalPrice() }}</strong>
+
+          <div class="earnings-grid">
+            <div class="earning-card highlight">
+              <div class="earning-icon">
+                <mat-icon>account_balance_wallet</mat-icon>
+              </div>
+              <span class="label">Your earnings</span>
+              <strong>{{ driverEarnings() | currency }}</strong>
+            </div>
+
+            <div class="earning-card">
+              <div class="earning-icon">
+                <mat-icon>storefront</mat-icon>
+              </div>
+              <span class="label">Platform fee</span>
+              <strong>{{ platformCommission() | currency }}</strong>
+            </div>
+
+            <div class="earning-card">
+              <div class="earning-icon">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
+              <span class="label">Total value</span>
+              <strong>{{ totalPrice() | currency }}</strong>
+            </div>
           </div>
         </div>
-      </div>
-      
-    </section>
-    
-    <section class="actions">
-      
-      @if (status() === 'PENDING') {
-        <button
-          type="button"
-          class="btn btn--secondary"
-          (click)="cancel()"
-          [disabled]="acting()"
-        >
-          @if (acting()) {
-            <mat-icon>hourglass_empty</mat-icon>
-            Cancelling…
-          } @else {
-            <mat-icon>close</mat-icon>
-            Cancel booking
-          }
-        </button>
-        
-        <button
-          type="button"
-          class="btn btn--primary"
-          (click)="confirm()"
-          [disabled]="acting()"
-        >
-          @if (acting()) {
-            <mat-icon>hourglass_empty</mat-icon>
-            Confirming…
-          } @else {
-            <mat-icon>check_circle</mat-icon>
-            Confirm booking
-          }
-        </button>
-      }
-      
-      @if (status() === 'CONFIRMED') {
 
-        @if (!canStartBooking()) {
-          <div class="info-banner">
-            Waiting for sender payment before starting delivery.
+      </section>
+
+      <div class="actions-panel">
+
+        @if (status() === 'CONFIRMED' && !canStartBooking()) {
+          <div class="info-notice">
+            <div class="info-notice-icon">
+              <mat-icon>hourglass_top</mat-icon>
+            </div>
+            <div>
+              <strong>Waiting for payment</strong>
+              <small>The sender must complete payment before you can start delivery.</small>
+            </div>
           </div>
         }
 
-        <button
-          type="button"
-          class="btn btn--primary"
-          (click)="start()"
-          [disabled]="acting() || !canStartBooking()"
-        >
-          @if (acting()) {
-            <mat-icon>hourglass_empty</mat-icon>
-            Starting…
-          } @else {
-            <mat-icon>play_arrow</mat-icon>
-            Start delivery
-          }
-        </button>
-      }
-    </section>
-    
-  }
-</div>
+        @if (status() === 'PENDING') {
+          <button
+            type="button"
+            class="btn btn--ghost action-btn action-btn--cancel"
+            (click)="cancel()"
+            [disabled]="acting()"
+          >
+            @if (acting()) {
+              <span class="btn-spinner btn-spinner--dark"></span>
+              Cancelling…
+            } @else {
+              <mat-icon>close</mat-icon>
+              Cancel booking
+            }
+          </button>
 
-<style>
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-</style>
+          <button
+            type="button"
+            class="btn btn--primary action-btn"
+            (click)="confirm()"
+            [disabled]="acting()"
+          >
+            @if (acting()) {
+              <span class="btn-spinner"></span>
+              Confirming…
+            } @else {
+              <mat-icon>check_circle</mat-icon>
+              Confirm booking
+            }
+          </button>
+        }
+
+        @if (status() === 'CONFIRMED') {
+          <button
+            type="button"
+            class="btn btn--primary action-btn"
+            (click)="start()"
+            [disabled]="acting() || !canStartBooking()"
+          >
+            @if (acting()) {
+              <span class="btn-spinner"></span>
+              Starting…
+            } @else {
+              <mat-icon>play_arrow</mat-icon>
+              Start delivery
+            }
+          </button>
+        }
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
