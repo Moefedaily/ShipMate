@@ -5,9 +5,12 @@ import com.cloudinary.utils.ObjectUtils;
 import com.shipmate.dto.request.insurance.AdminClaimDecisionRequest;
 import com.shipmate.dto.request.insurance.CreateInsuranceClaimRequest;
 import com.shipmate.dto.response.insurance.InsuranceClaimResponse;
+import com.shipmate.listener.notification.NotificationRequestedEvent;
 import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
 import com.shipmate.mapper.insurance.InsuranceClaimMapper;
 import com.shipmate.model.insuranceClaim.*;
+import com.shipmate.model.notification.NotificationType;
+import com.shipmate.model.notification.ReferenceType;
 import com.shipmate.model.payment.Payment;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
@@ -206,6 +209,16 @@ public class InsuranceClaimService {
         if (request.getDecision() == ClaimStatus.APPROVED) {
 
             claim.setClaimStatus(ClaimStatus.APPROVED);
+            eventPublisher.publishEvent(
+                new NotificationRequestedEvent(
+                    claim.getClaimant().getId(),
+                    "Insurance claim approved",
+                    "Your insurance claim for shipment " + claim.getShipment().getId() + " has been approved. Refund is being processed.",
+                    NotificationType.INSURANCE_UPDATE,
+                    claim.getShipment().getId(),
+                    ReferenceType.INSURANCE
+                )
+            );
 
             if (claim.getClaimReason() == ClaimReason.LOST) {
 
@@ -230,6 +243,16 @@ public class InsuranceClaimService {
         } else {
 
             claim.setClaimStatus(ClaimStatus.REJECTED);
+            eventPublisher.publishEvent(
+            new NotificationRequestedEvent(
+                claim.getClaimant().getId(),
+                "Insurance claim rejected",
+                "Your insurance claim has been rejected. Please check admin notes for details.",
+                NotificationType.INSURANCE_UPDATE,
+                claim.getShipment().getId(),
+                ReferenceType.INSURANCE
+            )
+        );
         }
 
         return mapper.toResponse(claim);

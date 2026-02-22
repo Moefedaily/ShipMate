@@ -5,5 +5,6 @@ public enum ReferenceType {
     BOOKING,
     PAYMENT,
     MESSAGE,
-    SYSTEM
+    INSURANCE,
+    SYSTEM,
 }

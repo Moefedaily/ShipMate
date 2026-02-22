@@ -84,6 +84,19 @@ export class NotificationsComponent {
       return;
     }
 
+    if (
+      notification.notificationType === 'INSURANCE_UPDATE' &&
+      notification.referenceType === 'INSURANCE'
+    ) {
+      this.router.navigate([
+        '/dashboard/shipments',
+        notification.referenceId,
+        'claim',
+        'details'
+      ]);
+      return;
+    }
+
     switch (notification.referenceType) {
 
       case 'SHIPMENT':
@@ -102,9 +115,7 @@ export class NotificationsComponent {
             notification.referenceId
           ]);
         } else if (roleType === 'SENDER') {
-          this.router.navigate([
-            '/dashboard/shipments'
-          ]);
+          this.router.navigate(['/dashboard/shipments']);
         }
         break;
 

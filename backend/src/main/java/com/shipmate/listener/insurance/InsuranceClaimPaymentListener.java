@@ -57,6 +57,16 @@ public class InsuranceClaimPaymentListener {
 
                 // 1) Mark claim as PAID (refund confirmed)
                 claim.setClaimStatus(ClaimStatus.PAID);
+                eventPublisher.publishEvent(
+                    new NotificationRequestedEvent(
+                        claim.getClaimant().getId(),
+                        "Insurance refund completed",
+                        "Your refund for shipment " + event.shipmentId() + " has been completed.",
+                        NotificationType.INSURANCE_UPDATE,
+                        event.shipmentId(),
+                        ReferenceType.INSURANCE
+                    )
+                );
                 claim.setResolvedAt(Instant.now());
                 claimRepository.save(claim);
 

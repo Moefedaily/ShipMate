@@ -7,13 +7,15 @@ export interface NotificationResponse {
       | 'PAYMENT_STATUS'
       | 'DELIVERY_STATUS'
       | 'NEW_MESSAGE'
-      | 'SYSTEM_ALERT';
+      | 'SYSTEM_ALERT'
+      | 'INSURANCE_UPDATE';
   referenceId?: string | null;
   referenceType?: 
       | 'SHIPMENT'
       | 'BOOKING'
       | 'PAYMENT'
       | 'MESSAGE'
+      | 'INSURANCE'
       | 'SYSTEM'
       | null;
   isRead: boolean;
