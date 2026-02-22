@@ -1,12 +1,10 @@
 @use '../../../../styles/variables/colors' as *;
 @use '../../../../styles/variables/typography' as *;
 
-
 .shipment-create-page {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 
 .create-header {
   display: flex;
@@ -20,56 +18,117 @@
   gap: 1rem;
 }
 
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.15rem;
+.header-text {
+  h1 {
+    font-size: 1.6rem;
     font-weight: $font-weight-semibold;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    &:hover {
-      background: $bg-surface;
-      transform: translateX(-3px);
-    }
+    margin: 0 0 0.2rem;
   }
 
-.shipment-create-card {
-  padding: 1.75rem 2rem;
-  border-radius: 16px;
-  background-color: $bg-card;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  p {
+    font-size: $text-size-label;
+    color: $text-muted;
+    margin: 0;
+  }
 }
 
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: $font-weight-semibold;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: $bg-surface;
+    transform: translateX(-3px);
+  }
+}
+
+.shipment-create-card {
+  padding: 2rem;
+  border-radius: 20px;
+  background-color: $bg-card;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+}
 
 .content {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
-  gap: 2rem;
+  gap: 2.5rem;
 }
-
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: 0;
+}
+
+.form-section {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: $color-primary;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
 }
 
 .form-block {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 label {
@@ -77,23 +136,31 @@ label {
   font-weight: $font-weight-medium;
   margin-bottom: 0.25rem;
   display: block;
+  color: inherit;
+}
+
+.field-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: $text-muted;
+  margin-left: 3px;
 }
 
 input,
 textarea {
   width: 100%;
   padding: 0.65rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid $border-default;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   font-size: $text-size-label;
   background: $bg-surface;
-
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus {
     outline: none;
     border-color: $color-primary;
     box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+    background: #fff;
   }
 
   &:disabled {
@@ -104,14 +171,14 @@ textarea {
 
 textarea {
   resize: vertical;
-  min-height: 90px;
+  min-height: 80px;
 }
-
 
 .form-error {
   font-size: $text-size-caption;
   color: $color-danger;
-  margin-bottom: 1rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0;
 }
 
 .hint {
@@ -120,81 +187,233 @@ textarea {
   margin-top: 0.25rem;
 }
 
+.insurance-readonly {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba($color-success, 0.05);
+  border: 1px solid rgba($color-success, 0.2);
+  margin-bottom: 1.25rem;
 
-.btn.btn--primary {
-  margin-top: 0.5rem;
-  align-self: flex-start;
-  min-width: 180px;
+  strong {
+    display: block;
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $color-success;
+  }
 
+  small {
+    font-size: $text-size-caption;
+    color: $text-muted;
+    display: block;
+  }
+}
+
+.insurance-readonly-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba($color-success, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $color-success;
+  }
+}
+
+.insurance-fee-pill {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba($color-success, 0.1);
+  border: 1px solid rgba($color-success, 0.25);
+  color: $color-success;
+  flex-shrink: 0;
+}
+
+.price-card {
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.price-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  background: $bg-surface;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: $text-size-caption;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+}
+
+.price-calculating {
+  font-size: $text-size-caption;
+  color: $color-primary;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.price-breakdown {
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $text-size-label;
+
+  strong {
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.rate-badge {
+  display: inline-block;
+  font-size: 11px;
+  background: rgba($color-primary, 0.1);
+  color: $color-primary;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 5px;
+  font-weight: $font-weight-semibold;
+}
+
+.deductible {
+  font-size: $text-size-caption;
+  color: $text-muted;
+
+  small {
+    font-size: inherit;
+  }
+}
+
+.price-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 0.25rem 0;
+}
+
+.total {
+  strong {
+    color: $color-primary;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+}
+
+.price-skeleton {
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-row {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+
+  &.short {
+    width: 55%;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.price-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  color: $text-muted;
+  font-size: $text-size-label;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+  }
+}
+
+.submit-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 12px;
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  transition: opacity 0.2s, transform 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }
 
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .map {
   height: 520px;
   border-radius: 14px;
   overflow: hidden;
-
-  border: 1px solid $border-default;
 }
-
-
-.edit-note {
-  font-size: $text-size-caption;
-  color: $text-muted;
-  margin-bottom: 1rem;
-
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-
-  mat-icon {
-    font-size: 16px;
-    color: $color-primary;
-  }
-}
-
-.price-preview {
-  margin-top: 1rem;
-  color: #92400e;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-
-  &.loading {
-    opacity: 0.7;
-  }
-
-  strong {
-    margin-left: 0.25rem;
-  }
-
-  .distance {
-    margin-left: auto;
-    color: #6b7280;
-    font-size: 0.8rem;
-  }
-
-  mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-}
-
-
 
 @media (max-width: 900px) {
   .content {
@@ -203,9 +422,5 @@ textarea {
 
   .map {
     height: 360px;
-  }
-
-  .btn.btn--primary {
-    width: 100%;
   }
 }

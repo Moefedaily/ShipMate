@@ -62,6 +62,10 @@ public class DriverProfile {
     @Builder.Default
     private DriverStatus status = DriverStatus.PENDING;
 
+    @Column(name = "strike_count", nullable = false)
+    @Builder.Default
+    private int strikeCount = 0;
+
     private Instant approvedAt;
 
     @CreationTimestamp

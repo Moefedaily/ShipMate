@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -101,7 +102,12 @@ class EarningsSummaryIT extends AbstractIntegrationTest {
                         .requestedPickupDate(LocalDate.now())
                         .requestedDeliveryDate(LocalDate.now().plusDays(1))
                         .basePrice(amount)
-                        .extraInsuranceFee(BigDecimal.ZERO)
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .declaredValue(null)
+                        .insuranceCoverageAmount(null)
+                        .insuranceDeductibleRate(null)
+                        .deliveredAt(Instant.now())
                         .build()
         );
 

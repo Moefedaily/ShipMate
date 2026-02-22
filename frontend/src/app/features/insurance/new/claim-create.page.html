@@ -1,0 +1,180 @@
+<div class="claim-create-page">
+
+  <div class="dashboard-hero create-header">
+    <div class="header-left">
+      <button class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+      <div class="header-text">
+        <h1>File Insurance Claim</h1>
+        <p>Report an issue with your insured shipment.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (shipment()) {
+    <div class="claim-layout">
+
+      <div class="claim-sidebar">
+        <div class="shipment-snapshot">
+          <div class="snapshot-header">
+            <mat-icon>inventory_2</mat-icon>
+            <span>Shipment</span>
+          </div>
+
+          <p class="snapshot-desc">{{ shipment()!.packageDescription || 'Shipment' }}</p>
+          <small class="snapshot-id">ID: {{ shipment()!.id | slice:0:8 }}</small>
+
+          <div class="snapshot-route">
+            <div class="route-point">
+              <span class="route-dot pickup"></span>
+              <span>{{ shipment()!.pickupAddress }}</span>
+            </div>
+            <div class="route-line"></div>
+            <div class="route-point">
+              <span class="route-dot delivery"></span>
+              <span>{{ shipment()!.deliveryAddress }}</span>
+            </div>
+          </div>
+
+          <div class="snapshot-pills">
+            <span class="pill">{{ shipment()!.packageWeight }} kg</span>
+            <span class="pill pill--accent">{{ shipment()!.basePrice | currency }}</span>
+            @if (shipment()!.insuranceSelected) {
+              <span class="pill pill--insurance">
+                <mat-icon>verified_user</mat-icon>
+                Insured
+              </span>
+            }
+          </div>
+
+          @if (shipment()!.insuranceCoverageAmount) {
+            <div class="coverage-info">
+              <span class="coverage-label">Coverage up to</span>
+              <span class="coverage-amount">{{ shipment()!.insuranceCoverageAmount | currency }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <section class="claim-card">
+
+        @if (!isInsured()) {
+          <div class="not-insured-notice">
+            <div class="not-insured-icon">
+              <mat-icon>gpp_bad</mat-icon>
+            </div>
+            <div>
+              <strong>Not insured</strong>
+              <p>This shipment is not insured. You cannot file a claim.</p>
+            </div>
+          </div>
+        }
+
+        @if (isInsured()) {
+          <form [formGroup]="form" class="form">
+
+            <div class="form-section">
+              <div class="section-label">
+                <span class="section-number">01</span>
+                <span>Claim type</span>
+              </div>
+
+              <div class="reason-options">
+                @for (reason of availableReasons(); track reason) {
+                  <label
+                    class="reason-option"
+                    [class.active]="form.controls.claimReason.value === reason"
+                  >
+                    <input type="radio" formControlName="claimReason" [value]="reason" />
+
+                    @if (reason === 'LOST') {
+                      <mat-icon>search_off</mat-icon>
+                      <div>
+                        <strong>Lost</strong>
+                        <small>Shipment never arrived</small>
+                      </div>
+                    }
+                    @if (reason === 'DAMAGED') {
+                      <mat-icon>broken_image</mat-icon>
+                      <div>
+                        <strong>Damaged</strong>
+                        <small>Package arrived damaged</small>
+                      </div>
+                    }
+                    @if (reason === 'OTHER') {
+                      <mat-icon>help_outline</mat-icon>
+                      <div>
+                        <strong>Other</strong>
+                        <small>Another issue occurred</small>
+                      </div>
+                    }
+                  </label>
+                }
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-label">
+                <span class="section-number">02</span>
+                <span>Description</span>
+              </div>
+
+              <div class="form-block">
+                <textarea
+                  formControlName="description"
+                  placeholder="Describe what happened in as much detail as possible…"
+                ></textarea>
+              </div>
+            </div>
+
+            @if (isDamaged()) {
+              <div class="form-section">
+                <div class="section-label">
+                  <span class="section-number">03</span>
+                  <span>Photos <span class="required-badge">Required</span></span>
+                </div>
+
+                <label class="file-upload-area">
+                  <mat-icon>add_photo_alternate</mat-icon>
+                  <span>Click to upload damage photos</span>
+                  <input type="file" multiple accept="image/*" (change)="onFileInputChange($event)" />
+                </label>
+
+                @if (photos().length === 0) {
+                  <small class="hint">At least one photo is required for damaged claims.</small>
+                }
+
+                @if (photoPreviews().length > 0) {
+                <div class="photo-grid">
+                    @for (item of photoPreviews(); track item.url; let i = $index) {
+                    <div class="photo">
+                        <img [src]="item.url" [alt]="item.file.name" />
+                        <button type="button" (click)="removePhoto(i)">×</button>
+                    </div>
+                    }
+                </div>
+                }
+              </div>
+            }
+
+            <button
+              type="button"
+              class="btn btn--danger submit-btn"
+              [disabled]="!canSubmit()"
+              (click)="submit()"
+            >
+              <mat-icon>gavel</mat-icon>
+              Submit Claim
+            </button>
+
+          </form>
+        }
+
+      </section>
+
+    </div>
+  }
+
+</div>

@@ -4,8 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.shipmate.dto.request.pricing.PricingEstimateRequest;
+import com.shipmate.dto.request.pricing.ShipmentPricingPreviewRequest;
 import com.shipmate.dto.response.pricing.PricingEstimateResponse;
+import com.shipmate.dto.response.pricing.ShipmentPricingPreviewResponse;
 import com.shipmate.service.pricing.PricingEstimateService;
+import com.shipmate.service.pricing.ShipmentPricingService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class PricingController {
 
     private final PricingEstimateService pricingEstimateService;
+    private final ShipmentPricingService shipmentPricingService;
 
     @Operation(
         summary = "Estimate shipment base price",
@@ -29,5 +33,18 @@ public class PricingController {
         @Valid @RequestBody PricingEstimateRequest request
     ) {
         return ResponseEntity.ok(pricingEstimateService.estimate(request));
+    }
+
+    @Operation(
+            summary = "Preview shipment pricing",
+            description = "Returns base price + optional insurance premium + total. Backend is authoritative."
+    )
+    @PostMapping("/shipment-preview")
+    public ResponseEntity<ShipmentPricingPreviewResponse> previewShipmentPricing(
+            @RequestBody ShipmentPricingPreviewRequest request
+    ) {
+        return ResponseEntity.ok(
+                shipmentPricingService.previewShipmentPricing(request)
+        );
     }
 }

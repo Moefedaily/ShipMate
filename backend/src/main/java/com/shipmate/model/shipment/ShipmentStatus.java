@@ -5,5 +5,6 @@ public enum ShipmentStatus {
     ASSIGNED,
     IN_TRANSIT,
     DELIVERED,
-    CANCELLED
+    CANCELLED,
+    LOST
 }

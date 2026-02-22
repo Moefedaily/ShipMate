@@ -36,7 +36,8 @@ public class ShipmentNotificationListener {
 
         if (event.status() != ShipmentStatus.IN_TRANSIT &&
             event.status() != ShipmentStatus.DELIVERED &&
-            event.status() != ShipmentStatus.CANCELLED) {
+            event.status() != ShipmentStatus.CANCELLED &&
+            event.status() != ShipmentStatus.LOST) {
             return;
         }
 
@@ -80,6 +81,7 @@ public class ShipmentNotificationListener {
             case IN_TRANSIT -> "Shipment in transit";
             case DELIVERED -> "Shipment delivered";
             case CANCELLED -> "Shipment cancelled";
+            case LOST -> "Shipment declared lost";
             default -> "Shipment update";
         };
     }
@@ -90,8 +92,8 @@ public class ShipmentNotificationListener {
                     "Your shipment " + shipmentId + " is now in transit.";
             case DELIVERED ->
                     "Your shipment " + shipmentId + " has been delivered successfully.";
-            case CANCELLED ->
-                    "Your shipment " + shipmentId + " was cancelled.";
+             case LOST ->
+                "Your shipment " + shipmentId + " has been declared lost. Please check your insurance claim status.";
             default ->
                     "Shipment updated.";
         };

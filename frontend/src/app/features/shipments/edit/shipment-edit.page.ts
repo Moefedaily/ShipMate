@@ -16,6 +16,7 @@ import {
 import { ShipmentResponse } from '../../../core/services/shipment/shipment.models';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -39,17 +40,23 @@ export class ShipmentEditPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly loader = inject(LoaderService);
 
-
   readonly shipment = signal<ShipmentResponse | null>(null);
   readonly submitting = signal(false);
 
   readonly pickup = signal<AddressResult | null>(null);
   readonly delivery = signal<AddressResult | null>(null);
 
-  readonly estimatedPrice = signal<number | null>(null);
-  readonly pricingDistanceKm = signal<number | null>(null);
   readonly pricingLoading = signal(false);
 
+  readonly basePrice = signal<number | null>(null);
+  readonly insuranceFee = signal<number | null>(null);
+  readonly totalPrice = signal<number | null>(null);
+  readonly deductibleRate = signal<number | null>(null);
+  readonly insuranceRateApplied = signal<number | null>(null);
+
+  readonly pricingDistanceKm = signal<number | null>(null);
+
+  readonly estimatedPrice = computed(() => this.totalPrice());
 
   readonly form = this.fb.nonNullable.group({
     packageDescription: [''],
@@ -59,10 +66,9 @@ export class ShipmentEditPage implements OnInit {
   });
 
   readonly formTick = toSignal(
-    this.form.valueChanges,
+    this.form.valueChanges.pipe(debounceTime(250)),
     { initialValue: this.form.getRawValue() }
   );
-
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -74,7 +80,6 @@ export class ShipmentEditPage implements OnInit {
     this.loadShipment(id);
   }
 
-
   private loadShipment(id: string): void {
     this.loader.show();
 
@@ -83,6 +88,7 @@ export class ShipmentEditPage implements OnInit {
         if (shipment.status !== 'CREATED') {
           this.toast.error('This shipment can no longer be edited');
           this.router.navigate(['/dashboard/shipments', shipment.id]);
+          this.loader.hide();
           return;
         }
 
@@ -107,6 +113,13 @@ export class ShipmentEditPage implements OnInit {
           lng: shipment.deliveryLongitude
         });
 
+        this.basePrice.set(null);
+        this.insuranceFee.set(null);
+        this.totalPrice.set(null);
+        this.deductibleRate.set(null);
+        this.insuranceRateApplied.set(null);
+        this.pricingDistanceKm.set(null);
+
         this.loader.hide();
       },
       error: () => {
@@ -117,7 +130,6 @@ export class ShipmentEditPage implements OnInit {
     });
   }
 
-
   onPickupSelected(addr: AddressResult): void {
     this.pickup.set(addr);
   }
@@ -125,7 +137,6 @@ export class ShipmentEditPage implements OnInit {
   onDeliverySelected(addr: AddressResult): void {
     this.delivery.set(addr);
   }
-
 
   readonly pricingInputsChanged = computed(() => {
     const shipment = this.shipment();
@@ -144,61 +155,74 @@ export class ShipmentEditPage implements OnInit {
     );
   });
 
- constructor() {
-  effect(() => {
-    const shipment = this.shipment();
-    const pickup = this.pickup();
-    const delivery = this.delivery();
-    const form = this.formTick();
+  constructor() {
+    effect(() => {
+      const shipment = this.shipment();
+      const pickup = this.pickup();
+      const delivery = this.delivery();
+      const form = this.formTick();
 
-    if (
-      !shipment ||
-      !pickup ||
-      !delivery ||
-      !this.form.controls.packageWeight.valid
-    ) {
-      this.estimatedPrice.set(null);
-      this.pricingDistanceKm.set(null);
-      return;
-    }
-
-    if (!this.pricingInputsChanged()) {
-      this.estimatedPrice.set(null);
-      this.pricingDistanceKm.set(null);
-      return;
-    }
-
-    const weight = form.packageWeight ?? 0;
-
-    if (weight <= 0) {
-      this.estimatedPrice.set(null);
-      this.pricingDistanceKm.set(null);
-      return;
-    }
-
-    this.pricingLoading.set(true);
-
-    this.shipmentService.estimate({
-      pickupLatitude: pickup.lat,
-      pickupLongitude: pickup.lng,
-      deliveryLatitude: delivery.lat,
-      deliveryLongitude: delivery.lng,
-      packageWeight: weight
-    }).subscribe({
-      next: res => {
-        this.estimatedPrice.set(res.estimatedBasePrice);
-        this.pricingDistanceKm.set(res.distanceKm);
-        this.pricingLoading.set(false);
-      },
-      error: () => {
-        this.estimatedPrice.set(null);
-        this.pricingDistanceKm.set(null);
-        this.pricingLoading.set(false);
+      if (!shipment || !pickup || !delivery || !this.form.controls.packageWeight.valid) {
+        this.resetPricingPreview();
+        return;
       }
-    });
-  });
-}
 
+      if (!this.pricingInputsChanged()) {
+        this.resetPricingPreview();
+        return;
+      }
+
+      const weight = form.packageWeight ?? 0;
+      if (weight <= 0) {
+        this.resetPricingPreview();
+        return;
+      }
+
+      this.pricingLoading.set(true);
+
+      this.shipmentService.previewShipmentPricing({
+        pickupLatitude: pickup.lat,
+        pickupLongitude: pickup.lng,
+        deliveryLatitude: delivery.lat,
+        deliveryLongitude: delivery.lng,
+        packageWeight: weight,
+
+        // insurance preview requires packageValue too
+        packageValue: shipment.packageValue,
+
+        // use CURRENT insurance config from shipment (edit doesn’t change it)
+        insuranceSelected: shipment.insuranceSelected === true,
+        declaredValue: shipment.insuranceSelected ? (shipment.declaredValue ?? undefined) : undefined
+      }).subscribe({
+        next: res => {
+          this.basePrice.set(res.basePrice);
+          this.insuranceFee.set(res.insuranceFee);
+          this.totalPrice.set(res.totalPrice);
+          this.deductibleRate.set(res.deductibleRate);
+          this.insuranceRateApplied.set(res.insuranceRateApplied);
+
+          // if your preview endpoint doesn’t return distance, keep old behavior (null)
+          // (optional improvement: extend response to include distanceKm)
+          this.pricingDistanceKm.set(this.pricingDistanceKm());
+
+          this.pricingLoading.set(false);
+        },
+        error: () => {
+          this.resetPricingPreview();
+          this.pricingLoading.set(false);
+        }
+      });
+    });
+  }
+
+  private resetPricingPreview(): void {
+    this.basePrice.set(null);
+    this.insuranceFee.set(null);
+    this.totalPrice.set(null);
+    this.deductibleRate.set(null);
+    this.insuranceRateApplied.set(null);
+    this.pricingDistanceKm.set(null);
+  }
 
   readonly canSubmit = computed(() => {
     this.formTick();

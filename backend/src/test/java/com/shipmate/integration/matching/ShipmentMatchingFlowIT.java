@@ -3,6 +3,7 @@ package com.shipmate.integration.matching;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -119,13 +120,14 @@ class ShipmentMatchingFlowIT extends AbstractIntegrationTest {
                         .requestedDeliveryDate(LocalDate.now().plusDays(1))
                         .status(ShipmentStatus.CREATED)
                         .basePrice(BigDecimal.valueOf(20))
-                        .extraInsuranceFee(BigDecimal.ZERO)
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .declaredValue(null)
+                        .insuranceCoverageAmount(null)
+                        .insuranceDeductibleRate(null)
+                        .deliveredAt(Instant.now())
                         .build()
         );
-
-        // --------------------
-        // WHEN matching is executed without explicit lat/lng
-        // --------------------
         List<MatchResultResponse> results =
                 shipmentMatchingService.matchShipments(
                         driver.getId(),

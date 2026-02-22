@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
-import { CreateShipmentRequest, DeliveryCodeStatusResponse, PageResponse, PricingEstimateRequest, PricingEstimateResponse, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
+import { map, Observable, tap } from 'rxjs';
+import { CreateShipmentRequest, DeliveryCodeStatusResponse, PageResponse, PricingEstimateRequest, PricingEstimateResponse, ShipmentPricingPreviewRequest, ShipmentPricingPreviewResponse, ShipmentResponse, UpdateShipmentRequest } from './shipment.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -90,6 +90,14 @@ export class ShipmentService {
       );
     }
 
+    previewShipmentPricing( req: ShipmentPricingPreviewRequest ): Observable<ShipmentPricingPreviewResponse> {
+    return this.http.post<ShipmentPricingPreviewResponse>(
+      `${this.api}/pricing/shipment-preview`,
+      req
+    ).pipe(
+      tap(res => console.log(res))
+    );
+  }
 }
 
 

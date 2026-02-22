@@ -78,8 +78,23 @@ public class Shipment {
     @Column(name = "delivery_order")
     private Integer deliveryOrder;
 
-    @Column(name = "extra_insurance_fee", precision = 8, scale = 2)
-    private BigDecimal extraInsuranceFee;
+    @Column(name = "insurance_fee", precision = 10, scale = 2)
+    private BigDecimal insuranceFee;
+
+    @Column(name = "insurance_selected", nullable = false)
+    private boolean insuranceSelected;
+
+    @Column(name = "declared_value", precision = 10, scale = 2)
+    private BigDecimal declaredValue;
+
+    @Column(name = "insurance_coverage_amount", precision = 10, scale = 2)
+    private BigDecimal insuranceCoverageAmount;
+
+    @Column(name = "insurance_deductible_rate", precision = 5, scale = 4)
+    private BigDecimal insuranceDeductibleRate;
+
+    @Column(name = "delivered_at")
+    private Instant deliveredAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

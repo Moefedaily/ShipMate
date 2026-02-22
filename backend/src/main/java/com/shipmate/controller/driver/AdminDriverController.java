@@ -26,7 +26,6 @@ public class AdminDriverController {
 
     private final DriverProfileService driverProfileService;
 
-    // ===================== GET PENDING DRIVERS =====================
 
     @Operation(
         summary = "Get pending driver applications",
@@ -42,7 +41,6 @@ public class AdminDriverController {
         return ResponseEntity.ok(driverProfileService.getPendingDrivers());
     }
 
-    // ===================== APPROVE DRIVER =====================
 
     @Operation(
         summary = "Approve driver application",
@@ -59,7 +57,6 @@ public class AdminDriverController {
         return ResponseEntity.ok(driverProfileService.approve(id));
     }
 
-    // ===================== REJECT DRIVER =====================
 
     @Operation(
         summary = "Reject driver application",
@@ -76,7 +73,6 @@ public class AdminDriverController {
         return ResponseEntity.ok(driverProfileService.reject(id));
     }
 
-    // ===================== SUSPEND DRIVER =====================
 
     @Operation(
         summary = "Suspend driver account",
@@ -93,4 +89,24 @@ public class AdminDriverController {
         return ResponseEntity.ok(driverProfileService.suspend(id));
     }
 
+    @Operation(
+        summary = "Get drivers with strikes",
+        description = "Retrieve all drivers with strike count information."
+    )
+    @GetMapping("/strikes")
+    public ResponseEntity<List<DriverProfileResponse>> getDriversWithStrikes() {
+        return ResponseEntity.ok(driverProfileService.getDriversWithStrikes());
+    }
+
+    @Operation(
+        summary = "Reset driver strikes",
+        description = "Resets strike count and restores driver if suspended."
+    )
+    @PostMapping("/{id}/reset-strikes")
+    public ResponseEntity<DriverProfileResponse> resetStrikes(
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity.ok(driverProfileService.resetStrikes(id));
+    }
+    
 }

@@ -31,4 +31,5 @@ public class DriverProfileResponse {
     private Instant lastLocationUpdatedAt;
     private Instant createdAt;
     private Instant approvedAt;
+    private int strikeCount;
 }

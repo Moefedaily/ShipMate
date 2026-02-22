@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -70,6 +72,21 @@ public class ShipmentService {
 
     @Value("${app.file.max-size:10485760}")
     private long maxFileSize;
+    @Value("${app.insurance.deductible-rate}")
+    private BigDecimal insuranceDeductibleRate;
+    @Value("${app.insurance.tier1.limit}")
+    private BigDecimal tier1Limit;
+
+    @Value("${app.insurance.tier1.rate}")
+    private BigDecimal tier1Rate;
+
+    @Value("${app.insurance.tier2.limit}")
+    private BigDecimal tier2Limit;
+
+    @Value("${app.insurance.tier2.rate}")
+    private BigDecimal tier2Rate;
+    @Value("${app.insurance.max-declared-value}")
+    private BigDecimal maxDeclaredValue;
 
     private static final List<String> ALLOWED_IMAGE_TYPES = List.of(
         "image/jpeg",
@@ -79,13 +96,13 @@ public class ShipmentService {
 
 
         public ShipmentResponse create(UUID senderId, CreateShipmentRequest request) {
+
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Shipment shipment = shipmentMapper.toEntity(request);
         shipment.setSender(sender);
         shipment.setStatus(ShipmentStatus.CREATED);
-        shipment.setExtraInsuranceFee(BigDecimal.ZERO);
 
         BigDecimal distanceKm = GeoUtils.haversineKm(
                 request.getPickupLatitude(),
@@ -100,7 +117,50 @@ public class ShipmentService {
 
         shipment.setBasePrice(basePrice);
 
+
+        if (request.isInsuranceSelected()) {
+
+            BigDecimal declaredValue = request.getDeclaredValue();
+
+            if (declaredValue == null ||
+                    declaredValue.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Declared value required");
+            }
+
+            declaredValue = declaredValue.setScale(2, RoundingMode.HALF_UP);
+
+            if (declaredValue.compareTo(request.getPackageValue()) > 0) {
+                throw new IllegalArgumentException("Declared value cannot exceed package value");
+            }
+
+            if (declaredValue.compareTo(maxDeclaredValue) > 0) {
+                throw new IllegalArgumentException("Declared value exceeds maximum allowed insurance limit");
+            }
+
+            // Tier-based rate
+            BigDecimal premiumRate = calculateInsuranceRate(declaredValue);
+
+            BigDecimal insuranceFee = declaredValue
+                    .multiply(premiumRate)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            shipment.setInsuranceSelected(true);
+            shipment.setDeclaredValue(declaredValue);
+            shipment.setInsuranceFee(insuranceFee);
+            shipment.setInsuranceCoverageAmount(declaredValue);
+            shipment.setInsuranceDeductibleRate(insuranceDeductibleRate);
+
+        } else {
+
+            shipment.setInsuranceSelected(false);
+            shipment.setDeclaredValue(null);
+            shipment.setInsuranceFee(BigDecimal.ZERO);
+            shipment.setInsuranceCoverageAmount(null);
+            shipment.setInsuranceDeductibleRate(null);
+        }
+
         Shipment saved = shipmentRepository.saveAndFlush(shipment);
+
         return shipmentAssembler.toResponse(saved);
     }
 
@@ -248,6 +308,10 @@ public class ShipmentService {
 
         validateDriverAccess(shipment, driverId);
 
+        if (shipment.getStatus() == ShipmentStatus.LOST) {
+                throw new IllegalStateException("Lost shipment cannot be modified");
+        }
+
         if (shipment.getStatus() != ShipmentStatus.ASSIGNED) {
                 throw new IllegalStateException("Shipment cannot move to IN_TRANSIT");
         }
@@ -285,11 +349,18 @@ public class ShipmentService {
 
         validateDriverAccess(shipment, driverId);
 
+        if (shipment.getStatus() == ShipmentStatus.LOST) {
+                throw new IllegalStateException("Lost shipment cannot be modified");
+        }
+
         if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
                 throw new IllegalStateException("Shipment must be IN_TRANSIT to deliver");
         }
 
         shipment.setStatus(ShipmentStatus.DELIVERED);
+        if (shipment.getDeliveredAt() == null) {
+            shipment.setDeliveredAt(Instant.now());
+        }
 
         eventPublisher.publishEvent(
                 new ShipmentStatusChangedEvent(
@@ -313,6 +384,11 @@ public class ShipmentService {
 
         validateDriverAccess(shipment, driverId);
 
+        if (shipment.getStatus() == ShipmentStatus.LOST) {
+            throw new IllegalStateException("Lost shipment cannot be modified");
+        }
+        
+
         if (shipment.getStatus() != ShipmentStatus.IN_TRANSIT) {
             throw new IllegalStateException("Shipment must be IN_TRANSIT to confirm delivery");
         }
@@ -329,6 +405,9 @@ public class ShipmentService {
         paymentService.capturePaymentForShipment(shipment);
 
         shipment.setStatus(ShipmentStatus.DELIVERED);
+        if (shipment.getDeliveredAt() == null) {
+            shipment.setDeliveredAt(Instant.now());
+        }
         eventPublisher.publishEvent(
                 new ShipmentStatusChangedEvent(
                         shipment.getId(),
@@ -374,6 +453,10 @@ public class ShipmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
         validateParticipantAccess(shipment, actorId);
+
+        if (shipment.getStatus() == ShipmentStatus.LOST) {
+                throw new IllegalStateException("Lost shipment cannot be modified");
+        }
 
         if (shipment.getStatus() == ShipmentStatus.DELIVERED) {
                 throw new IllegalStateException("Delivered shipment cannot be cancelled");
@@ -434,13 +517,16 @@ public class ShipmentService {
         boolean allCancelled = shipments.stream()
                 .allMatch(s -> s.getStatus() == ShipmentStatus.CANCELLED);
 
-        boolean allDelivered = shipments.stream()
-                .allMatch(s -> s.getStatus() == ShipmentStatus.DELIVERED);
-
+        boolean allDeliveredOrLost = shipments.stream()
+        .allMatch(s ->
+                s.getStatus() == ShipmentStatus.DELIVERED ||
+                s.getStatus() == ShipmentStatus.LOST
+        );
         boolean allFinished = shipments.stream()
                 .allMatch(s ->
                         s.getStatus() == ShipmentStatus.DELIVERED ||
-                        s.getStatus() == ShipmentStatus.CANCELLED
+                        s.getStatus() == ShipmentStatus.CANCELLED ||
+                        s.getStatus() == ShipmentStatus.LOST
                 );
 
         BookingStatus previousStatus = booking.getStatus();
@@ -449,7 +535,7 @@ public class ShipmentService {
         if (allCancelled) {
                 newStatus = BookingStatus.CANCELLED;
         }
-        else if (allDelivered || allFinished) {
+        else if (allDeliveredOrLost || allFinished) {
                 newStatus = BookingStatus.COMPLETED;
         }
         else {
@@ -482,4 +568,16 @@ public class ShipmentService {
         }
         }
 
+        private BigDecimal calculateInsuranceRate(BigDecimal declaredValue) {
+
+        if (declaredValue.compareTo(tier1Limit) <= 0) {
+            return tier1Rate;
+        }
+
+        if (declaredValue.compareTo(tier2Limit) <= 0) {
+            return tier2Rate;
+        }
+
+        throw new IllegalArgumentException("Declared value exceeds supported insurance tiers");
+    }
 }

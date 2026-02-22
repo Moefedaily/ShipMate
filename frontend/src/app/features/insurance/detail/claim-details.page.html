@@ -1,0 +1,170 @@
+<div class="claim-details-page">
+
+  <div class="dashboard-hero create-header">
+    <div class="header-left">
+      <button class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+      <div class="header-text">
+        <h1>Insurance Claim</h1>
+        <p>Track the progress of your claim.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (claim()) {
+    <div class="claim-details-layout">
+
+      <div class="status-sidebar">
+
+        <div class="status-hero" [attr.data-status]="claim()!.claimStatus">
+          <div class="status-icon-wrap">
+            @if (claim()!.claimStatus === 'SUBMITTED') {
+              <mat-icon>hourglass_empty</mat-icon>
+            } @else if (claim()!.claimStatus === 'UNDER_REVIEW') {
+              <mat-icon>manage_search</mat-icon>
+            } @else if (claim()!.claimStatus === 'APPROVED') {
+              <mat-icon>thumb_up</mat-icon>
+            } @else if (claim()!.claimStatus === 'REJECTED') {
+              <mat-icon>cancel</mat-icon>
+            } @else if (claim()!.claimStatus === 'PAID') {
+              <mat-icon>check_circle</mat-icon>
+            }
+          </div>
+          <div class="status-text">
+            <span class="status-tag">{{ claim()!.claimStatus }}</span>
+            <p class="status-desc">{{ getStatusLabel(claim()!.claimStatus) }}</p>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step" [class.done]="isStepDone('SUBMITTED')" [class.active]="claim()!.claimStatus === 'SUBMITTED'">
+            <span class="step-dot"></span>
+            <span class="step-label">Submitted</span>
+          </div>
+          <div class="timeline-connector"></div>
+          <div class="timeline-step" [class.done]="isStepDone('UNDER_REVIEW')" [class.active]="claim()!.claimStatus === 'UNDER_REVIEW'">
+            <span class="step-dot"></span>
+            <span class="step-label">Under review</span>
+          </div>
+          <div class="timeline-connector"></div>
+          <div class="timeline-step" [class.done]="isStepDone('APPROVED')" [class.active]="claim()!.claimStatus === 'APPROVED'">
+            <span class="step-dot"></span>
+            <span class="step-label">Approved</span>
+          </div>
+          <div class="timeline-connector"></div>
+          <div class="timeline-step" [class.done]="isStepDone('PAID')" [class.active]="claim()!.claimStatus === 'PAID'">
+            <span class="step-dot"></span>
+            <span class="step-label">Paid</span>
+          </div>
+        </div>
+
+        @if (claim()!.createdAt) {
+          <div class="meta-dates">
+            <div class="meta-date-item">
+              <span class="meta-date-label">Filed on</span>
+              <span class="meta-date-value">{{ claim()!.createdAt | date:'mediumDate' }}</span>
+            </div>
+            @if (claim()!.resolvedAt) {
+              <div class="meta-date-item">
+                <span class="meta-date-label">Resolved on</span>
+                <span class="meta-date-value">{{ claim()!.resolvedAt | date:'mediumDate' }}</span>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+
+      <div class="claim-body">
+
+        <div class="financial-card">
+          <div class="financial-card-header">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Financial summary</span>
+          </div>
+          <div class="financial-grid">
+            <div class="financial-item">
+              <span class="financial-label">Declared value</span>
+              <strong class="financial-value">{{ claim()!.declaredValueSnapshot | currency }}</strong>
+            </div>
+            <div class="financial-item">
+              <span class="financial-label">Coverage amount</span>
+              <strong class="financial-value">{{ claim()!.coverageAmount | currency }}</strong>
+            </div>
+            <div class="financial-item">
+              <span class="financial-label">Deductible rate</span>
+              <strong class="financial-value">{{ (claim()!.deductibleRate) * 100 | number:'1.0-0' }}%</strong>
+            </div>
+            <div class="financial-item highlight">
+              <span class="financial-label">Compensation</span>
+              <strong class="financial-value compensation">{{ claim()!.compensationAmount | currency }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+
+          <div class="detail-section">
+            <div class="section-label">
+              <span class="section-number">01</span>
+              <span>Claim details</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-key">Reason</span>
+              <span class="reason-badge reason-badge--{{ claim()!.claimReason | lowercase }}">
+                @if (claim()!.claimReason === 'LOST') {
+                  <mat-icon>search_off</mat-icon>
+                } @else if (claim()!.claimReason === 'DAMAGED') {
+                  <mat-icon>broken_image</mat-icon>
+                } @else {
+                  <mat-icon>help_outline</mat-icon>
+                }
+                {{ claim()!.claimReason }}
+              </span>
+            </div>
+
+            @if (claim()!.description) {
+              <div class="detail-row stacked">
+                <span class="detail-key">Description</span>
+                <p class="detail-text">{{ claim()!.description }}</p>
+              </div>
+            }
+          </div>
+
+          @if (claim()!.photos.length) {
+            <div class="detail-section">
+              <div class="section-label">
+                <span class="section-number">02</span>
+                <span>Submitted photos</span>
+              </div>
+              <div class="photo-grid">
+                @for (photo of claim()!.photos; track photo) {
+                  <img [src]="photo" alt="Claim photo" />
+                }
+              </div>
+            </div>
+          }
+
+          @if (claim()!.claimStatus === 'REJECTED' && claim()!.adminNotes) {
+            <div class="admin-notes">
+              <div class="admin-notes-icon">
+                <mat-icon>admin_panel_settings</mat-icon>
+              </div>
+              <div>
+                <strong>Admin notes</strong>
+                <p>{{ claim()!.adminNotes }}</p>
+              </div>
+            </div>
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+</div>

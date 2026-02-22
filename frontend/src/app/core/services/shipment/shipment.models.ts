@@ -15,8 +15,31 @@ export interface CreateShipmentRequest {
 
   requestedPickupDate: string;
   requestedDeliveryDate: string;
+
+  insuranceSelected: boolean;
+  declaredValue?: number;
+  insuranceOption: 'NONE' | 'STANDARD' | 'EXTENDED'
+} 
+
+export interface ShipmentPricingPreviewRequest {
+  pickupLatitude: number;
+  pickupLongitude: number;
+  deliveryLatitude: number;
+  deliveryLongitude: number;
+  packageWeight: number;
+  packageValue: number;
+  insuranceSelected: boolean;
+  declaredValue?: number;
 }
 
+export interface ShipmentPricingPreviewResponse {
+  basePrice: number;
+  insuranceFee: number;
+  totalPrice: number;
+  insuranceRateApplied: number;
+  deductibleRate: number;
+  declaredValue?: number;
+}
 export interface AssignedDriver {
   id: string;
   firstName: string;
@@ -29,10 +52,10 @@ export interface ShipmentResponse {
   senderId: string;
   paymentStatus: PaymentStatus;
   pickupAddress: string;
-  pickupLatitude: number;          
+  pickupLatitude: number;
   pickupLongitude: number;
   deliveryAddress: string;
-  deliveryLatitude: number; 
+  deliveryLatitude: number;
   deliveryLongitude: number;
   deliveryLocked: boolean;
   deliveryCodeAttempts: number;
@@ -44,8 +67,18 @@ export interface ShipmentResponse {
   requestedPickupDate: string;
   requestedDeliveryDate: string;
   basePrice: number;
-  extraInsuranceFee: number;
-  status: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  insuranceSelected: boolean;
+  insuranceFee: number;
+  declaredValue?: number;
+  insuranceCoverageAmount?: number;
+  status:
+    | 'CREATED'
+    | 'ASSIGNED'
+    | 'IN_TRANSIT'
+    | 'DELIVERED'
+    | 'CANCELLED'
+    | 'LOST';
+
   photos: string[] | null;
   createdAt: string;
   updatedAt: string;

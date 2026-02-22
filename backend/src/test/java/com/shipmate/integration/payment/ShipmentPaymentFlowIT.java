@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,12 @@ class ShipmentPaymentFlowIT extends AbstractIntegrationTest {
                         .requestedDeliveryDate(LocalDate.now().plusDays(1))
                         .status(ShipmentStatus.ASSIGNED)
                         .basePrice(BigDecimal.valueOf(100))
-                        .extraInsuranceFee(BigDecimal.ZERO)
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .declaredValue(null)
+                        .insuranceCoverageAmount(null)
+                        .insuranceDeductibleRate(null)
+                        .deliveredAt(Instant.now())
                         .build()
         );
 

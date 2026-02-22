@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -81,7 +82,12 @@ class RefundFlowIT extends AbstractIntegrationTest {
                         .requestedPickupDate(LocalDate.now())
                         .requestedDeliveryDate(LocalDate.now().plusDays(1))
                         .basePrice(BigDecimal.valueOf(100))
-                        .extraInsuranceFee(BigDecimal.ZERO)
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .declaredValue(null)
+                        .insuranceCoverageAmount(null)
+                        .insuranceDeductibleRate(null)
+                        .deliveredAt(Instant.now())
                         .build()
         );
 

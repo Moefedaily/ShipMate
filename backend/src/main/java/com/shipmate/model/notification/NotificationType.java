@@ -5,5 +5,6 @@ public enum NotificationType {
     PAYMENT_STATUS,
     DELIVERY_STATUS,
     NEW_MESSAGE,
-    SYSTEM_ALERT
+    SYSTEM_ALERT,
+    INSURANCE_UPDATE
 }
