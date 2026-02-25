@@ -26,6 +26,10 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Build with Maven
+      - name: Build and Run Tests
         working-directory: ./backend
-        run: mvn clean verify -DskipTests
+        run: mvn clean verify
+        
+      - name: Build Docker Image
+        working-directory: ./backend
+        run: docker build -t shipmate-backend:ci .  
