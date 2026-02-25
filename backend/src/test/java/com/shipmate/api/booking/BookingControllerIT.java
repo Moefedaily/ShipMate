@@ -50,7 +50,6 @@ class BookingControllerIT extends AbstractIntegrationTest {
 
     private static final String PASSWORD = "Password123!";
 
-    // ===================== CREATE BOOKING =====================
 
     @Test
     void createBooking_shouldSucceed_whenAuthenticatedDriver() throws Exception {
@@ -69,7 +68,6 @@ class BookingControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status").value(BookingStatus.PENDING.name()));
     }
 
-    // ===================== GET MY BOOKINGS =====================
 
     @Test
     void getMyBookings_shouldReturnDriverBookings() throws Exception {
@@ -164,6 +162,55 @@ class BookingControllerIT extends AbstractIntegrationTest {
         return obtainAccessToken(driver.getEmail(), PASSWORD);
     }
 
+        private UUID createFarShipment() {
+        User sender = userRepository.save(
+                User.builder()
+                        .email("sender-" + UUID.randomUUID() + "@shipmate.com")
+                        .password(passwordEncoder.encode(PASSWORD))
+                        .firstName("Sender")
+                        .lastName("Test")
+                        .role(Role.USER)
+                        .userType(UserType.SENDER)
+                        .verified(true)
+                        .active(true)
+                        .build()
+        );
+
+        Shipment shipment = Shipment.builder()
+                .sender(sender)
+                .pickupAddress("Paris")
+                .pickupLatitude(BigDecimal.valueOf(48.8566))
+                .pickupLongitude(BigDecimal.valueOf(2.3522))
+                .deliveryAddress("Very Far")
+                .deliveryLatitude(BigDecimal.valueOf(50.8566))
+                .deliveryLongitude(BigDecimal.valueOf(4.3522))
+                .packageWeight(BigDecimal.valueOf(2.5))
+                .packageValue(BigDecimal.valueOf(100))
+                .requestedPickupDate(LocalDate.now())
+                .requestedDeliveryDate(LocalDate.now().plusDays(1))
+                .status(ShipmentStatus.CREATED)
+                .basePrice(BigDecimal.valueOf(20))
+                .build();
+
+        return shipmentRepository.saveAndFlush(shipment).getId();
+        }
+        @Test
+        void createBooking_shouldFail_whenTripTooLong() throws Exception {
+        String token = createAndLoginDriver();
+        updateDriverLocation(token);
+
+        UUID farShipmentId = createFarShipment();
+
+        CreateBookingRequest request =
+                new CreateBookingRequest(List.of(farShipmentId));
+
+        mockMvc.perform(post("/api/bookings")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("TRIP_DISTANCE_CAP_EXCEEDED"));
+        }
     private void updateDriverLocation(String token) throws Exception {
         mockMvc.perform(post("/api/drivers/me/location")
                         .header("Authorization", "Bearer " + token)
@@ -218,8 +265,8 @@ class BookingControllerIT extends AbstractIntegrationTest {
                 .pickupLatitude(BigDecimal.valueOf(48.8566))
                 .pickupLongitude(BigDecimal.valueOf(2.3522))
                 .deliveryAddress("Lyon")
-                .deliveryLatitude(BigDecimal.valueOf(45.7640))
-                .deliveryLongitude(BigDecimal.valueOf(4.8357))
+                .deliveryLatitude(BigDecimal.valueOf(48.8666))
+                .deliveryLongitude(BigDecimal.valueOf(2.3622))
                 .packageWeight(BigDecimal.valueOf(2.5))
                 .packageValue(BigDecimal.valueOf(100))
                 .requestedPickupDate(LocalDate.now())

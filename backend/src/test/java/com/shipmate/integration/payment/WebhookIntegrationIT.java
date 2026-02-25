@@ -73,7 +73,7 @@ class WebhookIntegrationIT extends AbstractIntegrationTest {
                 Shipment.builder()
                         .sender(sender)
                         .booking(booking)
-                        .status(ShipmentStatus.ASSIGNED)
+                        .status(ShipmentStatus.DELIVERED)
                         .pickupAddress("Paris")
                         .pickupLatitude(BigDecimal.ONE)
                         .pickupLongitude(BigDecimal.ONE)
@@ -158,6 +158,11 @@ class WebhookIntegrationIT extends AbstractIntegrationTest {
                 .header("Stripe-Signature", "test")
                 .content(payload))
             .andExpect(status().isOk());
+        
+        Payment afterSecondCall = paymentRepository.findById(payment.getId()).orElseThrow();
+
+        assertThat(afterSecondCall.getPaymentStatus())
+            .isEqualTo(PaymentStatus.CAPTURED);
 
         long earningCountAfterSecondCall = driverEarningRepository.count();
 
@@ -166,7 +171,168 @@ class WebhookIntegrationIT extends AbstractIntegrationTest {
 
     }
 
+    @Test
+    void webhook_shouldIgnoreCapture_whenShipmentNotDelivered() throws Exception {
 
+        User sender = createUser(UserType.SENDER);
+        User driver = createUser(UserType.DRIVER);
+
+        Booking booking = bookingRepository.save(
+                Booking.builder()
+                        .driver(driver)
+                        .status(BookingStatus.IN_PROGRESS)
+                        .shipments(new ArrayList<>())
+                        .build()
+        );
+
+        Shipment shipment = shipmentRepository.save(
+                Shipment.builder()
+                        .sender(sender)
+                        .booking(booking)
+                        .status(ShipmentStatus.ASSIGNED)
+                        .pickupAddress("Paris")
+                        .pickupLatitude(BigDecimal.ONE)
+                        .pickupLongitude(BigDecimal.ONE)
+                        .deliveryAddress("Lyon")
+                        .deliveryLatitude(BigDecimal.TEN)
+                        .deliveryLongitude(BigDecimal.TEN)
+                        .packageWeight(BigDecimal.ONE)
+                        .packageValue(BigDecimal.TEN)
+                        .requestedPickupDate(LocalDate.now())
+                        .requestedDeliveryDate(LocalDate.now().plusDays(1))
+                        .basePrice(BigDecimal.valueOf(100))
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .build()
+        );
+
+        booking.getShipments().add(shipment);
+        bookingRepository.save(booking);
+
+        Payment payment = paymentRepository.save(
+                Payment.builder()
+                        .shipment(shipment)
+                        .sender(sender)
+                        .stripePaymentIntentId("pi_test_" + UUID.randomUUID())
+                        .amountTotal(BigDecimal.valueOf(100))
+                        .currency("EUR")
+                        .paymentStatus(PaymentStatus.AUTHORIZED)
+                        .build()
+        );
+
+        String payload = buildSucceededPayload(payment.getStripePaymentIntentId());
+
+        mockMvc.perform(post("/api/webhooks/stripe")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Stripe-Signature", "test")
+                .content(payload))
+            .andExpect(status().isOk());
+
+        Payment updated = paymentRepository.findById(payment.getId()).orElseThrow();
+
+        assertThat(updated.getPaymentStatus())
+                .isEqualTo(PaymentStatus.AUTHORIZED);
+
+        assertThat(driverEarningRepository.count()).isZero();
+    }
+    @Test
+    void webhook_shouldRefundPayment_andCreateRefundEarning() throws Exception {
+
+        User sender = createUser(UserType.SENDER);
+        User driver = createUser(UserType.DRIVER);
+
+        Booking booking = bookingRepository.save(
+                Booking.builder()
+                        .driver(driver)
+                        .status(BookingStatus.COMPLETED)
+                        .shipments(new ArrayList<>())
+                        .build()
+        );
+
+        Shipment shipment = shipmentRepository.save(
+                Shipment.builder()
+                        .sender(sender)
+                        .booking(booking)
+                        .status(ShipmentStatus.DELIVERED)
+                        .pickupAddress("Paris")
+                        .pickupLatitude(BigDecimal.ONE)
+                        .pickupLongitude(BigDecimal.ONE)
+                        .deliveryAddress("Lyon")
+                        .deliveryLatitude(BigDecimal.TEN)
+                        .deliveryLongitude(BigDecimal.TEN)
+                        .packageWeight(BigDecimal.ONE)
+                        .packageValue(BigDecimal.TEN)
+                        .requestedPickupDate(LocalDate.now())
+                        .requestedDeliveryDate(LocalDate.now().plusDays(1))
+                        .basePrice(BigDecimal.valueOf(100))
+                        .insuranceSelected(false)
+                        .insuranceFee(BigDecimal.ZERO.setScale(2))
+                        .build()
+        );
+
+        booking.getShipments().add(shipment);
+        bookingRepository.save(booking);
+
+        Payment payment = paymentRepository.save(
+                Payment.builder()
+                        .shipment(shipment)
+                        .sender(sender)
+                        .stripePaymentIntentId("pi_test_" + UUID.randomUUID())
+                        .amountTotal(BigDecimal.valueOf(100))
+                        .currency("EUR")
+                        .paymentStatus(PaymentStatus.AUTHORIZED)
+                        .build()
+        );
+
+        String capturePayload = buildSucceededPayload(payment.getStripePaymentIntentId());
+
+        mockMvc.perform(post("/api/webhooks/stripe")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Stripe-Signature", "test")
+                .content(capturePayload))
+            .andExpect(status().isOk());
+
+        String refundPayload = """
+        {
+        "id": "evt_refund_test",
+        "type": "charge.refunded",
+        "data": {
+            "object": {
+            "payment_intent": "%s"
+            }
+        }
+        }
+        """.formatted(payment.getStripePaymentIntentId());
+
+        mockMvc.perform(post("/api/webhooks/stripe")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Stripe-Signature", "test")
+                .content(refundPayload))
+            .andExpect(status().isOk());
+
+        Payment updated = paymentRepository.findById(payment.getId()).orElseThrow();
+
+        assertThat(updated.getPaymentStatus())
+                .isEqualTo(PaymentStatus.REFUNDED);
+
+        assertThat(
+                driverEarningRepository
+                        .existsByPaymentAndEarningType(updated, EarningType.REFUND)
+        ).isTrue();
+    }
+    private String buildSucceededPayload(String paymentIntentId) {
+        return """
+        {
+        "id": "evt_test_123",
+        "type": "payment_intent.succeeded",
+        "data": {
+            "object": {
+            "id": "%s"
+            }
+        }
+        }
+        """.formatted(paymentIntentId);
+    }
     private User createUser(UserType type) {
         return userRepository.save(
                 User.builder()
