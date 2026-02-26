@@ -10,12 +10,16 @@ on:
     branches: [main, dev]
     paths:
       - "backend/**"
+      - ".github/workflows/backend.yml"
+
 
 jobs:
   build:
     name: Build, Test & Publish Backend
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      packages: write
     services:
       postgres:
         image: postgres:14
