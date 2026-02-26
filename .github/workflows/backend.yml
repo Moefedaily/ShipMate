@@ -15,7 +15,9 @@ jobs:
   build:
     name: Build, Test & Publish Backend
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      packages: write
     services:
       postgres:
         image: postgres:14
