@@ -1,0 +1,124 @@
+<header class="app-header dashboard-header">
+  <div class="header-inner">
+
+    <div class="header-left">
+      <div class="logo">
+        <mat-icon>local_shipping</mat-icon>
+        <span>ShipMate</span>
+      </div>
+    </div>
+
+    <div class="header-center">
+      @if (userType === 'BOTH') {
+        <div class="role-toggle">
+          <button
+            class="role-btn"
+            [class.active]="activeRole === 'SENDER'"
+            (click)="switchRole('SENDER')"
+          >
+            <mat-icon>person</mat-icon>
+            Sender
+          </button>
+          <button
+            class="role-btn"
+            [class.active]="activeRole === 'DRIVER'"
+            (click)="switchRole('DRIVER')"
+          >
+            <mat-icon>local_shipping</mat-icon>
+            Driver
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="header-right">
+      <div class="header-actions">
+        <app-notifications />
+        <button class="icon-btn" (click)="chatToggle.emit()">
+          <mat-icon>chat_bubble_outline</mat-icon>
+        </button>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <button class="profile-btn" [matMenuTriggerFor]="profileMenu">
+        <app-avatar [src]="user()?.avatarUrl" size="sm" />
+        <div class="profile-text">
+          <span class="profile-name">{{ userName() }}</span>
+          <span class="profile-role">
+            @if (userType === 'SENDER') { Sender }
+            @else if (userType === 'DRIVER') { Driver }
+            @else { Sender & Driver }
+          </span>
+        </div>
+        <mat-icon class="profile-chevron">expand_more</mat-icon>
+      </button>
+
+      <mat-menu #profileMenu="matMenu" class="profile-menu-panel" xPosition="before">
+
+        <div class="menu-header" (click)="$event.stopPropagation()">
+          <app-avatar [src]="user()?.avatarUrl" size="md" />
+          <div class="menu-user-info">
+            <strong>{{ userName() }}</strong>
+            <span class="menu-user-role">
+              @if (userType === 'SENDER') { Sender account }
+              @else if (userType === 'DRIVER') { Driver account }
+              @else { Sender & Driver account }
+            </span>
+          </div>
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-section-label">Account</div>
+
+        <button class="menu-item" (click)="menuAction.emit('profile')">
+          <div class="menu-item-icon">
+            <mat-icon>person_outline</mat-icon>
+          </div>
+          <span>My Profile</span>
+        </button>
+
+        <button class="menu-item" (click)="menuAction.emit('settings')">
+          <div class="menu-item-icon">
+            <mat-icon>tune</mat-icon>
+          </div>
+          <span>Settings</span>
+        </button>
+
+        @if (showDriverWallet()) {
+          <div class="menu-divider"></div>
+          <div class="menu-section-label">Finance</div>
+          <button class="menu-item" (click)="menuAction.emit('earnings')">
+            <div class="menu-item-icon menu-item-icon--success">
+              <mat-icon>account_balance_wallet</mat-icon>
+            </div>
+            <span>Wallet & Earnings</span>
+          </button>
+        }
+
+        @if (showSenderClaims()) {
+          <div class="menu-divider"></div>
+          <div class="menu-section-label">Insurance</div>
+          <button class="menu-item" (click)="menuAction.emit('claims')">
+            <div class="menu-item-icon menu-item-icon--warning">
+              <mat-icon>gavel</mat-icon>
+            </div>
+            <span>My Claims</span>
+          </button>
+        }
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-item menu-item--danger" (click)="menuAction.emit('logout')">
+          <div class="menu-item-icon menu-item-icon--danger">
+            <mat-icon>logout</mat-icon>
+          </div>
+          <span>Sign out</span>
+        </button>
+
+      </mat-menu>
+    </div>
+
+  </div>
+</header>

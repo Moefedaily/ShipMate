@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Receipt - ShipMate</title>
+</head>
+
+<body style="margin:0;padding:0;background: linear-gradient(135deg, #f8f9fc 0%, #e8eaf0 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#1f2937;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:60px 20px;">
+<tr>
+<td align="center">
+
+<table width="100%" cellpadding="0" cellspacing="0"
+  style="max-width:540px;background:#ffffff;border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,0.12);border:1px solid #e5e7eb;overflow:hidden;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.02) 100%);padding:40px 32px 32px;border-bottom:1px solid #e5e7eb;">
+
+  <table width="100%">
+    <tr>
+      <td align="center" style="font-size:26px;font-weight:700;color:#111827;">
+        ShipMate
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="font-size:14px;color:#6b7280;">
+        Your trusted delivery partner
+      </td>
+    </tr>
+  </table>
+
+</td>
+</tr>
+
+<!-- BODY -->
+<tr>
+<td style="padding:40px 32px;">
+
+<table width="100%">
+
+<!-- TITLE -->
+<tr>
+<td align="center" style="padding-bottom:16px;">
+  <h1 style="margin:0;font-size:24px;font-weight:700;color:#111827;">
+    Payment Successful
+  </h1>
+</td>
+</tr>
+
+<!-- STATUS BADGE -->
+<tr>
+<td align="center" style="padding-bottom:24px;">
+  <div style="display:inline-block;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:8px 16px;">
+    <span style="font-size:12px;font-weight:700;color:#16a34a;text-transform:uppercase;">
+      Payment Completed
+    </span>
+  </div>
+</td>
+</tr>
+
+<!-- DESCRIPTION -->
+<tr>
+<td align="center" style="font-size:15px;color:#6b7280;line-height:1.6;padding-bottom:32px;">
+  Your payment has been successfully processed.<br/>
+</td>
+</tr>
+
+<!-- DETAILS BOX -->
+<tr>
+<td style="background:linear-gradient(135deg, rgba(34,197,94,0.04) 0%, rgba(34,197,94,0.01) 100%);border:1px solid rgba(34,197,94,0.15);border-radius:14px;padding:20px 24px;margin-bottom:32px;">
+
+<table width="100%">
+
+<tr>
+<td style="font-size:12px;color:#6b7280;padding:6px 0;">
+  Shipment ID
+</td>
+<td align="right"
+    style="font-size:13px;font-weight:600;color:#111827;"
+    th:text="${shipmentId}">
+</td>
+</tr>
+
+<tr>
+<td style="font-size:12px;color:#6b7280;padding:6px 0;">
+  Amount Paid
+</td>
+<td align="right"
+    style="font-size:16px;font-weight:700;color:#16a34a;"
+    th:text="${formattedAmount + ' ' + currency}">
+</td>
+</tr>
+
+<tr>
+<td style="font-size:12px;color:#6b7280;padding:6px 0;">
+  Payment Date
+</td>
+<td align="right"
+    style="font-size:13px;font-weight:600;color:#111827;"
+    th:text="${receiptDate}">
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- INFO BOX -->
+<tr>
+<td style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px 20px;">
+  <table width="100%">
+    <tr>
+      <td style="font-size:13px;color:#374151;line-height:1.6;">
+        You can track your shipment anytime in your dashboard.
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 32px;">
+
+<table width="100%">
+<tr>
+<td align="center" style="font-size:12px;color:#9ca3af;padding-bottom:16px;">
+  Need help? Contact us at
+  <a th:href="'mailto:' + ${supportEmail}"
+     th:text="${supportEmail}"
+     style="color:#ff7a00;text-decoration:none;"></a>
+</td>
+</tr>
+
+<tr>
+<td align="center" style="font-size:11px;color:#9ca3af;">
+  © <span th:text="${currentYear}"></span> ShipMate. All rights reserved.
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>

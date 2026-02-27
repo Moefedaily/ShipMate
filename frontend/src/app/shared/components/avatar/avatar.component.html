@@ -1,0 +1,36 @@
+<label
+  class="avatar"
+  [class.editable]="editable"
+  [class]="size"
+  [for]="editable ? 'avatarInput' : null"
+>
+
+  <img
+    [src]="src || null"
+    alt="Avatar"
+  />
+
+  @if (editable) {
+    <div class="overlay">Change</div>
+  }
+</label>
+
+@if (editable) {
+  <input
+    id="avatarInput"
+    type="file"
+    accept="image/*"
+    hidden
+    (change)="onFileSelected($event)"
+  />
+
+  @if (src) {
+    <button
+      type="button"
+      class="remove"
+      (click)="remove.emit()"
+    >
+      Remove
+    </button>
+  }
+}

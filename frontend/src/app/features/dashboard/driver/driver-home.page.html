@@ -1,0 +1,33 @@
+@if (state() === DriverDashboardState.LOCATION_REQUIRED) {
+  <app-driver-location-setup (completed)="onLocationCompleted()"
+  />
+}
+
+
+@if (state() === DriverDashboardState.NOT_APPLIED) {
+  <app-driver-not-applied-state
+    (applyClick)="onApply()"
+  />
+}
+
+@if (state() === DriverDashboardState.APPLYING) {
+  <app-driver-apply-form
+    (applied)="onApplied()"
+  />
+}
+
+@if (state() === DriverDashboardState.PENDING) {
+  <app-driver-pending-state />
+}
+
+@if (state() === DriverDashboardState.APPROVED) {
+  <app-driver-approved-state />
+}
+
+@if (state() === DriverDashboardState.REJECTED) {
+  <app-driver-rejected-state />
+}
+
+@if (state() === DriverDashboardState.SUSPENDED) {
+  <app-driver-suspended-state />
+}

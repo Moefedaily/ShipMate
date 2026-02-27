@@ -1,0 +1,62 @@
+@use '../../../../../../styles/variables/colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+
+.apply-card {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  h2 {
+    margin-bottom: 1.25rem;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+
+  label {
+    font-size: $text-size-label;
+    font-weight: $font-weight-medium;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 0.6rem 0.7rem;
+    border-radius: 0.5rem;
+    border: 1px solid $border-default;
+    font-size: $text-size-body;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+
+    &:disabled {
+      background-color: $bg-surface;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.error-banner {
+  background-color: $color-danger-subtle;
+  color: $color-danger;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: $text-size-label;
+  margin-bottom: 1rem;
+}
+
+button {
+  width: 100%;
+  margin-top: 0.5rem;
+}

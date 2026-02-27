@@ -1,0 +1,213 @@
+<!-- ================= WELCOME HERO ================= -->
+<section class="dashboard-hero">
+  <h1>Welcome back, {{ userName() }}!</h1>
+  <p>Here's what's happening with your shipments today.</p>
+</section>
+
+<!-- ================= CREATE SHIPMENT CTA ================= -->
+<section class="card create-shipment">
+  <div class="create-left">
+    <div class="icon-circle">
+      <mat-icon>add</mat-icon>
+    </div>
+    <div>
+      <h3>Create a new shipment</h3>
+      <p>
+        Get a quote and find a trusted traveler to deliver your package securely.
+      </p>
+    </div>
+  </div>
+
+  <button class="btn btn--primary" routerLink="/dashboard/shipments/new">
+    <mat-icon>add</mat-icon>
+    Create Shipment
+  </button>
+</section>
+
+<section class="shipments">
+  <div class="shipments-header">
+    <div class="shipments-title">
+      <mat-icon>inventory_2</mat-icon>
+      <h2>Active Shipments</h2>
+    </div>
+
+    <a class="link" routerLink="/dashboard/shipments">
+      View all history
+      <mat-icon>chevron_right</mat-icon>
+    </a>
+  </div>
+
+  <div class="shipment-grid" [class.single]="activeShipments().length === 1">
+
+    @if (loading()) {
+      <p class="muted">
+        <mat-icon class="spin">refresh</mat-icon>
+        Loading shipments…
+      </p>
+    }
+
+    @else if (activeShipments().length === 0) {
+      <div class="card empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No active shipments yet</p>
+      </div>
+    }
+
+    @else {
+      @for (s of activeShipments(); track s.id) {
+        <article
+          class="card shipment-card"
+          [routerLink]="['/dashboard/shipments', s.id]"
+        >
+
+          <img
+            [src]="s.photos && s.photos.length ? s.photos[0] : 'assets/images/box.jpg'"
+            [alt]="s.packageDescription || 'Shipment'"
+          />
+
+          <span
+            class="badge"
+            [ngClass]="{
+              'badge--warning': s.status === 'CREATED',
+              'badge--info': s.status === 'ASSIGNED',
+              'badge--success': s.status === 'IN_TRANSIT',
+              'badge--neutral': s.status === 'DELIVERED',
+              'badge--danger': s.status === 'CANCELLED',
+              'badge--lost': s.status === 'LOST'
+            }"
+          >
+            {{ s.status }}
+          </span>
+
+          <div class="shipment-body">
+
+            <h4>{{ s.packageDescription || 'Shipment' }}</h4>
+            <small>ID: {{ s.id | slice:0:8 }}</small>
+
+            <div class="route">
+              <mat-icon class="route-icon start">place</mat-icon>
+              <span>{{ s.pickupAddress }}</span>
+              <mat-icon class="arrow">arrow_forward</mat-icon>
+              <mat-icon class="route-icon end">flag</mat-icon>
+              <span>{{ s.deliveryAddress }}</span>
+            </div>
+
+            <div class="meta-row">
+              <span class="pill">{{ s.packageWeight }} kg</span>
+              <span class="pill pill--accent">{{ s.basePrice | currency }}</span>
+              @if (s.insuranceSelected) {
+                <span class="pill pill--insurance">
+                  <mat-icon>verified_user</mat-icon>
+                  Insured
+                </span>
+              }
+            </div>
+
+            @if (s.insuranceSelected && s.insuranceFee) {
+              <div class="insurance-row">
+                <div class="insurance-row-item">
+                  <span class="insurance-label">Insurance</span>
+                  <span class="insurance-value">+ {{ s.insuranceFee | currency }}</span>
+                </div>
+                @if (s.declaredValue) {
+                  <div class="insurance-row-item">
+                    <span class="insurance-label">Declared</span>
+                    <span class="insurance-value">{{ s.declaredValue | currency }}</span>
+                  </div>
+                }
+                <div class="insurance-row-item insurance-total-row">
+                  <span class="insurance-label">Total</span>
+                  <span class="insurance-value insurance-total">{{ (s.basePrice + s.insuranceFee) | currency }}</span>
+                </div>
+              </div>
+            }
+
+            <div class="driver-section">
+              @if (s.driver) {
+                <div class="assigned-driver">
+                  <div class="driver-avatar">
+                    @if (s.driver.avatarUrl) {
+                      <img [src]="s.driver.avatarUrl" alt="Driver avatar" />
+                    } @else {
+                      <mat-icon>person</mat-icon>
+                    }
+                  </div>
+
+                  <div class="driver-info">
+                    <span class="label">Driver</span>
+                    <strong>{{ s.driver.firstName }}</strong>
+                  </div>
+
+                  <div class="driver-meta">
+                    <mat-icon>directions_car</mat-icon>
+                    <span>{{ s.driver.vehicleType }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="shipment-footer">
+              @if (s.status === 'CREATED') {
+                <button
+                  class="btn btn--ghost"
+                  (click)="$event.stopPropagation()"
+                  [routerLink]="['/dashboard/shipments', s.id, 'edit']"
+                >
+                  Edit
+                </button>
+              }
+
+              <button
+                class="btn btn--ghost"
+                (click)="$event.stopPropagation()"
+                [routerLink]="['/dashboard/shipments', s.id]"
+              >
+                Details
+              </button>
+            </div>
+
+          </div>
+        </article>
+      }
+    }
+
+  </div>
+</section>
+
+<!-- ================= SHIPPING TIPS ================= -->
+<section class="shipping-tips">
+  <h2>Shipping Tips</h2>
+
+  <div class="tips-grid">
+    <div class="card tip">
+      <mat-icon>schedule</mat-icon>
+      <div>
+        <h4>Flexible pickup windows</h4>
+        <p>Providing flexible pickup times helps travelers accept your requests faster.</p>
+      </div>
+    </div>
+
+    <div class="card tip">
+      <mat-icon>photo_camera</mat-icon>
+      <div>
+        <h4>Add clear photos</h4>
+        <p>Detailed photos help drivers assess space requirements accurately.</p>
+      </div>
+    </div>
+
+    <div class="card tip">
+      <mat-icon>inventory</mat-icon>
+      <div>
+        <h4>Accurate weight</h4>
+        <p>Specify correct weight to avoid delays and ensure proper vehicle selection.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

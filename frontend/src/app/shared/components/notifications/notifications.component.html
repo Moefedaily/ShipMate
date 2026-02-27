@@ -1,0 +1,106 @@
+<div class="notifications-wrapper" (clickOutside)="close()">
+  
+  <button 
+    class="notification-btn" 
+    (click)="toggle(); $event.stopPropagation()"
+    [class.has-notifications]="hasUnread()"
+  >
+    <mat-icon>notifications</mat-icon>
+    @if (hasUnread()) {
+      <span class="notification-badge">{{ unreadCount() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="notifications-panel">
+      
+      <div class="panel-header">
+        <div class="header-title">
+          <mat-icon>notifications</mat-icon>
+          <h3>Notifications</h3>
+        </div>
+        
+        @if (hasUnread()) {
+          <button class="mark-read-btn" (click)="markAllRead()">
+            <mat-icon>done_all</mat-icon>
+            Mark all read
+          </button>
+        }
+      </div>
+
+      <div class="panel-body">
+        
+        @if (loading()) {
+          <div class="loading-state">
+            <mat-icon class="spin">refresh</mat-icon>
+            <p>Loading notifications...</p>
+          </div>
+        }
+        
+        @else if (notifications().length === 0) {
+          <div class="empty-state">
+            <mat-icon>notifications_none</mat-icon>
+            <p>No notifications yet</p>
+            <span class="empty-hint">You're all caught up!</span>
+          </div>
+        }
+        
+        @else {
+          <div class="notifications-list">
+            @for (notif of notifications(); track notif.id) {
+              <article 
+                class="notification-item" 
+                [class.unread]="!notif.isRead"
+                (click)="handleNotificationClick(notif)"
+              >
+                
+                <div class="notif-icon" [ngClass]="getNotificationIconClass(notif.notificationType)">
+                  <mat-icon>{{ getNotificationIcon(notif.notificationType) }}</mat-icon>
+                </div>
+
+                <div class="notif-content">
+                  <div class="notif-header">
+                    <strong class="notif-title">{{ notif.title }}</strong>
+                    @if (!notif.isRead) {
+                      <span class="unread-dot"></span>
+                    }
+                  </div>
+                  
+                  <p class="notif-message">{{ notif.message }}</p>
+                  
+                  <div class="notif-footer">
+                    <span class="notif-time">
+                      <mat-icon>schedule</mat-icon>
+                      {{ getRelativeTime(notif.createdAt) }}
+                    </span>
+                  </div>
+                </div>
+
+                @if (!notif.isRead) {
+                  <button 
+                    class="mark-read-single"
+                    (click)="markOneRead(notif.id); $event.stopPropagation()"
+                    title="Mark as read"
+                  >
+                    <mat-icon>check</mat-icon>
+                  </button>
+                }
+              </article>
+            }
+          </div>
+        }
+      </div>
+
+      @if (notifications().length > 0) {
+        <div class="panel-footer">
+          <button class="view-all-btn" (click)="viewAllNotifications()">
+            View all notifications
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>

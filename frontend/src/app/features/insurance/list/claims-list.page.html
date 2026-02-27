@@ -1,0 +1,90 @@
+<div class="claims-page">
+
+  <div class="dashboard-hero">
+    <div class="header-left">
+      <button class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+      <div class="header-text">
+        <h1>Insurance Claims</h1>
+        <p>Track the status of your submitted claims</p>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-icon class="spin">refresh</mat-icon>
+      <p>Loading claims…</p>
+    </div>
+  }
+
+  @if (!loading() && claims().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <mat-icon>gavel</mat-icon>
+      </div>
+      <strong>No claims yet</strong>
+      <p>You haven't submitted any insurance claims.</p>
+    </div>
+  }
+
+  @if (!loading() && claims().length > 0) {
+    <div class="claims-grid">
+      @for (claim of claims(); track claim.id) {
+        <div class="claim-card" (click)="openClaim(claim)">
+
+          <div class="claim-card-header">
+            <div class="reason-badge reason-badge--{{ claim.claimReason.toLowerCase() }}">
+              @if (claim.claimReason === 'LOST') {
+                <mat-icon>search_off</mat-icon>
+              }
+              @if (claim.claimReason === 'DAMAGED') {
+                <mat-icon>broken_image</mat-icon>
+              }
+              @if (claim.claimReason === 'OTHER') {
+                <mat-icon>help_outline</mat-icon>
+              }
+              {{ claim.claimReason }}
+            </div>
+
+            <span class="status-badge status-badge--{{ claim.claimStatus.toLowerCase() }}">
+              <span class="dot"></span>
+              {{ claim.claimStatus }}
+            </span>
+          </div>
+
+          <div class="claim-card-body">
+            <div class="claim-meta-row">
+              <div class="claim-meta-item">
+                <span class="meta-label">Shipment</span>
+                <span class="meta-value mono">{{ claim.shipmentId | slice:0:8 }}…</span>
+              </div>
+              <div class="claim-meta-item">
+                <span class="meta-label">Filed on</span>
+                <span class="meta-value">{{ claim.createdAt | date:'mediumDate' }}</span>
+              </div>
+            </div>
+          </div>
+
+          @if (claim.compensationAmount) {
+            <div class="claim-card-footer">
+              <span class="compensation-label">
+                <mat-icon>payments</mat-icon>
+                Compensation
+              </span>
+              <span class="compensation-amount">{{ claim.compensationAmount | currency }}</span>
+            </div>
+          }
+
+          <div class="claim-card-arrow">
+            <mat-icon>chevron_right</mat-icon>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

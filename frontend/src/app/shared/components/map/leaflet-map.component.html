@@ -1,0 +1,19 @@
+<div class="map-container">
+  <div #mapEl class="leaflet-map" aria-label="Delivery route map"></div>
+</div>
+@if (mode === 'route' && showLegend) {
+
+<div class="map-legend">
+  <div>
+    <span class="legend-dot pickup"></span>
+    Pickup action
+  </div>
+  <div>
+    <span class="legend-dot delivery"></span>
+    Delivery action
+  </div>
+  <div class="legend-note">
+    Pickup and delivery actions may occur at the same location and are shown separately.
+  </div>
+</div>
+}

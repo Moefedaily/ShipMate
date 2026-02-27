@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Refunded - ShipMate</title>
+</head>
+<body style="margin:0;padding:0;background: linear-gradient(135deg, #f8f9fc 0%, #e8eaf0 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#1f2937;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:60px 20px;">
+    <tr>
+      <td align="center">
+        
+        <!-- Main Card -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#ffffff;border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,0.12);border:1px solid #e5e7eb;overflow:hidden;">
+          
+          <!-- Header with gradient -->
+          <tr>
+            <td style="background:linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.02) 100%);padding:40px 32px 32px;border-bottom:1px solid #e5e7eb;">
+              <!-- Logo/Brand -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <div style="width:64px;height:64px;background:linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.1) 100%);border:2px solid rgba(34,197,94,0.25);border-radius:16px;"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-size:26px;font-weight:700;color:#111827;letter-spacing:-0.02em;padding-bottom:8px;">
+                    ShipMate
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-size:14px;color:#6b7280;font-weight:500;">
+                    Your trusted delivery partner
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding:40px 32px;">
+              
+              <!-- Title -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding-bottom:16px;">
+                    <h1 style="margin:0;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.01em;line-height:1.3;">
+                      Payment Refunded
+                    </h1>
+                  </td>
+                </tr>
+
+                <!-- Success Badge -->
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <div style="display:inline-block;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:8px 16px;">
+                      <span style="font-size:12px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.04em;">
+                        <span style="display:inline-block;width:6px;height:6px;background:#16a34a;border-radius:50%;margin-right:6px;"></span>
+                        Refund Processed
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- Description -->
+                <tr>
+                  <td align="center" style="font-size:15px;color:#6b7280;line-height:1.6;padding-bottom:32px;">
+                    Your payment has been successfully refunded.<br/>
+                    The amount will be credited back to your original payment method.
+                  </td>
+                </tr>
+
+                <!-- Refund Details Box -->
+                <tr>
+                  <td style="background:linear-gradient(135deg, rgba(34,197,94,0.04) 0%, rgba(34,197,94,0.01) 100%);border:1px solid rgba(34,197,94,0.15);border-radius:14px;padding:20px 24px;margin-bottom:32px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-bottom:16px;">
+                          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:8px;">
+                            Refund Details
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="font-size:13px;color:#6b7280;padding:4px 0;">
+                                Shipment ID
+                              </td>
+                              <td align="right" style="font-size:13px;font-weight:600;color:#111827;padding:4px 0;" th:text="${shipmentId}">
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="font-size:13px;color:#6b7280;padding:4px 0;">
+                                Amount Refunded
+                              </td>
+                              <td align="right" style="font-size:18px;font-weight:700;color:#16a34a;padding:4px 0;">
+                                €<span th:text="${formattedAmount + ' ' + currency}"></span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="font-size:13px;color:#6b7280;padding:4px 0;">
+                                Refund Date
+                              </td>
+                              <td align="right" style="font-size:13px;font-weight:600;color:#111827;padding:4px 0;" th:text="${refundDate}">
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Info Box -->
+                <tr>
+                  <td style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#374151;line-height:1.6;">
+                          <strong style="color:#111827;font-weight:600;">Processing Time:</strong><br/>
+                          The refunded amount will appear on your original payment method within <strong>5-10 business days</strong>, depending on your bank or card issuer.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Spacer -->
+                <tr>
+                  <td style="padding:24px 0;">
+                    <div style="height:1px;background:linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);"></div>
+                  </td>
+                </tr>
+
+                <!-- Additional Info -->
+                <tr>
+                  <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#6b7280;line-height:1.6;text-align:center;">
+                          If you don't see the refund in your account after 10 business days, please contact your bank or reach out to our support team.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <!-- Note -->
+                <tr>
+                  <td style="font-size:12px;color:#6b7280;line-height:1.5;padding-bottom:16px;text-align:center;">
+                    If you have any questions about this refund, we're here to help.
+                  </td>
+                </tr>
+                
+                <!-- Help -->
+                <tr>
+                  <td align="center" style="font-size:12px;color:#9ca3af;padding-bottom:16px;">
+                    Contact us at 
+                    <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}" style="color:#ff7a00;text-decoration:none;"> </a>
+                  </td>
+                </tr>
+
+                <!-- Copyright -->
+                <tr>
+                  <td align="center" style="font-size:11px;color:#9ca3af;">
+                    © <span th:text="${currentYear}"></span> ShipMate. All rights reserved.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,66 @@
+.address-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #666;
+  }
+
+  input {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.6rem;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+    background: #fff;
+
+    &:focus {
+      outline: none;
+      border-color: #ff7a00;
+      box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.12);
+    }
+
+    &:disabled {
+      background: #f6f6f6;
+      cursor: not-allowed;
+    }
+  }
+
+  .loading {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 0.25rem;
+  }
+
+  .results {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 0.6rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 20;
+    max-height: 240px;
+    overflow-y: auto;
+
+    li {
+      padding: 0.6rem 0.75rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 122, 0, 0.08);
+      }
+    }
+  }
+}

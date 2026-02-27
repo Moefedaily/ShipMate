@@ -1,0 +1,360 @@
+@use '../../../../styles/variables/colors' as *;
+@use '../../../../styles/variables/typography' as *;
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: $bg-card;
+  border-bottom: 1px solid $border-default;
+}
+
+.header-inner {
+  height: 72px;
+  padding: 0 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+// ── LEFT ──────────────────────────────────────────────
+
+.header-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: $font-weight-bold;
+  letter-spacing: -0.02em;
+  color: $text-primary;
+  text-decoration: none;
+
+  mat-icon {
+    color: $color-primary;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// ── CENTER ────────────────────────────────────────────
+
+.header-center {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.role-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 12px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+}
+
+.role-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  color: $text-muted;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not(.active) {
+    background: rgba($color-primary, 0.07);
+    color: $text-primary;
+  }
+
+  &.active {
+    background: $color-primary;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba($color-primary, 0.28);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+// ── RIGHT ─────────────────────────────────────────────
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: $border-default;
+}
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $text-muted;
+    transition: color 0.2s;
+  }
+
+  &:hover {
+    background: $bg-card;
+    border-color: rgba($color-primary, 0.22);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+
+    mat-icon {
+      color: $color-primary;
+    }
+  }
+}
+
+// ── PROFILE BUTTON ────────────────────────────────────
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid $border-default;
+  background: $bg-surface;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    background: $bg-card;
+    border-color: rgba($color-primary, 0.22);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.profile-name {
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  white-space: nowrap;
+}
+
+.profile-role {
+  font-size: 11px;
+  color: $text-muted;
+  white-space: nowrap;
+}
+
+.profile-chevron {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: $text-muted;
+  transition: transform 0.2s;
+}
+
+// ── DROPDOWN MENU ─────────────────────────────────────
+
+// These styles must live at global level (not scoped) because
+// mat-menu renders outside the component's shadow. Add this block
+// to your global styles.scss as well, or use ::ng-deep.
+
+::ng-deep .profile-menu-panel {
+  margin-top: 0.5rem;
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 1px solid $border-default;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+  min-width: 260px !important;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.1rem 1rem;
+  background: $bg-surface;
+  pointer-events: none;
+}
+
+.menu-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: $text-size-label;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: 1.2;
+  }
+}
+
+.menu-user-role {
+  font-size: $text-size-caption;
+  color: $text-muted;
+}
+
+.menu-divider {
+  height: 1px;
+  background: $border-default;
+  margin: 0.25rem 0;
+}
+
+.menu-section-label {
+  padding: 0.5rem 1.1rem 0.2rem;
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $text-muted;
+  pointer-events: none;
+}
+
+// Menu items — plain buttons, no mat-menu-item directive
+::ng-deep .profile-menu-panel button.menu-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0 1rem !important;
+  height: 44px !important;
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: $text-size-label !important;
+  font-weight: $font-weight-medium !important;
+  color: $text-primary !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: background 0.15s !important;
+
+  span {
+    flex: 1;
+    line-height: 1;
+  }
+
+  &:hover {
+    background: rgba($color-primary, 0.05) !important;
+  }
+
+  &.menu-item--danger {
+    color: $color-danger !important;
+
+    &:hover {
+      background: rgba($color-danger, 0.05) !important;
+    }
+  }
+}
+
+.menu-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+  }
+
+  &--success {
+    background: rgba($color-success, 0.1);
+    mat-icon { color: $color-success; }
+  }
+
+  &--warning {
+    background: rgba(#f59e0b, 0.1);
+    mat-icon { color: #d97706; }
+  }
+
+  &--danger {
+    background: rgba($color-danger, 0.08);
+    mat-icon { color: $color-danger; }
+  }
+}
+
+// ── RESPONSIVE ───────────────────────────────────────
+
+@media (max-width: 768px) {
+  .profile-text {
+    display: none;
+  }
+
+  .header-divider {
+    display: none;
+  }
+
+  .profile-btn {
+    padding: 0.25rem;
+    border-radius: 50%;
+  }
+
+  .profile-chevron {
+    display: none;
+  }
+}

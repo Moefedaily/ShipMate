@@ -1,0 +1,27 @@
+@use '../../../styles/variables/colors' as *;
+@use '../../../styles/variables/typography' as *;
+
+
+.dashboard-layout {
+  min-height: 100vh;
+  background-color: $bg-app;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2.5rem 2rem;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 1.5rem 1rem;
+  }
+}

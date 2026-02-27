@@ -1,0 +1,29 @@
+<div class="address-field">
+
+  @if (label) {
+    <label>{{ label }}</label>
+  }
+
+  <input
+  type="text"
+  [value]="query()"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  (input)="handleInput($event)"
+/>
+
+  @if (loading()) {
+    <div class="loading">Searching…</div>
+  }
+
+  @if (results().length > 0) {
+    <ul class="results">
+      @for (r of results(); track $index) {
+        <li (click)="select(r)">
+          {{ r.address }}
+        </li>
+      }
+    </ul>
+  }
+
+</div>

@@ -1,0 +1,278 @@
+<div class="shipment-detail-page">
+
+  <div class="dashboard-hero detail-header">
+    <div class="header-left">
+      <button class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+      <div class="header-text">
+        <h1>Shipment details</h1>
+        <p>
+          Status:
+          <span
+            class="status-badge"
+            [ngClass]="{
+              'status-created': shipment()?.status === 'CREATED',
+              'status-assigned': shipment()?.status === 'ASSIGNED',
+              'status-in-transit': shipment()?.status === 'IN_TRANSIT',
+              'status-delivered': shipment()?.status === 'DELIVERED',
+              'status-cancelled': shipment()?.status === 'CANCELLED',
+              'status-lost': shipment()?.status === 'LOST'
+            }"
+          >
+            <span class="dot"></span>
+            {{ shipment()?.status }}
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <section class="card shipment-detail-card">
+    <div class="content">
+
+      <div class="info">
+
+        <div class="info-block">
+          <label><mat-icon>store</mat-icon> Pickup location</label>
+          <strong>{{ shipment()?.pickupAddress }}</strong>
+        </div>
+
+        <div class="info-block">
+          <label><mat-icon>location_on</mat-icon> Delivery location</label>
+          <strong>{{ shipment()?.deliveryAddress }}</strong>
+        </div>
+
+        <div class="info-row">
+          <div>
+            <label><mat-icon>fitness_center</mat-icon> Weight</label>
+            <strong>{{ shipment()?.packageWeight }} kg</strong>
+          </div>
+          <div>
+            <label><mat-icon>payments</mat-icon> Package value</label>
+            <strong>{{ shipment()?.packageValue | currency }}</strong>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div>
+            <label><mat-icon>calendar_today</mat-icon> Pickup date</label>
+            <strong>{{ shipment()?.requestedPickupDate | date:'mediumDate' }}</strong>
+          </div>
+          <div>
+            <label><mat-icon>event</mat-icon> Delivery date</label>
+            <strong>{{ shipment()?.requestedDeliveryDate | date:'mediumDate' }}</strong>
+          </div>
+        </div>
+
+        @if (shipment()?.packageDescription) {
+          <div class="info-block">
+            <label><mat-icon>description</mat-icon> Description</label>
+            <strong>{{ shipment()?.packageDescription }}</strong>
+          </div>
+        }
+
+        @if (shipment()?.driver) {
+          <div class="assigned-driver">
+            <div class="driver-avatar">
+              @if (shipment()?.driver?.avatarUrl) {
+                <img [src]="shipment()?.driver?.avatarUrl" [alt]="shipment()?.driver?.firstName" />
+              } @else {
+                <mat-icon>person</mat-icon>
+              }
+            </div>
+            <div>
+              <span class="label">Assigned driver</span>
+              <strong>{{ shipment()?.driver?.firstName }} {{ shipment()?.driver?.lastName }}</strong>
+            </div>
+            <span class="vehicle">
+              <mat-icon>directions_car</mat-icon>
+              {{ shipment()?.driver?.vehicleType }}
+            </span>
+          </div>
+        }
+
+        <div class="price-card">
+          <div class="price-card-header">
+            <mat-icon>receipt_long</mat-icon>
+            <span>Pricing</span>
+          </div>
+          <div class="price-breakdown">
+            <div class="price-row">
+              <span>Base price</span>
+              <strong>{{ shipment()?.basePrice | currency }}</strong>
+            </div>
+
+            @if (shipment()?.insuranceSelected && shipment()?.insuranceFee) {
+              <div class="price-row">
+                <span>Insurance</span>
+                <strong>+ {{ shipment()!.insuranceFee | currency }}</strong>
+              </div>
+            }
+
+            <div class="price-divider"></div>
+
+            <div class="price-row total">
+              <span>Total</span>
+              <strong>
+                {{ ((shipment()?.basePrice ?? 0) + (shipment()?.insuranceFee ?? 0)) | currency }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        @if (shipment()?.insuranceSelected) {
+          <div class="insurance-block">
+            <div class="insurance-block-header">
+              <div class="insurance-block-icon">
+                <mat-icon>verified_user</mat-icon>
+              </div>
+              <div>
+                <strong>Shipment insured</strong>
+                <small>This shipment is covered by insurance</small>
+              </div>
+              @if (shipment()?.insuranceFee) {
+                <span class="insurance-fee-pill">{{ shipment()!.insuranceFee | currency }}</span>
+              }
+            </div>
+
+            @if (shipment()?.insuranceCoverageAmount || shipment()?.declaredValue) {
+              <div class="insurance-details-grid">
+                @if (shipment()?.declaredValue) {
+                  <div class="insurance-detail-item">
+                    <span class="insurance-detail-label">Declared value</span>
+                    <span class="insurance-detail-value">{{ shipment()!.declaredValue | currency }}</span>
+                  </div>
+                }
+                @if (shipment()?.insuranceCoverageAmount) {
+                  <div class="insurance-detail-item">
+                    <span class="insurance-detail-label">Coverage up to</span>
+                    <span class="insurance-detail-value coverage">{{ shipment()!.insuranceCoverageAmount | currency }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (shipment()?.status === 'ASSIGNED' || shipment()?.status === 'IN_TRANSIT') {
+          <div class="payment-section">
+            <div class="payment-header">
+              <mat-icon>payments</mat-icon>
+              <div>
+                <span class="label">Payment status</span>
+                <strong>{{ paymentStatus() }}</strong>
+              </div>
+            </div>
+
+            @if (canPay()) {
+              <button class="btn btn--primary action-btn" (click)="goToPayment()">
+                <mat-icon>credit_card</mat-icon>
+                Pay Now
+              </button>
+            }
+
+            @if (isAuthorized()) {
+              <div class="payment-success">
+                <mat-icon>verified</mat-icon>
+                Payment secured — driver can start delivery.
+              </div>
+
+              @if (deliveryCodeState.hasCode()) {
+                <div class="delivery-code-card">
+                  <div class="delivery-code-header">
+                    <mat-icon>vpn_key</mat-icon>
+                    <span>Delivery confirmation code</span>
+                  </div>
+                  <div class="delivery-code-box">
+                    <span class="code">{{ deliveryCodeState.code() }}</span>
+                    <button class="btn btn--ghost" (click)="deliveryCodeState.copyToClipboard()">
+                      <mat-icon>content_copy</mat-icon>
+                      Copy
+                    </button>
+                  </div>
+                  <small class="hint">Share this code with the driver upon delivery.</small>
+                </div>
+              }
+            }
+
+            @if (isCaptured()) {
+              <div class="payment-status-row payment-status-row--success">
+                <mat-icon>check_circle</mat-icon>
+                Payment completed successfully.
+              </div>
+            }
+
+            @if (isRefunded()) {
+              <div class="payment-status-row payment-status-row--refunded">
+                <mat-icon>undo</mat-icon>
+                Payment refunded.
+              </div>
+            }
+          </div>
+        }
+
+        @if (claimLoading()) {
+          <div class="claim-loading">
+            <mat-icon>hourglass_top</mat-icon>
+            Checking insurance claim status…
+          </div>
+        }
+
+        @if (!claimLoading() && canFileClaim()) {
+          <div class="claim-section">
+            <div class="claim-section-header">
+              <div class="claim-section-icon">
+                <mat-icon>report_problem</mat-icon>
+              </div>
+              <div>
+                <strong>Insurance claim</strong>
+                <small>Need to report an issue with this shipment?</small>
+              </div>
+            </div>
+            <button class="btn btn--danger action-btn" (click)="goToClaim()">
+              <mat-icon>gavel</mat-icon>
+              File a claim
+            </button>
+          </div>
+        }
+
+        @if (!claimLoading() && claimExists()) {
+          <div class="claim-exists">
+            <mat-icon>assignment_turned_in</mat-icon>
+            An insurance claim has already been submitted for this shipment.
+          </div>
+        }
+
+        @if (shipment()?.status === 'CREATED') {
+          <button class="btn btn--primary action-btn" (click)="editShipment()">
+            <mat-icon>edit</mat-icon>
+            Edit shipment
+          </button>
+        }
+
+      </div>
+
+      <div class="map">
+        <app-leaflet-map mode="route" [stops]="mapStops()" [showLegend]="false" />
+      </div>
+
+    </div>
+  </section>
+
+  @if (shipment()?.photos?.length) {
+    <section class="card shipment-detail-card photos-section">
+      <h3>
+        <mat-icon>photo_library</mat-icon>
+        Package photos
+      </h3>
+      <div class="photo-grid">
+        @for (photo of shipment()?.photos; track photo) {
+          <img [src]="photo" [alt]="'Package photo ' + ($index + 1)" />
+        }
+      </div>
+    </section>
+  }
+
+</div>

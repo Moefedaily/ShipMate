@@ -1,0 +1,25 @@
+/* =====================================================
+   ShipMate — Global Styles Entry Point 
+   ===================================================== */
+
+/* ---------- ALL @use ---------- */
+@use '@angular/material' as mat;
+@use './variables/colors';
+@use './variables/typography';
+@use './base/base';
+@use './components/buttons';
+@use './components/cards';
+@use './components/badges';
+@use './components/leaflet-map';
+
+/* ---------- Angular Material Theme ---------- */
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}

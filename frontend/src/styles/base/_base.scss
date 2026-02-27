@@ -1,0 +1,94 @@
+@use '../variables/colors' as *;
+@use '../variables/typography' as *;
+
+/* ---------- Reset & Box Model ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Body Defaults ---------- */
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: $font-family-base;
+  background-color: $bg-app;
+  color: $text-primary;
+  line-height: $line-height-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Headings ---------- */
+
+h1 {
+  font-size: $text-size-display;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+}
+
+h2 {
+  font-size: $text-size-heading;
+  font-weight: $font-weight-semibold;
+}
+
+h3 {
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-medium;
+}
+
+/* ---------- Text Elements ---------- */
+
+p {
+  font-size: $text-size-body;
+  color: $text-secondary;
+  line-height: $line-height-loose;
+}
+
+small {
+  font-size: $text-size-caption;
+  color: $text-muted;
+}
+
+/* ---------- Links ---------- */
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Images ---------- */
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* ---------- Forms ---------- */
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: $text-size-body;
+}
