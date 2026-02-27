@@ -1,14 +1,12 @@
 services:
   db:
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     container_name: shipmate-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "${POSTGRES_PORT}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,57 +14,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    networks:
-      - shipmate_net
+    networks: [shipmate_net]
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     container_name: shipmate-backend
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DB_HOST: ${DB_HOST}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL}
-      JWT_REFRESH_TOKEN_TTL: ${JWT_REFRESH_TOKEN_TTL}
-
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
-
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "--fail",
-          "http://localhost:${BACKEND_PORT:-8080}/actuator/health",
-        ]
-      interval: 30s
-      timeout: 3s
-      retries: 10
-    networks:
-      - ${DOCKER_NETWORK}
+    networks: [shipmate_net]
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
     container_name: shipmate-frontend
     restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-4200}:4200"
-    networks:
-      - shipmate_net
     depends_on:
       - backend
+    networks: [shipmate_net]
 
 volumes:
   pg_data:
