@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: ghcr.io/moefedaily/shipmate-backend:prod
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: db
+
+  web:
+    image: ghcr.io/moefedaily/shipmate-frontend:prod
+    container_name: shipmate-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks: [shipmate_net]
