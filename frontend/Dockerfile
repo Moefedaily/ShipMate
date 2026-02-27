@@ -1,5 +1,5 @@
-# ---- Base image for building and development ----
-FROM node:20-alpine as dev
+# ---- Build stage ----
+FROM node:20-alpine AS build
 WORKDIR /app
 
 # Install dependencies early to cache better
@@ -8,9 +8,11 @@ RUN npm install
 
 # Copy the rest of the app
 COPY . .
+RUN npm run build -- --configuration production
 
-# Expose the default Angular dev port
-EXPOSE 4200
+# ---- Runtime stage ----
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Start Angular CLI dev server
-CMD ["npm", "run", "start"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
