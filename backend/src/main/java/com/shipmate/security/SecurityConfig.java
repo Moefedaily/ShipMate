@@ -59,8 +59,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                }) // use default CORS config
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login","/api/auth/logout", "/api/auth/register", "/api/auth/refresh", "/api/auth/verify-email", "/api/auth/reset-password", "/api/auth/forgot-password").permitAll()
