@@ -1,10 +1,8 @@
 package com.shipmate.security;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,8 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.filter.CorsFilter;
-
 
 import java.util.Arrays;
 import java.util.List;
@@ -77,41 +73,24 @@ public class SecurityConfig {
                 .build();
     }
 
-    // @Bean
-    // public CorsConfigurationSource corsConfigurationSource() {
-    //     CorsConfiguration config = new CorsConfiguration();
-    //     System.out.println("Allowed Origins from Env: " + allowedOrigins);
-    //     config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-
-    //     config.setAllowedMethods(List.of(
-    //             "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-    //     ));
-
-    //     config.setAllowedHeaders(List.of("*"));
-
-    //     config.setAllowCredentials(true);
-
-    //     UrlBasedCorsConfigurationSource source =
-    //             new UrlBasedCorsConfigurationSource();
-    //     source.registerCorsConfiguration("/**", config);
-
-    //     return source;
-    // }
-
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
+        System.out.println("Allowed Origins from Env: " + allowedOrigins);
         config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
+
+        config.setAllowedHeaders(List.of("*"));
+
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE); 
-        return bean;
+        return source;
     }
 }
