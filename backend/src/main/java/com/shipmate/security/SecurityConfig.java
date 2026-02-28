@@ -76,6 +76,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        System.out.println("Allowed Origins from Env: " + allowedOrigins);
         config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
 
         config.setAllowedMethods(List.of(
