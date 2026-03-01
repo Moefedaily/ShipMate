@@ -125,11 +125,9 @@ jobs:
             # 5. Create Temporary Override File
 
             echo "Creating temporary docker-compose.override.yml..."
-            cat > docker-compose.override.yml <<EOF
-            services:
-              backend:
-                image: $NEW_IMAGE
-            EOF
+            echo "services:" > docker-compose.override.yml
+            echo "  backend:" >> docker-compose.override.yml
+            echo "    image: $NEW_IMAGE" >> docker-compose.override.yml
 
             # 6. Deploy New Version
 
@@ -142,10 +140,12 @@ jobs:
             sleep 20
 
             echo "Performing health check via Actuator..."
+
             if ! docker inspect -f '{{.State.Running}}' shipmate-backend 2>/dev/null | grep -q true; then
               echo "Backend container is not running!"
               exit 1
             fi
+
             if ! docker exec shipmate-backend curl -f http://localhost:8080/actuator/health; then
               echo "Health check failed. Initiating automated rollback..."
 
@@ -153,11 +153,9 @@ jobs:
 
               if [ -n "$CURRENT_IMAGE" ]; then
                 echo "Restoring previous stable image: $CURRENT_IMAGE"
-                cat > docker-compose.override.yml <<EOF
-                services:
-                  backend:
-                    image: $CURRENT_IMAGE
-                EOF
+                echo "services:" > docker-compose.override.yml
+                echo "  backend:" >> docker-compose.override.yml
+                echo "    image: $CURRENT_IMAGE" >> docker-compose.override.yml
                 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d backend
                 echo "Rollback completed successfully."
               else
