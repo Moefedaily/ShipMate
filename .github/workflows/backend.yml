@@ -115,6 +115,9 @@ jobs:
             mkdir -p backups
             docker exec shipmate-db pg_dump -U $POSTGRES_USER -d $POSTGRES_DB > backups/pre_deploy_$(date +%Y%m%d_%H%M%S).sql
             echo "Database backup completed successfully."
+            echo "Cleaning old backups, keeping only the 3 most recent files..."
+            ls -tp backups/pre_deploy_*.sql 2>/dev/null | grep -v '/$' | tail -n +4 | xargs -r rm --
+            echo "Old backups cleaned."
 
             # 4. Pull New Backend Image
 
