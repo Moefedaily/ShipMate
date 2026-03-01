@@ -76,6 +76,7 @@ jobs:
 
           echo "Frontend image successfully published to GHCR."
 
+
   # CD JOB
   # Deploy using Override Strategy with Health Check & Rollback
   
@@ -113,11 +114,9 @@ jobs:
             # 3. Create Temporary Override File
 
             echo "Creating temporary docker-compose.override.yml for frontend..."
-            cat > docker-compose.override.yml <<EOF
-            services:
-              web:
-                image: $NEW_IMAGE
-            EOF
+            echo "services:" > docker-compose.override.yml
+            echo "  web:" >> docker-compose.override.yml
+            echo "    image: $NEW_IMAGE" >> docker-compose.override.yml
 
             # 4. Deploy New Frontend Version
 
@@ -130,6 +129,12 @@ jobs:
             sleep 10
 
             echo "Performing health check on Nginx..."
+
+            if ! docker inspect -f '{{.State.Running}}' shipmate-web 2>/dev/null | grep -q true; then
+              echo "Frontend container is not running!"
+              exit 1
+            fi
+
             if ! curl -f http://localhost; then
               echo "Health check failed. Initiating frontend rollback..."
 
@@ -137,11 +142,9 @@ jobs:
 
               if [ -n "$CURRENT_IMAGE" ]; then
                 echo "Restoring previous frontend image: $CURRENT_IMAGE"
-                cat > docker-compose.override.yml <<EOF
-                services:
-                  web:
-                    image: $CURRENT_IMAGE
-                EOF
+                echo "services:" > docker-compose.override.yml
+                echo "  web:" >> docker-compose.override.yml
+                echo "    image: $CURRENT_IMAGE" >> docker-compose.override.yml
                 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d web
                 echo "Frontend rollback completed successfully."
               else
