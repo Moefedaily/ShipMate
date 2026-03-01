@@ -76,11 +76,11 @@ jobs:
           echo "Image successfully published to GHCR."
 
 
-  # CD JOB
-  # Deploy using Override Strategy with Backup and Rollback
+    # CD JOB
+  # Deploy using Immutable Compose Strategy (No Override)
 
   deploy:
-    name: Deploy to Production (Override Strategy)
+    name: Deploy to Production (Immutable Strategy)
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
             echo "Connecting to production server..."
             cd /opt/shipmate
 
-            # 1. Load environment variables from .env
+            # 1. Load environment variables
 
             echo "Loading environment variables from .env..."
             source .env
@@ -115,6 +115,7 @@ jobs:
             mkdir -p backups
             docker exec shipmate-db pg_dump -U $POSTGRES_USER -d $POSTGRES_DB > backups/pre_deploy_$(date +%Y%m%d_%H%M%S).sql
             echo "Database backup completed successfully."
+
             echo "Cleaning old backups, keeping only the 3 most recent files..."
             ls -tp backups/pre_deploy_*.sql 2>/dev/null | grep -v '/$' | tail -n +4 | xargs -r rm --
             echo "Old backups cleaned."
@@ -125,52 +126,39 @@ jobs:
             echo "Pulling new image from registry: $NEW_IMAGE"
             docker pull $NEW_IMAGE
 
-            # 5. Create Temporary Override File
+            # 5. Update docker-compose.prod.yml to use new SHA
 
-            echo "Creating temporary docker-compose.override.yml..."
-            echo "services:" > docker-compose.override.yml
-            echo "  backend:" >> docker-compose.override.yml
-            echo "    image: $NEW_IMAGE" >> docker-compose.override.yml
+            echo "Updating docker-compose.prod.yml with new SHA..."
+            sed -i "s|image: ghcr.io/moefedaily/shipmate-backend:.*|image: $NEW_IMAGE|" docker-compose.prod.yml
 
             # 6. Deploy New Version
 
             echo "Deploying new backend version..."
-            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d backend
+            echo "Waiting for backend and database to become healthy..."
 
-            # 7. Health Check
+            MAX_RETRIES=20
+            RETRY_DELAY=3
+            COUNTER=0
 
-            echo "Waiting for Spring Boot application to initialize..."
-            sleep 20
+            until docker exec shipmate-backend curl -fs http://localhost:8080/actuator/health | grep -q '"db".*"UP"'; do
+              COUNTER=$((COUNTER+1))
 
-            echo "Performing health check via Actuator..."
+              if [ $COUNTER -ge $MAX_RETRIES ]; then
+                echo "Backend or database did not become healthy in time. Initiating rollback..."
 
-            if ! docker inspect -f '{{.State.Running}}' shipmate-backend 2>/dev/null | grep -q true; then
-              echo "Backend container is not running!"
-              exit 1
-            fi
+                if [ -n "$CURRENT_IMAGE" ]; then
+                  sed -i "s|image: ghcr.io/moefedaily/shipmate-backend:.*|image: $CURRENT_IMAGE|" docker-compose.prod.yml
+                  docker compose -f docker-compose.prod.yml up -d backend
+                  echo "Rollback completed successfully."
+                else
+                  echo "Rollback failed: No previous image reference found."
+                fi
 
-            if ! docker exec shipmate-backend curl -f http://localhost:8080/actuator/health; then
-              echo "Health check failed. Initiating automated rollback..."
-
-              rm -f docker-compose.override.yml
-
-              if [ -n "$CURRENT_IMAGE" ]; then
-                echo "Restoring previous stable image: $CURRENT_IMAGE"
-                echo "services:" > docker-compose.override.yml
-                echo "  backend:" >> docker-compose.override.yml
-                echo "    image: $CURRENT_IMAGE" >> docker-compose.override.yml
-                docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d backend
-                echo "Rollback completed successfully."
-              else
-                echo "Rollback failed: No previous image reference found."
+                exit 1
               fi
 
-              exit 1
-            fi
+              echo "Backend or DB not ready yet... retrying in ${RETRY_DELAY}s"
+              sleep $RETRY_DELAY
+            done
 
-            # 8. Cleanup
-
-            echo "Health check passed. Removing temporary override file..."
-            rm -f docker-compose.override.yml
-
-            echo "Deployment finished successfully."
+            echo "Backend and database are healthy."
