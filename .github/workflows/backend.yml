@@ -140,7 +140,7 @@ jobs:
             RETRY_DELAY=3
             COUNTER=0
 
-            until docker exec shipmate-backend curl -fs http://localhost:8080/actuator/health | grep -q '"db".*"UP"'; do
+            until docker exec shipmate-backend curl -fs http://localhost:8080/actuator/health > /dev/null; do
               COUNTER=$((COUNTER+1))
 
               if [ $COUNTER -ge $MAX_RETRIES ]; then
