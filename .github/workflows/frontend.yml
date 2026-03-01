@@ -77,11 +77,11 @@ jobs:
           echo "Frontend image successfully published to GHCR."
 
 
-  # CD JOB
-  # Deploy using Override Strategy with Health Check & Rollback
-  
+    # CD JOB
+  # Deploy using Immutable Compose Strategy (No Override)
+
   deploy:
-    name: Deploy Frontend to Production (Override Strategy)
+    name: Deploy Frontend to Production (Immutable Strategy)
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -111,52 +111,44 @@ jobs:
             echo "Pulling new image from registry: $NEW_IMAGE"
             docker pull $NEW_IMAGE
 
-            # 3. Create Temporary Override File
+            # 3. Update docker-compose.prod.yml with new SHA
 
-            echo "Creating temporary docker-compose.override.yml for frontend..."
-            echo "services:" > docker-compose.override.yml
-            echo "  web:" >> docker-compose.override.yml
-            echo "    image: $NEW_IMAGE" >> docker-compose.override.yml
+            echo "Updating docker-compose.prod.yml with new frontend SHA..."
+            sed -i "s|image: ghcr.io/moefedaily/shipmate-frontend:.*|image: $NEW_IMAGE|" docker-compose.prod.yml
 
-            # 4. Deploy New Frontend Version
+            # 4. Deploy New Version
 
             echo "Deploying new frontend version..."
-            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d web
+            docker compose -f docker-compose.prod.yml up -d web
 
-            # 5. Post-Deployment Health Check
+            # 5. Health Check
 
             echo "Waiting for Nginx to initialize..."
-            sleep 10
+            echo "Waiting for frontend to become ready..."
 
-            echo "Performing health check on Nginx..."
+            MAX_RETRIES=15
+            RETRY_DELAY=2
+            COUNTER=0
 
-            if ! docker inspect -f '{{.State.Running}}' shipmate-web 2>/dev/null | grep -q true; then
-              echo "Frontend container is not running!"
-              exit 1
-            fi
+            until curl -fs http://localhost/index.html > /dev/null; do
+              COUNTER=$((COUNTER+1))
 
-            if ! curl -f http://localhost; then
-              echo "Health check failed. Initiating frontend rollback..."
+              if [ $COUNTER -ge $MAX_RETRIES ]; then
+                echo "Frontend did not become ready in time. Initiating rollback..."
 
-              rm -f docker-compose.override.yml
+                if [ -n "$CURRENT_IMAGE" ]; then
+                  sed -i "s|image: ghcr.io/moefedaily/shipmate-frontend:.*|image: $CURRENT_IMAGE|" docker-compose.prod.yml
+                  docker compose -f docker-compose.prod.yml up -d web
+                  echo "Frontend rollback completed successfully."
+                else
+                  echo "Rollback failed: No previous image reference found."
+                fi
 
-              if [ -n "$CURRENT_IMAGE" ]; then
-                echo "Restoring previous frontend image: $CURRENT_IMAGE"
-                echo "services:" > docker-compose.override.yml
-                echo "  web:" >> docker-compose.override.yml
-                echo "    image: $CURRENT_IMAGE" >> docker-compose.override.yml
-                docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d web
-                echo "Frontend rollback completed successfully."
-              else
-                echo "Rollback failed: No previous image reference found."
+                exit 1
               fi
 
-              exit 1
-            fi
+              echo "Frontend not ready yet... retrying in ${RETRY_DELAY}s"
+              sleep $RETRY_DELAY
+            done
 
-            # 6. Cleanup After Successful Deployment
-
-            echo "Health check passed. Removing temporary override file..."
-            rm -f docker-compose.override.yml
-
-            echo "Frontend deployment completed successfully."
+            echo "Frontend is healthy."
