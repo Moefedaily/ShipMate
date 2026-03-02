@@ -131,6 +131,10 @@ jobs:
             echo "Updating docker-compose.prod.yml with new SHA..."
             sed -i "s|image: ghcr.io/moefedaily/shipmate-backend:.*|image: $NEW_IMAGE|" docker-compose.prod.yml
 
+            # 6. Restart backend with new image
+            echo "Restarting backend container with new image..."
+            docker compose -f docker-compose.prod.yml up -d backend
+
             # 6. Deploy New Version
 
             echo "Deploying new backend version..."
@@ -162,3 +166,6 @@ jobs:
             done
 
             echo "Backend and database are healthy."
+            echo "Deployment successful. Cleaning unused Docker images..."
+            docker image prune -f
+            echo "Cleanup completed."
