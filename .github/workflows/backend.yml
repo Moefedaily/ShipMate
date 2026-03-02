@@ -166,6 +166,25 @@ jobs:
             done
 
             echo "Backend and database are healthy."
-            echo "Deployment successful. Cleaning unused Docker images..."
+
+            echo "Applying Docker image retention policy (keeping last 3 versions)..."
+
+            IMAGES=$(docker images ghcr.io/moefedaily/shipmate-backend \
+              --format "{{.Repository}}:{{.Tag}}" \
+              --filter "dangling=false")
+
+            COUNT=0
+            for IMAGE in $IMAGES; do
+              COUNT=$((COUNT+1))
+              if [ $COUNT -gt 3 ]; then
+                echo "Removing old image: $IMAGE"
+                docker rmi "$IMAGE" || true
+              fi
+            done
+
+            echo "Image retention applied."
+
+            echo "Cleaning unused Docker layers..."
             docker image prune -f
-            echo "Cleanup completed."
+
+            echo "Deployment completed successfully."
