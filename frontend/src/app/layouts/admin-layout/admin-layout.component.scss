@@ -1,0 +1,48 @@
+@use '../../../styles/variables/typography' as *;
+@use '../../../styles/variables/admin-colors' as *;
+
+$sidebar-collapsed: 64px;
+$sidebar-expanded:  220px;
+$transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Force dark background on entire admin shell
+.admin-shell {
+  min-height: 100vh;
+  background: $admin-bg-base;
+  display: flex;
+  color: $admin-text-primary;
+  font-family: $font-family-base;
+}
+
+// ── Main area offset ──────────────────────────────────────────────────────────
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-left: $sidebar-collapsed;
+  transition: margin-left $transition;
+  min-width: 0;
+}
+
+.admin-shell.sidebar-expanded .admin-main {
+  margin-left: $sidebar-expanded;
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .admin-content {
+    padding: 1.25rem 1rem;
+  }
+}

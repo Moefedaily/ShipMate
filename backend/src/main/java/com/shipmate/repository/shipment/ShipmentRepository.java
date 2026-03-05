@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,11 +36,28 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     List<Shipment> findAllUserShipments(UUID userId);
 
     @Query("""
+        select distinct s from Shipment s
+        left join s.booking b
+        left join b.driver d
+        where s.sender.id = :userId
+        or d.id = :userId
+        """)
+        Page<Shipment> findAllUserShipments(
+                @Param("userId") UUID userId,
+                Pageable pageable
+        );
+    @Query("""
         select s from Shipment s
         join fetch s.booking b
         join fetch s.sender sender
         where s.id = :shipmentId
     """)
     Optional<Shipment> findWithBookingAndSender(@Param("shipmentId") UUID shipmentId);
+
+    long countByStatus(ShipmentStatus status);
+
+    long countBySender(User sender);
+
+    long countByStatusIn(Collection<ShipmentStatus> statuses);
 
 }

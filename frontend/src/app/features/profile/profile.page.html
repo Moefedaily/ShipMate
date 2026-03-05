@@ -1,120 +1,210 @@
 <div class="profile-page">
 
-  <!-- Header -->
-  <div class="page-header">
-    <div>
-      <h1>Profile</h1>
-      <p class="subtitle">Manage your personal information and account status.</p>
-    </div>
-  </div>
-
-  <!-- GLOBAL ERROR -->
   @if (errorMessage()) {
     <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
       {{ errorMessage() }}
     </div>
   }
 
- <!-- AVATAR -->
-<section class="card profile-card avatar-card">
-  <app-avatar
-    [src]="avatarUrl()"
-    size="md"
-    [editable]="true"
-    (upload)="onAvatarUpload($event)"
-    (remove)="removeAvatar()"
-  />
-</section>
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h1>My Profile</h1>
+      <p class="subtitle">Manage your personal information and account settings.</p>
+    </div>
+    <span
+      class="status-pill"
+      [class.status-pill--success]="verified()"
+      [class.status-pill--warning]="!verified()"
+    >
+      <mat-icon>{{ verified() ? 'verified' : 'pending' }}</mat-icon>
+      {{ verified() ? 'Verified' : 'Not verified' }}
+    </span>
+  </div>
 
-  <!-- PERSONAL INFO -->
-  <section class="card profile-card">
-    <div class="card-head">
-      <div class="card-title">
-        <div class="icon-bubble" aria-hidden="true">👤</div>
-        <div>
-          <h2>Personal information</h2>
-          <p>Update only your name. Email and account status are read-only.</p>
-        </div>
+  <!-- ── Avatar + Quick Stats ────────────────────────────────────────────── -->
+  <section class="profile-card identity-card">
+
+    <div class="identity-left">
+      <div class="avatar-wrap">
+        <app-avatar
+          [src]="avatarUrl()"
+          size="md"
+          [editable]="true"
+          (upload)="onAvatarUpload($event)"
+          (remove)="removeAvatar()"
+        />
       </div>
 
-      <span
-        class="status-pill"
-        [class.status-pill--success]="verified()"
-        [class.status-pill--warning]="!verified()"
-      >
-        @if (verified()) { Verified } @else { Not verified }
-      </span>
+      <div class="identity-info">
+        <h2 class="identity-name">
+          {{ form.controls.firstName.value }} {{ form.controls.lastName.value }}
+        </h2>
+        <span class="identity-email">{{ email() }}</span>
+        <div class="identity-badges">
+          @if (userType() === 'SENDER' || userType() === 'BOTH') {
+            <span class="type-badge type-badge--sender">
+              <mat-icon>send</mat-icon>Sender
+            </span>
+          }
+          @if (userType() === 'DRIVER' || userType() === 'BOTH') {
+            <span class="type-badge type-badge--driver">
+              <mat-icon>local_shipping</mat-icon>Driver
+            </span>
+          }
+          <span class="type-badge" [class.type-badge--active]="active()" [class.type-badge--inactive]="!active()">
+            <mat-icon>{{ active() ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ active() ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick-stat chips -->
+    <div class="identity-stats">
+      <div class="stat-item">
+        <mat-icon>mail_outline</mat-icon>
+        <div>
+          <span class="stat-label">Email</span>
+          <span class="stat-value">{{ email() }}</span>
+        </div>
+      </div>
+      <div class="stat-item">
+        <mat-icon>phone_iphone</mat-icon>
+        <div>
+          <span class="stat-label">Phone</span>
+          <span class="stat-value">{{ form.controls.phone.value || '—' }}</span>
+        </div>
+      </div>
+      @if (showDriverSection()) {
+        <div class="stat-item">
+          <mat-icon>directions_car</mat-icon>
+          <div>
+            <span class="stat-label">Vehicle</span>
+            <span class="stat-value">{{ driverVehicleTypeLabel() }}</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <mat-icon>fitness_center</mat-icon>
+          <div>
+            <span class="stat-label">Max Load</span>
+            <span class="stat-value">{{ driverMaxWeight() }} kg</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </section>
+
+  <!-- ── Personal Information ────────────────────────────────────────────── -->
+  <section class="profile-card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="icon-bubble">
+          <mat-icon>person_outline</mat-icon>
+        </div>
+        <div>
+          <h2>Personal information</h2>
+          <p>Update your name and phone number.</p>
+        </div>
+      </div>
     </div>
 
     <form class="profile-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
 
       <div class="form-row">
         <div class="form-field">
-          <label for="firstName">First name</label>
+          <label for="firstName">
+            <mat-icon>badge</mat-icon>
+            First name
+          </label>
           <input
             id="firstName"
             type="text"
             formControlName="firstName"
             autocomplete="given-name"
+            placeholder="First name"
             [class.input--invalid]="isFirstNameInvalid()"
           />
           @if (isFirstNameInvalid()) {
-            <small class="error">Min. 2 characters.</small>
+            <small class="error"><mat-icon>info</mat-icon> Min. 2 characters.</small>
           }
         </div>
 
         <div class="form-field">
-          <label for="lastName">Last name</label>
+          <label for="lastName">
+            <mat-icon>badge</mat-icon>
+            Last name
+          </label>
           <input
             id="lastName"
             type="text"
             formControlName="lastName"
             autocomplete="family-name"
+            placeholder="Last name"
             [class.input--invalid]="isLastNameInvalid()"
           />
           @if (isLastNameInvalid()) {
-            <small class="error">Min. 2 characters.</small>
+            <small class="error"><mat-icon>info</mat-icon> Min. 2 characters.</small>
           }
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-field">
-          <label for="phone">Phone number</label>
+          <label for="phone">
+            <mat-icon>phone</mat-icon>
+            Phone number
+          </label>
           <input
             id="phone"
             type="tel"
             formControlName="phone"
             autocomplete="tel"
-            placeholder="+1 (555) 000-0000"
+            placeholder="+33123456789"
+            [class.input--invalid]="isPhoneInvalid()"
           />
+          @if (isPhoneInvalid()) {
+            <small class="error">
+              <mat-icon>info</mat-icon>
+              Enter a valid international phone number (example: +33755844445)
+            </small>
+          }
+          <small class="hint">
+            <mat-icon>info_outline</mat-icon>
+            Use international format (E.164). Example: +33XXXXXXXXX
+          </small>
         </div>
       </div>
 
-      <!-- READONLY INFO -->
+      <!-- Read-only info -->
       <div class="readonly-grid">
-
         <div class="readonly-item">
-          <span class="readonly-label">Email</span>
-          <span class="readonly-value">{{ email() }}</span>
+          <mat-icon>mail</mat-icon>
+          <div>
+            <span class="readonly-label">Email address</span>
+            <span class="readonly-value">{{ email() }}</span>
+          </div>
         </div>
-
         <div class="readonly-item">
-          <span class="readonly-label">Account</span>
-          <span class="readonly-value">
-            @if (active()) { Active } @else { Disabled }
-          </span>
+          <mat-icon>{{ active() ? 'check_circle' : 'cancel' }}</mat-icon>
+          <div>
+            <span class="readonly-label">Account status</span>
+            <span class="readonly-value">{{ active() ? 'Active' : 'Disabled' }}</span>
+          </div>
         </div>
-
         <div class="readonly-item">
-          <span class="readonly-label">Type</span>
-          <span class="readonly-value">
-            @if (userType() === 'SENDER') { Sender }
-            @else if (userType() === 'DRIVER') { Driver }
-            @else { Sender & Driver }
-          </span>
+          <mat-icon>manage_accounts</mat-icon>
+          <div>
+            <span class="readonly-label">Account type</span>
+            <span class="readonly-value">
+              @if (userType() === 'SENDER') { Sender }
+              @else if (userType() === 'DRIVER') { Driver }
+              @else { Sender &amp; Driver }
+            </span>
+          </div>
         </div>
-
       </div>
 
       <div class="actions">
@@ -123,25 +213,27 @@
           class="btn btn--primary"
           [disabled]="submitting() || form.invalid || !hasChanges()"
         >
+          <mat-icon>save</mat-icon>
           {{ submitting() ? 'Saving…' : 'Save changes' }}
         </button>
-
         @if (!hasChanges()) {
-          <span class="hint">No changes to save.</span>
+          <span class="hint"><mat-icon>check</mat-icon> No changes to save.</span>
         }
       </div>
 
     </form>
   </section>
 
-  <!-- DRIVER INFO (CONDITIONAL) -->
+  <!-- ── Driver Section ──────────────────────────────────────────────────── -->
   @if (showDriverSection()) {
-    <section class="card profile-card">
+    <section class="profile-card">
       <div class="card-head">
         <div class="card-title">
-          <div class="icon-bubble icon-bubble--driver" aria-hidden="true">🚚</div>
+          <div class="icon-bubble icon-bubble--driver">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
           <div>
-            <h2>Driver information</h2>
+            <h2>Driver profile</h2>
             <p>Your driver profile is managed by the admin review process.</p>
           </div>
         </div>
@@ -152,31 +244,45 @@
           [class.status-pill--warning]="driverStatus() === 'PENDING'"
           [class.status-pill--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'"
         >
+          <mat-icon>
+            {{ driverStatus() === 'APPROVED' ? 'verified' :
+               driverStatus() === 'PENDING'  ? 'schedule' : 'cancel' }}
+          </mat-icon>
           {{ driverStatus() }}
         </span>
       </div>
 
       <div class="readonly-grid">
         <div class="readonly-item">
-          <span class="readonly-label">Vehicle type</span>
-          <span class="readonly-value">{{ driverVehicleTypeLabel() }}</span>
+          <mat-icon>directions_car</mat-icon>
+          <div>
+            <span class="readonly-label">Vehicle type</span>
+            <span class="readonly-value">{{ driverVehicleTypeLabel() }}</span>
+          </div>
         </div>
-
         <div class="readonly-item">
-          <span class="readonly-label">Max capacity</span>
-          <span class="readonly-value">{{ driverMaxWeight() }} kg</span>
+          <mat-icon>fitness_center</mat-icon>
+          <div>
+            <span class="readonly-label">Max capacity</span>
+            <span class="readonly-value">{{ driverMaxWeight() }} kg</span>
+          </div>
         </div>
-
         <div class="readonly-item">
-          <span class="readonly-label">Approved at</span>
-          <span class="readonly-value">
-            @if (driverApprovedAt()) { {{ driverApprovedAt() }} } @else { — }
-          </span>
+          <mat-icon>event_available</mat-icon>
+          <div>
+            <span class="readonly-label">Approved at</span>
+            <span class="readonly-value">
+              @if (driverApprovedAt()) { {{ driverApprovedAt() | date:'mediumDate' }} } @else { — }
+            </span>
+          </div>
         </div>
       </div>
 
-      <!-- status message -->
       <div class="driver-note" [class.driver-note--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'">
+        <mat-icon>
+          {{ driverStatus() === 'PENDING'   ? 'hourglass_empty' :
+             driverStatus() === 'APPROVED'  ? 'check_circle' : 'warning_amber' }}
+        </mat-icon>
         @if (driverStatus() === 'PENDING') {
           Your application is under review. You will be notified once it's approved.
         } @else if (driverStatus() === 'APPROVED') {
@@ -187,8 +293,35 @@
           Your driver access is suspended. Contact support for more details.
         }
       </div>
-
     </section>
   }
+
+  <!-- ── Danger Zone ──────────────────────────────────────────────────────── -->
+  <section class="profile-card danger-zone">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="icon-bubble icon-bubble--danger">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <div>
+          <h2>Delete account</h2>
+          <p>
+            Permanently deactivate your account. Your personal data will be anonymized
+            and your account will no longer be accessible.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="danger-content">
+      <p class="danger-text">
+        <mat-icon>info_outline</mat-icon>
+        This action cannot be undone.
+      </p>
+      <button type="button" class="btn btn--danger" (click)="deleteAccount()">
+        <mat-icon>delete_forever</mat-icon>
+        Delete my account
+      </button>
+    </div>
+  </section>
 
 </div>

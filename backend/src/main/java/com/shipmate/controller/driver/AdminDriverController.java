@@ -3,16 +3,21 @@ package com.shipmate.controller.driver;
 import java.util.List;
 import java.util.UUID;
 
+import com.shipmate.dto.request.admin.AdminStrikeRequest;
 import com.shipmate.dto.response.driver.DriverProfileResponse;
+import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.service.driver.DriverProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -88,6 +93,25 @@ public class AdminDriverController {
     public ResponseEntity<DriverProfileResponse> suspend(@PathVariable UUID id) {
         return ResponseEntity.ok(driverProfileService.suspend(id));
     }
+    @Operation(
+        summary = "Add strike to driver",
+        description = "Adds a strike to a driver for a reported issue. If the driver reaches 5 strikes, their account will be suspended."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Strike added successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
+        @ApiResponse(responseCode = "404", description = "Driver profile not found")
+    })
+    @PostMapping("/{id}/strikes")
+    public ResponseEntity<DriverProfileResponse> addStrike(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdminStrikeRequest request
+    ) {
+        return ResponseEntity.ok(
+                driverProfileService.addStrike(id, request.note())
+        );
+    }
 
     @Operation(
         summary = "Get drivers with strikes",
@@ -108,5 +132,24 @@ public class AdminDriverController {
     ) {
         return ResponseEntity.ok(driverProfileService.resetStrikes(id));
     }
-    
+
+    @GetMapping
+    @Operation(
+        summary = "List drivers with optional status filter",
+        description = "Retrieve a paginated list of drivers, optionally filtered by status (PENDING, APPROVED, SUSPENDED)."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Drivers listed successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
+    public ResponseEntity<Page<DriverProfileResponse>> getDrivers(
+            @RequestParam(required = false) DriverStatus status,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            driverProfileService.getDrivers(status, pageable)
+        );
+    }
+        
 }

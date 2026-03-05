@@ -1,0 +1,114 @@
+<div class="admin-page">
+
+  <div>
+    <a class="back-btn" routerLink="/admin/payments">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Payments
+    </a>
+  </div>
+
+  @if (loading()) { <div class="page-loading"><div class="loader-spinner"></div></div> }
+  @if (error())   { <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div> }
+
+  @if (!loading() && payment()) {
+
+    <div class="payment-hero">
+      <div class="hero-icon-wrap">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+
+      <div class="hero-body">
+        <div class="hero-amount">
+          {{ payment()!.amountTotal | number:'1.2-2' }} {{ payment()!.currency }}
+        </div>
+
+        <div class="hero-meta-row">
+          <app-admin-badge
+            [label]="statusBadge(payment()!.paymentStatus).label"
+            [variant]="statusBadge(payment()!.paymentStatus).variant"
+          />
+          <span class="text-muted">{{ payment()!.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        @if (canRefund()) {
+          <button class="btn btn--danger" [disabled]="refunding()" (click)="refund()">
+            <mat-icon>undo</mat-icon>
+            {{ refunding() ? 'Refunding…' : 'Refund' }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="detail-grid">
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>receipt_long</mat-icon>
+          <h3>Payment Info</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <span class="detail-row__label">Payment ID</span>
+            <span class="detail-row__value mono">{{ payment()!.id }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Shipment ID</span>
+            <span class="detail-row__value mono">{{ payment()!.shipmentId }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Sender ID</span>
+            <span class="detail-row__value mono">{{ payment()!.senderId }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Amount</span>
+            <span class="detail-row__value">
+              {{ payment()!.amountTotal | number:'1.2-2' }} {{ payment()!.currency }}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Status</span>
+            <span class="detail-row__value">
+              <app-admin-badge
+                [label]="statusBadge(payment()!.paymentStatus).label"
+                [variant]="statusBadge(payment()!.paymentStatus).variant"
+              />
+            </span>
+          </div>
+
+          @if (payment()!.stripePaymentIntentId) {
+            <div class="detail-row">
+              <span class="detail-row__label">Stripe Intent</span>
+              <span class="detail-row__value mono">{{ payment()!.stripePaymentIntentId }}</span>
+            </div>
+          }
+
+          <div class="detail-row">
+            <span class="detail-row__label">Created</span>
+            <span class="detail-row__value">{{ payment()!.createdAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>link</mat-icon>
+          <h3>Related</h3>
+        </div>
+        <div class="detail-card__body">
+          <a class="btn btn--ghost" [routerLink]="['/admin/shipments', payment()!.shipmentId]">
+            <mat-icon>inventory_2</mat-icon>
+            View Shipment
+          </a>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

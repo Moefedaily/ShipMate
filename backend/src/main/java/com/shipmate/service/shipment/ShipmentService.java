@@ -19,11 +19,13 @@ import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.admin.AdminActionLogger;
 import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.payment.PaymentService;
 import com.shipmate.service.pricing.PricingService;
 import com.shipmate.util.GeoUtils;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,6 +69,7 @@ public class ShipmentService {
     private final PaymentService paymentService;
     private final DeliveryCodeService deliveryCodeService;
     private final DeliveryCodeEventPublisher deliveryCodeEventPublisher;
+    private final AdminActionLogger adminActionLogger;
 
 
 
@@ -580,4 +583,60 @@ public class ShipmentService {
 
         throw new IllegalArgumentException("Declared value exceeds supported insurance tiers");
     }
+    @Transactional
+    public Shipment adminUpdateStatus(UUID shipmentId, ShipmentStatus target, String adminNotes) {
+
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Shipment not found"));
+
+        ShipmentStatus current = shipment.getStatus();
+
+        if (current == ShipmentStatus.DELIVERED) {
+            throw new IllegalStateException("Delivered shipment cannot be changed");
+        }
+
+        if (current == ShipmentStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled shipment cannot be changed");
+        }
+
+        if (target == ShipmentStatus.DELIVERED) {
+            throw new IllegalArgumentException("Use delivery flow to mark delivered");
+        }
+
+        if (target == ShipmentStatus.IN_TRANSIT && current != ShipmentStatus.ASSIGNED) {
+            throw new IllegalArgumentException("Shipment must be ASSIGNED before IN_TRANSIT");
+        }
+
+        if (current == target) {
+            throw new IllegalArgumentException("Shipment already in status " + target);
+        }
+
+        shipment.setStatus(target);
+
+        Shipment saved = shipmentRepository.save(shipment);
+
+        if (target == ShipmentStatus.CANCELLED) {
+            adminActionLogger.shipmentCancelled(saved.getId(), adminNotes);
+        }
+        else if (target == ShipmentStatus.LOST) {
+            adminActionLogger.shipmentMarkedLost(saved.getId(), adminNotes != null ? adminNotes : "Admin marked shipment LOST");
+        }
+        else {
+            adminActionLogger.shipmentStatusOverride(
+                    saved.getId(),
+                    "Admin changed shipment status from " + current + " to " + target
+            );
+        }
+
+        return saved;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Shipment> adminListShipments(ShipmentStatus status, Pageable pageable) {
+        if (status == null) {
+            return shipmentRepository.findAll(pageable);
+        }
+        return shipmentRepository.findByStatus(status, pageable);
+    }
+
 }

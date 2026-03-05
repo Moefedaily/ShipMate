@@ -46,4 +46,9 @@ export class UserService {
     );
   }
 
+  deleteMyAccount(): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/users/me`
+    );
+  }
 }

@@ -1,0 +1,60 @@
+<div class="admin-page">
+
+  @if (loading()) {
+    <div class="table-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (error()) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>{{ error() }}
+    </div>
+  }
+
+  @if (!loading() && !error()) {
+
+    <div class="page-toolbar">
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <span class="result-count">{{ bookings().length }} bookings</span>
+      </div>
+    </div>
+
+    @if (bookings().length === 0) {
+      <div class="empty-state">
+        <mat-icon>event_busy</mat-icon>
+        <span>No bookings found</span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Shipment ID</th>
+              <th>Driver ID</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (booking of bookings(); track booking.id) {
+              <tr>
+                <td class="mono">{{ shortId(booking.id) }}</td>
+                <td class="mono">{{ shortId(booking.shipmentId) }}</td>
+                <td class="mono">{{ shortId(booking.driverId) }}</td>
+                <td>
+                  <span class="status-chip" [class]="'status-chip--' + booking.status.toLowerCase()">
+                    {{ booking.status }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ booking.createdAt | date:'mediumDate' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  }
+
+</div>

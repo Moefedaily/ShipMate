@@ -1,0 +1,13 @@
+@use '../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+@use '../../../../../../styles/variables/admin-shared' as *;
+
+.route-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: $text-size-caption;
+  color: $admin-text-secondary;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; color: $admin-text-muted; }
+}

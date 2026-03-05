@@ -1,0 +1,254 @@
+@use '../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../styles/variables/typography' as *;
+@use '../../../../../styles/variables/admin-shared' as *;
+
+// ── Stats Grid ────────────────────────────────────────────────────────────────
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 16px;
+  text-decoration: none;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
+  cursor: pointer;
+
+  &:hover {
+    background: $admin-bg-raised;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+    .stat-card__arrow { opacity: 1; transform: translateX(0); }
+  }
+
+  &--primary .stat-card__icon { background: $color-primary-subtle;  mat-icon { color: $color-primary; } }
+  &--success .stat-card__icon { background: $color-success-subtle;  mat-icon { color: $color-success; } }
+  &--warning .stat-card__icon { background: $color-warning-subtle;  mat-icon { color: $color-warning; } }
+  &--info    .stat-card__icon { background: $color-info-subtle;     mat-icon { color: $color-info;    } }
+  &--danger  .stat-card__icon { background: $color-danger-subtle;   mat-icon { color: $color-danger;  } }
+
+  &--primary:hover { border-color: $admin-border-primary; }
+  &--success:hover { border-color: rgba($color-success, 0.3); }
+  &--warning:hover { border-color: rgba($color-warning, 0.3); }
+  &--info:hover    { border-color: rgba($color-info,    0.3); }
+  &--danger:hover  { border-color: rgba($color-danger,  0.3); }
+}
+
+.stat-card__icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 22px; width: 22px; height: 22px; }
+}
+
+.stat-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stat-card__value {
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-bold;
+  color: $admin-text-primary;
+  line-height: 1.2;
+}
+
+.stat-card__label {
+  font-size: $text-size-caption;
+  color: $admin-text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-card__arrow {
+  font-size: 18px; width: 18px; height: 18px;
+  color: $admin-text-muted;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s, transform 0.18s;
+  flex-shrink: 0;
+}
+
+// ── Section ───────────────────────────────────────────────────────────────────
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  font-size: $text-size-caption;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $admin-text-muted;
+  margin: 0;
+}
+
+// ── Quick Actions ─────────────────────────────────────────────────────────────
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.15s, box-shadow 0.18s;
+
+  &:hover {
+    background: $admin-bg-raised;
+    border-color: $admin-border-strong;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+    .action-card__arrow { color: $admin-text-primary; transform: translateX(2px); }
+  }
+}
+
+.action-card__icon {
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &--warning { background: $color-warning-subtle; mat-icon { color: $color-warning; } }
+  &--danger  { background: $color-danger-subtle;  mat-icon { color: $color-danger;  } }
+  &--info    { background: $color-info-subtle;    mat-icon { color: $color-info;    } }
+  &--success { background: $color-success-subtle; mat-icon { color: $color-success; } }
+}
+
+.action-card__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong { font-size: $text-size-label; font-weight: $font-weight-semibold; color: $admin-text-primary; }
+  span   { font-size: $text-size-caption; color: $admin-text-muted; }
+}
+
+.action-card__arrow {
+  font-size: 20px; width: 20px; height: 20px;
+  color: $admin-text-muted;
+  transition: color 0.15s, transform 0.15s;
+}
+
+/* ── Needs Attention Section ───────────────────────── */
+
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.attention-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 14px;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.15s,
+    box-shadow 0.18s;
+
+  &:hover {
+    background: $admin-bg-raised;
+    border-color: $admin-border-strong;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+    .attention-arrow {
+      color: $admin-text-primary;
+      transform: translateX(2px);
+    }
+  }
+}
+
+.attention-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.attention-icon--warning {
+  background: $color-warning-subtle;
+  color: $color-warning;
+}
+
+.attention-icon--danger {
+  background: $color-danger-subtle;
+  color: $color-danger;
+}
+
+.attention-icon--info {
+  background: $color-info-subtle;
+  color: $color-info;
+}
+
+.attention-card__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $admin-text-primary;
+  }
+
+  span {
+    font-size: $text-size-caption;
+    color: $admin-text-muted;
+  }
+}
+
+.attention-arrow {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: $admin-text-muted;
+  transition: color 0.15s, transform 0.15s;
+}

@@ -1,0 +1,197 @@
+@use '../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: $admin-bg-surface;
+  border-bottom: 1px solid $admin-border;
+}
+
+.header-inner {
+  height: 64px;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+// ── Left ──────────────────────────────────────────────────────────────────────
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-title {
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-semibold;
+  color: $admin-text-primary;
+  margin: 0;
+  letter-spacing: $letter-spacing-tight;
+}
+
+// ── Right ─────────────────────────────────────────────────────────────────────
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-btn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  border: 1px solid $admin-border;
+  background: $admin-bg-raised;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+
+  mat-icon {
+    font-size: 18px; width: 18px; height: 18px;
+    color: $admin-text-muted; transition: color 0.15s;
+  }
+
+  &:hover {
+    background: $admin-bg-overlay;
+    border-color: $admin-border-primary;
+    transform: translateY(-1px);
+    mat-icon { color: $color-primary; }
+  }
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background: $admin-border;
+}
+
+// ── Profile chip ──────────────────────────────────────────────────────────────
+
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.65rem 0.25rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid $admin-border;
+  background: $admin-bg-raised;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: $admin-bg-overlay;
+    border-color: $admin-border-primary;
+  }
+}
+
+.chip-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary, $color-primary-hover);
+  color: #fff;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-bold;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.chip-name {
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  color: $admin-text-primary;
+  white-space: nowrap;
+}
+
+.chip-chevron {
+  font-size: 16px; width: 16px; height: 16px;
+  color: $admin-text-muted;
+}
+
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+
+::ng-deep .admin-profile-menu {
+  margin-top: 0.5rem;
+  border-radius: 14px !important;
+  overflow: hidden;
+  border: 1px solid $admin-border-strong !important;
+  background: $admin-bg-overlay !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+  min-width: 220px !important;
+
+  .mat-mdc-menu-content { padding: 0 !important; }
+}
+
+.amenu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.amenu-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary, $color-primary-hover);
+  color: #fff;
+  font-size: $text-size-label;
+  font-weight: $font-weight-bold;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.amenu-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: $text-size-label;
+    font-weight: $font-weight-semibold;
+    color: $admin-text-primary;
+    line-height: 1.2;
+  }
+
+  span {
+    font-size: $text-size-caption;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.amenu-divider { height: 1px; background: $admin-border; margin: 0.2rem 0; }
+
+::ng-deep .admin-profile-menu button.amenu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  padding: 0 1rem !important;
+  height: 42px !important;
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: $text-size-label !important;
+  font-weight: $font-weight-medium !important;
+  color: $admin-text-secondary !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: background 0.15s, color 0.15s !important;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: $admin-text-muted; }
+
+  &:hover {
+    background: $admin-bg-raised !important;
+    color: $admin-text-primary !important;
+  }
+
+  &.amenu-item--danger {
+    color: $color-danger !important;
+    mat-icon { color: $color-danger; }
+    &:hover { background: rgba($color-danger, 0.08) !important; }
+  }
+}

@@ -1,0 +1,88 @@
+<div class="admin-page">
+
+  <div class="page-toolbar">
+    <div class="toolbar-left">
+      <h2 class="section-title">Payments</h2>
+      <span class="text-muted">(no server-side filtering yet)</span>
+    </div>
+
+    <div class="toolbar-right">
+      @if (page()) {
+        <span class="result-count">{{ page()!.totalElements }} payments</span>
+      }
+    </div>
+  </div>
+
+  @if (loading()) { <div class="table-loading"><div class="loader-spinner"></div></div> }
+  @if (error())   { <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div> }
+
+  @if (!loading() && page()) {
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Shipment</th>
+            <th>Sender</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Stripe Intent</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (payment of page()!.content; track payment.id) {
+            <tr>
+              <td class="mono text-muted">{{ shortId(payment.id) }}</td>
+              <td class="mono text-muted">{{ shortId(payment.shipmentId) }}</td>
+              <td class="mono text-muted">{{ shortId(payment.senderId) }}</td>
+
+              <td>
+                <strong>
+                  {{ payment.amountTotal | number:'1.2-2' }} {{ payment.currency }}
+                </strong>
+              </td>
+
+              <td>
+                <app-admin-badge
+                  [label]="statusBadge(payment.paymentStatus).label"
+                  [variant]="statusBadge(payment.paymentStatus).variant"
+                />
+              </td>
+
+              <td class="mono text-muted">
+                {{ payment.stripePaymentIntentId ? (payment.stripePaymentIntentId | slice:0:16) + '…' : '—' }}
+              </td>
+
+              <td class="text-muted">{{ payment.createdAt | date:'mediumDate' }}</td>
+
+              <td>
+                <div class="row-actions">
+                  <a class="row-btn" [routerLink]="['/admin/payments', payment.id]">
+                    <mat-icon>visibility</mat-icon>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+
+    @if (page()!.totalPages > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="page()!.number === 0" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="page-info">Page {{ page()!.number + 1 }} of {{ page()!.totalPages }}</span>
+        <button class="page-btn" [disabled]="page()!.number >= page()!.totalPages - 1" (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+
+</div>

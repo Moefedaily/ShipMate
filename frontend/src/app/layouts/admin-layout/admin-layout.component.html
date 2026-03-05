@@ -1,0 +1,21 @@
+<div class="admin-shell" [class.sidebar-expanded]="sidebarExpanded()">
+
+  <!-- Sidebar -->
+  <app-admin-sidebar />
+
+  <!-- Main area -->
+  <div class="admin-main">
+
+    <!-- Sticky header -->
+    <app-admin-header
+      [pageTitle]="pageTitle()"
+      [sidebarExpanded]="sidebarExpanded()"
+    />
+
+    <!-- Page content -->
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

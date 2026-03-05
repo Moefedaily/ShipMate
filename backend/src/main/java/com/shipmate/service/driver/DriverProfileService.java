@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,7 @@ import com.shipmate.model.notification.ReferenceType;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.admin.AdminActionLogger;
 import com.shipmate.service.mail.MailService;
 
 import jakarta.transaction.Transactional;
@@ -38,6 +41,7 @@ public class DriverProfileService {
     private final UserRepository userRepository;
     private final MailService mailService;
     private final ApplicationEventPublisher eventPublisher;
+    private final AdminActionLogger adminActionLogger;
     public DriverProfileResponse apply(UUID userId, DriverApplyRequest request) {
 
     User user = userRepository.findById(userId)
@@ -78,9 +82,13 @@ public class DriverProfileService {
         profile.setStatus(DriverStatus.APPROVED);
         profile.setApprovedAt(Instant.now());
 
-         mailService.sendDriverApprovedEmail(
-            profile.getUser().getEmail()
+        mailService.sendDriverApprovedEmail(profile.getUser().getEmail());
+
+        adminActionLogger.driverApproved(
+                profile.getId(),
+                "Admin approved driver application"
         );
+
         return mapper.toResponse(profile);
     }
 
@@ -92,14 +100,16 @@ public class DriverProfileService {
         }
 
         profile.setStatus(DriverStatus.REJECTED);
-        profile.setApprovedAt(Instant.now());
 
-         mailService.sendDriverRejectedEmail(
-            profile.getUser().getEmail()
+        mailService.sendDriverRejectedEmail(profile.getUser().getEmail());
+
+        adminActionLogger.driverRejected(
+                profile.getId(),
+                "Admin rejected driver application"
         );
+
         return mapper.toResponse(profile);
     }
-
     private DriverProfile getProfileOrThrow(UUID id) {
         return driverProfileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
@@ -114,12 +124,15 @@ public class DriverProfileService {
 
         profile.setStatus(DriverStatus.SUSPENDED);
 
-        mailService.sendDriverSuspendedEmail(
-            profile.getUser().getEmail()
+        mailService.sendDriverSuspendedEmail(profile.getUser().getEmail());
+
+        adminActionLogger.driverSuspended(
+                profile.getId(),
+                "Admin suspended driver"
         );
+
         return mapper.toResponse(profile);
     }
-
     public void updateLocation(UUID userId, UpdateDriverLocationRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -157,7 +170,6 @@ public class DriverProfileService {
             profile.setStatus(DriverStatus.APPROVED);
         }
 
-        // Notify driver
         eventPublisher.publishEvent(
                 new NotificationRequestedEvent(
                         profile.getUser().getId(),
@@ -171,7 +183,45 @@ public class DriverProfileService {
 
         mailService.sendDriverReactivatedEmail(profile.getUser().getEmail());
 
+        adminActionLogger.driverResetStrikes(
+                profile.getId(),
+                "Admin reset driver strikes"
+        );
+
         log.info("[ADMIN] Strikes reset for driverProfileId={}", driverProfileId);
+
+        return mapper.toResponse(profile);
+    }
+    @Transactional
+    public Page<DriverProfileResponse> getDrivers(
+            DriverStatus status,
+            Pageable pageable
+    ) {
+
+        Page<DriverProfile> page;
+
+        if (status != null) {
+            page = driverProfileRepository.findByStatus(status, pageable);
+        } else {
+            page = driverProfileRepository.findAll(pageable);
+        }
+
+        return page.map(mapper::toResponse);
+    }
+
+    @Transactional
+    public DriverProfileResponse addStrike(UUID driverId, String note) {
+
+        DriverProfile profile = getProfileOrThrow(driverId);
+
+        profile.setStrikeCount(profile.getStrikeCount() + 1);
+
+        if (profile.getStrikeCount() >= 5) {
+            profile.setStatus(DriverStatus.SUSPENDED);
+            adminActionLogger.driverSuspended(driverId, "Auto suspension after strikes");
+        }
+
+        adminActionLogger.driverStrike(driverId, note);
 
         return mapper.toResponse(profile);
     }

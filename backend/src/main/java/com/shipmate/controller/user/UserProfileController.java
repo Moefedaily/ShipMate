@@ -109,4 +109,20 @@ public class UserProfileController {
         userProfileService.deleteAvatar(UUID.fromString(userId));
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/me")
+    @Operation(
+        summary = "Delete my account",
+        description = "Permanently deletes the authenticated user's account. This action cannot be undone."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Void> deleteMyAccount(
+            @AuthenticationPrincipal(expression = "username") String userId) {
+
+        userProfileService.deleteAccount(UUID.fromString(userId));
+        return ResponseEntity.noContent().build();
+    }
 }

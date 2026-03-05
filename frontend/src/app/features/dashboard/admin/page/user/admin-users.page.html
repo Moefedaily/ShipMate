@@ -1,0 +1,143 @@
+<div class="admin-page">
+
+  <div class="page-toolbar">
+    <div class="toolbar-left">
+
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          placeholder="Search by email…"
+          [(ngModel)]="searchInput"
+          (keyup.enter)="onSearch()"
+        />
+        @if (searchInput) {
+          <button class="search-clear" (click)="searchInput = ''; onSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="filter-chips">
+        <button class="chip" [class.active]="filters.active === undefined" (click)="onActiveFilter('')">
+          All
+        </button>
+        <button class="chip" [class.active]="filters.active === true" (click)="onActiveFilter('true')">
+          Active
+        </button>
+        <button class="chip" [class.active]="filters.active === false" (click)="onActiveFilter('false')">
+          Inactive
+        </button>
+      </div>
+
+    </div>
+
+    <div class="toolbar-right">
+      @if (page()) {
+        <span class="result-count">{{ page()!.totalElements }} users</span>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="table-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (error()) {
+    <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div>
+  }
+
+  @if (!loading() && page()) {
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (user of page()!.content; track user.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="user-initials">
+                    {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                  </div>
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </td>
+
+              <td class="text-muted">{{ user.email }}</td>
+
+              <td>
+                <app-admin-badge
+                  [label]="userTypeBadge(user.userType).label"
+                  [variant]="userTypeBadge(user.userType).variant"
+                />
+              </td>
+
+              <td>
+                <app-admin-badge
+                  [label]="userStatusBadge(user.active).label"
+                  [variant]="userStatusBadge(user.active).variant"
+                />
+              </td>
+
+              <td class="text-muted">{{ user.createdAt | date:'mediumDate' }}</td>
+
+              <td>
+                <div class="row-actions">
+                  <a class="row-btn" [routerLink]="['/admin/users', user.id]">
+                    <mat-icon>visibility</mat-icon>
+                  </a>
+
+                  @if (user.active) {
+                    <button
+                      class="row-btn row-btn--danger"
+                      [disabled]="actingId() === user.id"
+                      (click)="deactivate(user.id, $event)"
+                      title="Deactivate"
+                    >
+                      <mat-icon>block</mat-icon>
+                    </button>
+                  } @else {
+                    <button
+                      class="row-btn row-btn--success"
+                      [disabled]="actingId() === user.id"
+                      (click)="activate(user.id, $event)"
+                      title="Activate"
+                    >
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+
+    @if (page()!.totalPages > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="page()!.number === 0" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="page-info">
+          Page {{ page()!.number + 1 }} of {{ page()!.totalPages }}
+        </span>
+        <button class="page-btn" [disabled]="page()!.number >= page()!.totalPages - 1" (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+
+</div>

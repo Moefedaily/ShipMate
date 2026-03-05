@@ -1,0 +1,60 @@
+<aside class="admin-sidebar" [class.expanded]="expanded()">
+
+  <!-- Top: Logo + toggle -->
+  <div class="sidebar-top">
+    <div class="sidebar-logo">
+      <mat-icon class="logo-icon">shield</mat-icon>
+      @if (expanded()) {
+        <span class="logo-text">Admin</span>
+      }
+    </div>
+    <button
+      class="toggle-btn"
+      (click)="toggleExpanded()"
+      [matTooltip]="expanded() ? 'Collapse' : 'Expand'"
+      matTooltipPosition="right"
+    >
+      <mat-icon>{{ expanded() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+    </button>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.route) {
+      <a
+        class="nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/admin' }"
+        [matTooltip]="expanded() ? '' : item.label"
+        matTooltipPosition="right"
+      >
+        <span class="nav-icon-wrap">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (item.badge) {
+            <span class="nav-badge">{{ item.badge }}</span>
+          }
+        </span>
+        @if (expanded()) {
+          <span class="nav-label">{{ item.label }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Bottom: User pill -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user" [matTooltip]="expanded() ? '' : userName()" matTooltipPosition="right">
+      <div class="user-avatar">
+        {{ userName().charAt(0).toUpperCase() }}
+      </div>
+      @if (expanded()) {
+        <div class="user-info">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">Administrator</span>
+        </div>
+      }
+    </div>
+  </div>
+
+</aside>

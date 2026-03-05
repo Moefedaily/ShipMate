@@ -1,5 +1,6 @@
 <div class="shipment-create-page">
 
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="dashboard-hero create-header">
     <div class="header-left">
       <button type="button" class="btn btn--ghost back-btn" (click)="goBack()">
@@ -11,6 +12,16 @@
         <p>Update details before your shipment gets picked up.</p>
       </div>
     </div>
+
+    <!-- Status chip -->
+    @if (shipment()) {
+      <div class="header-status">
+        <span class="status-chip">
+          <mat-icon>inventory_2</mat-icon>
+          {{ shipment()!.status }}
+        </span>
+      </div>
+    }
   </div>
 
   <section class="shipment-create-card">
@@ -18,9 +29,11 @@
 
       <form [formGroup]="form" class="form">
 
+        <!-- ── 01 Route ──────────────────────────────────────────────────── -->
         <div class="form-section">
           <div class="section-label">
             <span class="section-number">01</span>
+            <mat-icon>route</mat-icon>
             <span>Route</span>
           </div>
 
@@ -32,8 +45,20 @@
               (selectAddress)="onPickupSelected($event)"
             />
             @if (!pickup()) {
-              <small class="hint">Select an address from the dropdown</small>
+              <small class="hint">
+                <mat-icon>info_outline</mat-icon>
+                Select an address from the dropdown
+              </small>
+            } @else {
+              <small class="hint hint--success">
+                <mat-icon>check_circle</mat-icon>
+                {{ pickup()!.address }}
+              </small>
             }
+          </div>
+
+          <div class="route-connector">
+            <mat-icon>more_vert</mat-icon>
           </div>
 
           <div class="form-block">
@@ -44,43 +69,71 @@
               (selectAddress)="onDeliverySelected($event)"
             />
             @if (!delivery()) {
-              <small class="hint">Select an address from the dropdown</small>
+              <small class="hint">
+                <mat-icon>info_outline</mat-icon>
+                Select an address from the dropdown
+              </small>
+            } @else {
+              <small class="hint hint--success">
+                <mat-icon>check_circle</mat-icon>
+                {{ delivery()!.address }}
+              </small>
             }
           </div>
         </div>
 
+        <!-- ── 02 Package ────────────────────────────────────────────────── -->
         <div class="form-section">
           <div class="section-label">
             <span class="section-number">02</span>
+            <mat-icon>inventory_2</mat-icon>
             <span>Package</span>
           </div>
 
           <div class="form-block">
-            <label>Description</label>
-            <textarea formControlName="packageDescription" placeholder="Optional package description"></textarea>
+            <label>
+              <mat-icon>description</mat-icon>
+              Description
+              <span class="label-optional">optional</span>
+            </label>
+            <textarea
+              formControlName="packageDescription"
+              placeholder="What's inside the package?"
+            ></textarea>
           </div>
 
           <div class="form-row">
             <div class="field-group">
-              <label>Weight <span class="field-unit">kg</span></label>
+              <label>
+                <mat-icon>scale</mat-icon>
+                Weight <span class="field-unit">kg</span>
+              </label>
               <input type="number" formControlName="packageWeight" min="0.01" step="0.01" />
             </div>
           </div>
         </div>
 
+        <!-- ── 03 Schedule ───────────────────────────────────────────────── -->
         <div class="form-section">
           <div class="section-label">
             <span class="section-number">03</span>
+            <mat-icon>calendar_month</mat-icon>
             <span>Schedule</span>
           </div>
 
           <div class="form-row">
             <div class="field-group">
-              <label>Pickup date</label>
+              <label>
+                <mat-icon>flight_takeoff</mat-icon>
+                Pickup date
+              </label>
               <input type="date" formControlName="requestedPickupDate" />
             </div>
             <div class="field-group">
-              <label>Delivery date</label>
+              <label>
+                <mat-icon>flight_land</mat-icon>
+                Delivery date
+              </label>
               <input type="date" formControlName="requestedDeliveryDate" />
             </div>
           </div>
@@ -90,30 +143,49 @@
             form.controls.requestedDeliveryDate.value &&
             form.controls.requestedDeliveryDate.value < form.controls.requestedPickupDate.value
           ) {
-            <p class="form-error">Delivery date must be after pickup date</p>
+            <p class="form-error">
+              <mat-icon>error_outline</mat-icon>
+              Delivery date must be after pickup date
+            </p>
           }
         </div>
 
+        <!-- ── Insurance (read-only) ─────────────────────────────────────── -->
         @if (shipment()?.insuranceSelected) {
           <div class="insurance-readonly">
             <div class="insurance-readonly-icon">
               <mat-icon>verified_user</mat-icon>
             </div>
-            <div>
+            <div class="insurance-readonly-text">
               <strong>Insurance active</strong>
               <small>Insurance settings cannot be changed after creation.</small>
             </div>
             @if (shipment()!.insuranceFee) {
-              <span class="insurance-fee-pill">+ {{ shipment()!.insuranceFee | currency }}</span>
+              <span class="insurance-fee-pill">
+                <mat-icon>add</mat-icon>
+                {{ shipment()!.insuranceFee | currency }}
+              </span>
             }
           </div>
         }
 
+        <!-- ── Price card ─────────────────────────────────────────────────── -->
         <div class="price-card">
           <div class="price-card-header">
-            <span>Price summary</span>
+            <div class="price-card-header__left">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Price summary</span>
+            </div>
             @if (pricingLoading()) {
-              <span class="price-calculating">Recalculating…</span>
+              <span class="price-calculating">
+                <span class="calc-dot"></span>
+                Recalculating…
+              </span>
+            } @else if (pricingInputsChanged() && totalPrice() !== null) {
+              <span class="price-updated">
+                <mat-icon>check</mat-icon>
+                Updated
+              </span>
             }
           </div>
 
@@ -126,13 +198,17 @@
           } @else if (basePrice() !== null) {
             <div class="price-breakdown">
               <div class="price-row">
-                <span>Base price</span>
+                <span class="price-row__label">
+                  <mat-icon>straighten</mat-icon>
+                  Base price
+                </span>
                 <strong>{{ basePrice() | currency }}</strong>
               </div>
 
               @if (shipment()?.insuranceSelected && insuranceFee()) {
                 <div class="price-row">
-                  <span>
+                  <span class="price-row__label">
+                    <mat-icon>shield</mat-icon>
                     Insurance
                     @if (insuranceRateApplied() !== null) {
                       <span class="rate-badge">{{ insuranceRateApplied()! * 100 | number:'1.0-2' }}%</span>
@@ -143,7 +219,10 @@
 
                 @if (deductibleRate() !== null) {
                   <div class="price-row deductible">
-                    <small>Deductible: {{ deductibleRate()! * 100 | number:'1.0-0' }}%</small>
+                    <small>
+                      <mat-icon>info_outline</mat-icon>
+                      Deductible: {{ deductibleRate()! * 100 | number:'1.0-0' }}%
+                    </small>
                   </div>
                 }
               }
@@ -151,7 +230,10 @@
               <div class="price-divider"></div>
 
               <div class="price-row total">
-                <span>New total</span>
+                <span class="price-row__label">
+                  <mat-icon>payments</mat-icon>
+                  New total
+                </span>
                 <strong>{{ totalPrice() | currency }}</strong>
               </div>
             </div>
@@ -168,6 +250,7 @@
           }
         </div>
 
+        <!-- ── Submit ─────────────────────────────────────────────────────── -->
         <button
           type="button"
           class="btn btn--primary submit-btn"
@@ -183,14 +266,39 @@
           }
         </button>
 
+        <!-- ── Danger zone ─────────────────────────────────────────────────── -->
+        <div class="danger-zone">
+          <div class="danger-text">
+            <mat-icon>warning_amber</mat-icon>
+            <div>
+              <strong>Delete shipment</strong>
+              <small>This action cannot be undone.</small>
+            </div>
+          </div>
+          <button type="button" class="btn btn--danger" (click)="deleteShipment()">
+            <mat-icon>delete_forever</mat-icon>
+            Delete
+          </button>
+        </div>
+
       </form>
 
-      <div class="map">
-        <app-leaflet-map
-          mode="preview"
-          [pickup]="pickup() ? { lat: pickup()!.lat, lng: pickup()!.lng, label: pickup()!.address } : null"
-          [delivery]="delivery() ? { lat: delivery()!.lat, lng: delivery()!.lng, label: delivery()!.address } : null"
-        />
+      <!-- ── Map ──────────────────────────────────────────────────────────── -->
+      <div class="map-wrap">
+        <div class="map-header">
+          <mat-icon>map</mat-icon>
+          <span>Route preview</span>
+          @if (pickup() && delivery()) {
+            <span class="map-badge">Live</span>
+          }
+        </div>
+        <div class="map">
+          <app-leaflet-map
+            mode="preview"
+            [pickup]="pickup() ? { lat: pickup()!.lat, lng: pickup()!.lng, label: pickup()!.address } : null"
+            [delivery]="delivery() ? { lat: delivery()!.lat, lng: delivery()!.lng, label: delivery()!.address } : null"
+          />
+        </div>
       </div>
 
     </div>

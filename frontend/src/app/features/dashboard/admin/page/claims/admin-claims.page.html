@@ -1,0 +1,205 @@
+<div class="admin-page">
+
+  <div class="page-toolbar">
+
+    <div class="toolbar-left">
+
+      <div class="filter-chips">
+
+        <button
+          class="chip"
+          [class.active]="!filters.status"
+          (click)="onStatusFilter('')"
+        >
+          All
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filters.status === 'SUBMITTED'"
+          (click)="onStatusFilter('SUBMITTED')"
+        >
+          Submitted
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filters.status === 'UNDER_REVIEW'"
+          (click)="onStatusFilter('UNDER_REVIEW')"
+        >
+          Under Review
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filters.status === 'APPROVED'"
+          (click)="onStatusFilter('APPROVED')"
+        >
+          Approved
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filters.status === 'REJECTED'"
+          (click)="onStatusFilter('REJECTED')"
+        >
+          Rejected
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="toolbar-right">
+      @if (page()) {
+        <span class="result-count">
+          {{ page()!.totalElements }} claims
+        </span>
+      }
+    </div>
+
+  </div>
+
+
+  @if (loading()) {
+    <div class="table-loading">
+      <div class="loader-spinner"></div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+
+  @if (!loading() && page()) {
+
+    <div class="table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>Claim ID</th>
+            <th>Shipment</th>
+            <th>Declared Value</th>
+            <th>Compensation</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (claim of page()!.content; track claim.id) {
+
+            <tr>
+
+              <td class="mono text-muted">
+                {{ claim.id | slice:0:8 }}…
+              </td>
+
+              <td class="mono text-muted">
+                {{ claim.shipmentId | slice:0:8 }}…
+              </td>
+
+              <td>
+                ${{ claim.declaredValueSnapshot | number:'1.2-2' }}
+              </td>
+
+              <td>
+                <strong>
+                  ${{ claim.compensationAmount | number:'1.2-2' }}
+                </strong>
+              </td>
+
+              <td>
+                <app-admin-badge
+                  [label]="statusBadge(claim.claimStatus).label"
+                  [variant]="statusBadge(claim.claimStatus).variant"
+                />
+              </td>
+
+              <td class="text-muted">
+                {{ claim.createdAt | date:'mediumDate' }}
+              </td>
+
+              <td>
+
+                <div class="row-actions">
+
+                  <a
+                    class="row-btn"
+                    [routerLink]="['/admin/claims', claim.id]"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </a>
+
+                  @if (claim.claimStatus === 'SUBMITTED' || claim.claimStatus === 'UNDER_REVIEW') {
+
+                    <button
+                      class="row-btn row-btn--success"
+                      (click)="approve(claim.id)"
+                    >
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+
+                    <button
+                      class="row-btn row-btn--danger"
+                      (click)="reject(claim.id)"
+                    >
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    @if (page()!.totalPages > 1) {
+
+      <div class="pagination">
+
+        <button
+          class="page-btn"
+          [disabled]="page()!.number === 0"
+          (click)="prevPage()"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <span class="page-info">
+          Page {{ page()!.number + 1 }} of {{ page()!.totalPages }}
+        </span>
+
+        <button
+          class="page-btn"
+          [disabled]="page()!.number >= page()!.totalPages - 1"
+          (click)="nextPage()"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+      </div>
+
+    }
+
+  }
+
+</div>

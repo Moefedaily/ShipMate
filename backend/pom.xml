@@ -114,6 +114,13 @@
             <version>1.78</version>
         </dependency>
 
+		<!-- Bucket4j for rate limiting -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.16.1</version>
+		</dependency>
+
         <!-- Cloudinary -->
         <dependency>
             <groupId>com.cloudinary</groupId>
