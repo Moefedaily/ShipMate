@@ -29,14 +29,6 @@ import lombok.RequiredArgsConstructor;
 public class ShipmentMatchingController {
 
     private final ShipmentMatchingService shipmentMatchingService;
-
-    /**
-     * Driver-facing endpoint to find compatible shipments near a driver.
-     *
-     * Notes:
-     * - If lat/lng are not provided, service falls back to driver's last known location (DriverProfile).
-     * - Only considers CREATED shipments and excludes already booked shipments (service layer rules).
-     */
     
     @Operation(summary = "Find compatible shipments near a driver")
     @ApiResponses({

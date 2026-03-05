@@ -131,12 +131,6 @@
           />
         </div>
 
-        @if (isChatReadonly()) {
-          <div class="readonly-banner">
-            <mat-icon>info</mat-icon>
-            <span>This booking is {{ selectedConversation()!.shipmentStatus.toLowerCase() }}. Messaging is disabled.</span>
-          </div>
-        }
       }
 
     </div>

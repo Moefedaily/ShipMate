@@ -219,54 +219,68 @@
       <p>No deliveries nearby at the moment</p>
     </div>
   } @else {
-    <div class="delivery-grid">
-      @for (m of matches(); track m.shipment.id) {
-        <article class="card delivery-card">
-          <div class="card-media">
-            <span class="card-icon">
-              <mat-icon>inventory_2</mat-icon>
-            </span>
+      <div class="delivery-grid">
+        @for (m of matches(); track m.shipment.id) {
+
+          <article class="card delivery-card">
+
+            <!-- IMAGE -->
+            <div class="card-media">
+
+            <img
+              class="shipment-photo"
+              [src]="m.shipment.photos?.[0] ?? 'assets/images/box.jpg'"
+              [alt]="m.shipment.packageDescription || 'Shipment'"
+            />
 
             <span class="distance-pill">
               {{ m.metrics.distanceToPickupKm | number:'1.1-1' }} km
             </span>
+
           </div>
 
-          <div class="card-body">
-            <div class="card-title-row">
-              <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
-              <span class="price">
-                {{ m.shipment.basePrice | currency }}
-              </span>
+            <div class="card-body">
+
+              <div class="card-title-row">
+                <h4>{{ m.shipment.packageDescription || 'Shipment' }}</h4>
+
+                <span class="price">
+                  {{ m.shipment.basePrice | currency }}
+                </span>
+              </div>
+
+              <p class="route">
+                {{ m.shipment.pickupAddress }}
+                <mat-icon>arrow_forward</mat-icon>
+                {{ m.shipment.deliveryAddress }}
+              </p>
+
+              <div class="tag-row">
+
+                <span class="tag">
+                  {{ m.shipment.packageWeight }} kg
+                </span>
+
+                <span class="tag tag--info">
+                  {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
+                </span>
+
+              </div>
+
+              <button
+                class="btn btn--secondary btn-full"
+                [disabled]="isBookingLocked()"
+                (click)="openMatching()"
+              >
+                View details
+              </button>
+
             </div>
 
-            <p class="route">
-              {{ m.shipment.pickupAddress }}
-              <mat-icon>arrow_forward</mat-icon>
-              {{ m.shipment.deliveryAddress }}
-            </p>
+          </article>
 
-            <div class="tag-row">
-              <span class="tag">
-                {{ m.shipment.packageWeight }} kg
-              </span>
-
-              <span class="tag tag--info">
-                {{ m.metrics.pickupToDeliveryKm | number:'1.0-0' }} km route
-              </span>
-            </div>
-
-            <button
-              class="btn btn--secondary btn-full"
-              [disabled]="isBookingLocked()"
-              (click)="openMatching()"
-            >
-              View details
-            </button>
-          </div>
-        </article>
-      }
-    </div>
+        }
+      </div>
   }
 </section>
 

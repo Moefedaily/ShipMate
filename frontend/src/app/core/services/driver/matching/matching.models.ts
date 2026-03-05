@@ -20,6 +20,8 @@ export interface Shipment {
 
   basePrice: number;
 
+  photos?: string[];
+
   status: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED';
 
   createdAt: string;

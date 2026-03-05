@@ -265,6 +265,32 @@ export class ShipmentEditPage implements OnInit {
     });
   }
 
+  deleteShipment(): void {
+
+    const shipment = this.shipment();
+    if (!shipment) return;
+    const confirmed = confirm(
+      'Delete this shipment? This action cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    this.loader.show();
+    this.shipmentService.deleteShipment(shipment.id).subscribe({
+
+      next: () => {
+        this.toast.success('Shipment deleted');
+        this.loader.hide();
+        this.router.navigate(['/dashboard/sender']);
+      },
+
+      error: err => {
+        this.loader.hide();
+        this.toast.error(
+          err.error?.message || 'Unable to delete shipment'
+        );
+      }
+    });
+  }
   goBack(): void {
     const id = this.shipment()?.id;
     this.router.navigate(id ? ['/dashboard/shipments', id] : ['/dashboard/sender']);

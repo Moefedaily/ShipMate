@@ -26,12 +26,14 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     """)
     Optional<Booking> findWithShipmentsById(@Param("id") UUID id);
 
-    @EntityGraph(attributePaths = "shipments")
+    @EntityGraph(attributePaths = {
+        "shipments",
+        "shipments.sender"
+    })
     Optional<Booking> findFirstByDriverAndStatusInOrderByCreatedAtDesc(
-    User driver,
-    List<BookingStatus> statuses
+        User driver,
+        List<BookingStatus> statuses
     );
-
     @Query("""
     SELECT DISTINCT b FROM Booking b
     LEFT JOIN b.shipments s

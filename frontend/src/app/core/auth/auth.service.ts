@@ -7,6 +7,7 @@ import { AuthState } from './auth.state';
 import { AuthUser, RegisterRequest } from './auth.models';
 import { getDeviceId, getSessionId } from './session.util';
 import { WsService } from '../services/ws/ws.service';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly authState = inject(AuthState);
   private readonly ws = inject(WsService);
+  private readonly router = inject(Router);
   private readonly api = environment.apiBaseUrl;
 
   private initialized = false;
@@ -101,7 +103,10 @@ export class AuthService {
       {},
       { withCredentials: true }
     ).pipe(
-      tap(() => this.authState.clear()),
+      tap(() => {
+        this.authState.clear();
+        this.router.navigate(['/login']);
+      }),
       map(() => void 0)
     );
   }
