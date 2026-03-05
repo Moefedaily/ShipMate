@@ -4,9 +4,11 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shipmate.dto.request.insurance.AdminClaimDecisionRequest;
 import com.shipmate.dto.request.insurance.CreateInsuranceClaimRequest;
+import com.shipmate.dto.response.admin.AdminClaimResponse;
 import com.shipmate.dto.response.insurance.InsuranceClaimResponse;
 import com.shipmate.listener.notification.NotificationRequestedEvent;
 import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
+import com.shipmate.mapper.insurance.AdminClaimMapper;
 import com.shipmate.mapper.insurance.InsuranceClaimMapper;
 import com.shipmate.model.insuranceClaim.*;
 import com.shipmate.model.notification.NotificationType;
@@ -21,6 +23,7 @@ import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.payment.PaymentService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +59,8 @@ public class InsuranceClaimService {
     private final InsuranceClaimMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
     private final  Cloudinary cloudinary;
+    private final AdminClaimMapper adminClaimMapper;
+
     
 
     public InsuranceClaimResponse submitClaim( UUID shipmentId, UUID claimantId, CreateInsuranceClaimRequest request) {
@@ -180,13 +185,12 @@ public class InsuranceClaimService {
     }
 
     @Transactional
-    public InsuranceClaimResponse reviewClaim(
+    public AdminClaimResponse reviewAdminClaim(
             UUID claimId,
             UUID adminUserId,
             AdminClaimDecisionRequest request
     ) {
-
-        InsuranceClaim claim = claimRepository.findById(claimId)
+        InsuranceClaim claim = claimRepository.findAdminById(claimId)
                 .orElseThrow(() -> new IllegalArgumentException("Claim not found"));
 
         if (claim.getClaimStatus() != ClaimStatus.SUBMITTED &&
@@ -209,11 +213,13 @@ public class InsuranceClaimService {
         if (request.getDecision() == ClaimStatus.APPROVED) {
 
             claim.setClaimStatus(ClaimStatus.APPROVED);
+
             eventPublisher.publishEvent(
                 new NotificationRequestedEvent(
                     claim.getClaimant().getId(),
                     "Insurance claim approved",
-                    "Your insurance claim for shipment " + claim.getShipment().getId() + " has been approved. Refund is being processed.",
+                    "Your insurance claim for shipment " + claim.getShipment().getId()
+                            + " has been approved. Refund is being processed.",
                     NotificationType.INSURANCE_UPDATE,
                     claim.getShipment().getId(),
                     ReferenceType.INSURANCE
@@ -221,16 +227,12 @@ public class InsuranceClaimService {
             );
 
             if (claim.getClaimReason() == ClaimReason.LOST) {
-
                 Shipment shipment = claim.getShipment();
-
                 shipment.setStatus(ShipmentStatus.LOST);
                 shipmentRepository.save(shipment);
+
                 eventPublisher.publishEvent(
-                    new ShipmentStatusChangedEvent(
-                        shipment.getId(),
-                        ShipmentStatus.LOST
-                    )
+                    new ShipmentStatusChangedEvent(shipment.getId(), ShipmentStatus.LOST)
                 );
             }
 
@@ -238,24 +240,29 @@ public class InsuranceClaimService {
                     .findByShipment(claim.getShipment())
                     .orElseThrow(() -> new IllegalStateException("Payment not found"));
 
+            claimRepository.save(claim);
+
             paymentService.refundByAdmin(payment.getId());
 
         } else {
 
             claim.setClaimStatus(ClaimStatus.REJECTED);
+
             eventPublisher.publishEvent(
-            new NotificationRequestedEvent(
-                claim.getClaimant().getId(),
-                "Insurance claim rejected",
-                "Your insurance claim has been rejected. Please check admin notes for details.",
-                NotificationType.INSURANCE_UPDATE,
-                claim.getShipment().getId(),
-                ReferenceType.INSURANCE
-            )
-        );
+                new NotificationRequestedEvent(
+                    claim.getClaimant().getId(),
+                    "Insurance claim rejected",
+                    "Your insurance claim has been rejected. Please check admin notes for details.",
+                    NotificationType.INSURANCE_UPDATE,
+                    claim.getShipment().getId(),
+                    ReferenceType.INSURANCE
+                )
+            );
+
+            claimRepository.save(claim);
         }
 
-        return mapper.toResponse(claim);
+        return adminClaimMapper.toAdminResponse(claim);
     }
 
     @Transactional(readOnly = true)
@@ -367,5 +374,25 @@ public class InsuranceClaimService {
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
+    }
+
+
+    public List<AdminClaimResponse> listAdminClaims(ClaimStatus status) {
+
+        List<InsuranceClaim> claims = (status == null)
+                ? claimRepository.findAllForAdmin()
+                : claimRepository.findAllForAdminByStatus(status);
+
+        return claims.stream()
+                .map(adminClaimMapper::toAdminResponse)
+                .toList();
+    }
+
+    public AdminClaimResponse getAdminClaim(UUID id) {
+
+        InsuranceClaim claim = claimRepository.findAdminById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Claim not found"));
+
+        return adminClaimMapper.toAdminResponse(claim);
     }
 }

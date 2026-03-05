@@ -54,6 +54,7 @@ public class ShipmentResponse {
 
     private Instant createdAt;
     private Instant updatedAt;
+    private SenderSummary sender;
 
     private boolean insuranceSelected;
     private BigDecimal insuranceFee;

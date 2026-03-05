@@ -1,0 +1,211 @@
+@use '../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+
+$sidebar-collapsed: 80px;
+$sidebar-expanded:  220px;
+$transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: $sidebar-collapsed;
+  background: $admin-bg-surface;
+  border-right: 1px solid $admin-border;
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transition: width $transition;
+  overflow: hidden;
+
+  &.expanded { width: $sidebar-expanded; }
+}
+
+// ── Top ───────────────────────────────────────────────────────────────────────
+
+.sidebar-top {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid $admin-border;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.logo-icon {
+  color: $color-primary;
+  font-size: 22px; width: 22px; height: 22px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: $text-size-label;
+  font-weight: $font-weight-bold;
+  color: $admin-text-primary;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 1px solid $admin-border;
+  background: $admin-bg-raised;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+
+  mat-icon {
+    font-size: 16px; width: 16px; height: 16px;
+    color: $admin-text-muted; transition: color 0.15s;
+  }
+
+  &:hover {
+    background: $admin-bg-overlay;
+    border-color: $admin-border-primary;
+    mat-icon { color: $color-primary; }
+  }
+}
+
+// ── Nav ───────────────────────────────────────────────────────────────────────
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0.5rem;
+  gap: 0.2rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 42px;
+  padding: 0 0.65rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: $admin-text-secondary;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $admin-bg-raised;
+    color: $admin-text-primary;
+    .nav-icon-wrap mat-icon { color: $color-primary; }
+  }
+
+  &.active {
+    background: $color-primary-subtle;
+    color: $color-primary;
+    .nav-icon-wrap mat-icon { color: $color-primary; }
+    .nav-label { font-weight: $font-weight-semibold; }
+  }
+}
+
+.nav-icon-wrap {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+
+  mat-icon {
+    font-size: 20px; width: 20px; height: 20px;
+    color: $admin-text-muted; transition: color 0.15s;
+  }
+}
+
+.nav-badge {
+  position: absolute;
+  top: -4px; right: -6px;
+  background: $color-danger;
+  color: #fff;
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 99px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.nav-label {
+  font-size: $text-size-label;
+  font-weight: $font-weight-medium;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.sidebar-footer {
+  padding: 0.75rem 0.5rem;
+  border-top: 1px solid $admin-border;
+  flex-shrink: 0;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: background 0.15s;
+  cursor: default;
+
+  &:hover { background: $admin-bg-raised; }
+}
+
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary, $color-primary-hover);
+  color: #fff;
+  font-size: $text-size-caption;
+  font-weight: $font-weight-bold;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.user-name {
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $admin-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 11px;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}

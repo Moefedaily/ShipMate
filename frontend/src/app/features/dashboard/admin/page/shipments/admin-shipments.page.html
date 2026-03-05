@@ -1,0 +1,120 @@
+<div class="admin-page">
+
+  <div class="page-toolbar">
+    <div class="toolbar-left">
+      <div class="filter-chips">
+        @for (opt of statusOptions; track opt.value) {
+          <button
+            class="chip"
+            [class.active]="(!filters.status && !opt.value) || filters.status === opt.value"
+            (click)="onStatusFilter(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      @if (page()) {
+        <span class="result-count">
+          {{ page()!.totalElements }} shipments
+        </span>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="table-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (error()) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && page()) {
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Sender</th>
+            <th>Pickup → Delivery</th>
+            <th>Status</th>
+            <th>Base Price</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (s of page()!.content; track s.id) {
+            <tr>
+              <td class="mono text-muted">{{ shortId(s.id) }}</td>
+              <td>
+              <div class="user-cell">
+                <div class="user-initials">
+                  {{ s.sender?.firstName?.charAt(0) }}
+                </div>
+                <div>
+                  <div>{{ s.sender?.firstName }} {{ s.sender?.lastName }}</div>
+                  <div class="text-muted">{{ s.sender?.email }}</div>
+                </div>
+              </div>
+            </td>
+
+              <td>
+                <div class="route-cell">
+                  <span>{{ s.pickupAddress }}</span>
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span>{{ s.deliveryAddress }}</span>
+                </div>
+              </td>
+
+              <td>
+                <app-admin-badge
+                  [label]="statusBadge(s.status).label"
+                  [variant]="statusBadge(s.status).variant"
+                />
+              </td>
+
+              <td>
+                {{ s.basePrice != null ? ('$' + (s.basePrice | number:'1.2-2')) : '—' }}
+              </td>
+
+              <td class="text-muted">{{ s.createdAt | date:'mediumDate' }}</td>
+
+              <td>
+                <div class="row-actions">
+                  <a class="row-btn" [routerLink]="['/admin/shipments', s.id]">
+                    <mat-icon>visibility</mat-icon>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (page()!.totalPages > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="page()!.number === 0" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <span class="page-info">
+          Page {{ page()!.number + 1 }} of {{ page()!.totalPages }}
+        </span>
+
+        <button class="page-btn" [disabled]="page()!.number >= page()!.totalPages - 1" (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+
+</div>

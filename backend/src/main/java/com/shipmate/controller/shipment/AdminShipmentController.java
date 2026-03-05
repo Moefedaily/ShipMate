@@ -1,7 +1,9 @@
 package com.shipmate.controller.shipment;
 
+import com.shipmate.dto.request.shipment.AdminUpdateShipmentStatusRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.mapper.shipment.ShipmentMapper;
+import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.service.shipment.ShipmentService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,9 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,28 +31,6 @@ public class AdminShipmentController {
     private final ShipmentService shipmentService;
     private final ShipmentMapper shipmentMapper;
 
-    // ===================== GET ALL SHIPMENTS =====================
-
-    @Operation(
-        summary = "Get all shipments",
-        description = "Retrieves a list of all shipments in the system. Admin only."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved all shipments"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
-    })
-    @GetMapping
-    public ResponseEntity<List<ShipmentResponse>> getAllShipments() {
-        return ResponseEntity.ok(
-                shipmentService.getAllShipments()
-                        .stream()
-                        .map(shipmentMapper::toResponse)
-                        .toList()
-        );
-    }
-
-    // ===================== GET SHIPMENT BY ID =====================
 
     @Operation(
         summary = "Get shipment by ID",
@@ -69,4 +50,40 @@ public class AdminShipmentController {
                 )
         );
     }
+
+    @GetMapping
+    @Operation(summary = "List shipments", description = "List shipments with optional status filter + pagination")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Shipments listed successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
+    public ResponseEntity<Page<ShipmentResponse>> getShipments(
+            @RequestParam(required = false) ShipmentStatus status,
+            Pageable pageable
+    ) {
+        Page<ShipmentResponse> page = shipmentService
+                .adminListShipments(status, pageable)
+                .map(shipmentMapper::toResponse);
+
+        return ResponseEntity.ok(page);
+    }
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Update shipment status", description = "Admin updates a shipment status")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Shipment status updated"),
+        @ApiResponse(responseCode = "400", description = "Invalid status transition"),
+        @ApiResponse(responseCode = "404", description = "Shipment not found")
+    })
+    public ResponseEntity<ShipmentResponse> updateStatus(
+            @PathVariable UUID id,
+            @RequestBody AdminUpdateShipmentStatusRequest request
+    ) {
+        return ResponseEntity.ok(
+                shipmentMapper.toResponse(
+                        shipmentService.adminUpdateStatus(id, request.getStatus(), request.getAdminNotes())
+                )
+        );
+    }
+
 }

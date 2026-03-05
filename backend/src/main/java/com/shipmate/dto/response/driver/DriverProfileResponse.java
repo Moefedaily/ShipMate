@@ -21,6 +21,9 @@ import lombok.Setter;
 public class DriverProfileResponse {
 
     private UUID  id;
+    private String firstName;
+    private String lastName;
+    private String email;
     private String licenseNumber;
     private VehicleType vehicleType;
     private BigDecimal maxWeightCapacity;

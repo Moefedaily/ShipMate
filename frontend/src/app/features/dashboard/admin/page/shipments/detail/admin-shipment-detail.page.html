@@ -1,0 +1,190 @@
+<div class="admin-page">
+
+  <div>
+    <a class="back-btn" routerLink="/admin/shipments">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Shipments
+    </a>
+  </div>
+
+  @if (loading()) { <div class="page-loading"><div class="loader-spinner"></div></div> }
+  @if (error())   { <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div> }
+
+  @if (!loading() && shipment()) {
+
+    <div class="shipment-hero">
+
+      <div class="hero-route">
+        <div class="route-point">
+          <span class="route-dot route-dot--origin"></span>
+          <div>
+            <span class="route-label">Pickup</span>
+            <span class="route-city">{{ shipment()!.pickupAddress }}</span>
+          </div>
+        </div>
+
+        <div class="route-line">
+          <mat-icon>arrow_forward</mat-icon>
+        </div>
+
+        <div class="route-point">
+          <span class="route-dot route-dot--dest"></span>
+          <div>
+            <span class="route-label">Delivery</span>
+            <span class="route-city">{{ shipment()!.deliveryAddress }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-meta-row">
+        <app-admin-badge
+          [label]="statusBadge(shipment()!.status).label"
+          [variant]="statusBadge(shipment()!.status).variant"
+        />
+
+        <span class="hero-price">
+          ${{ shipment()!.basePrice | number:'1.2-2' }}
+        </span>
+
+        <span class="hero-date text-muted">
+          {{ shipment()!.createdAt | date:'mediumDate' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>inventory_2</mat-icon>
+          <h3>Shipment Details</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <span class="detail-row__label">Shipment ID</span>
+            <span class="detail-row__value mono">{{ shipment()!.id }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Status</span>
+            <span class="detail-row__value">
+              <app-admin-badge
+                [label]="statusBadge(shipment()!.status).label"
+                [variant]="statusBadge(shipment()!.status).variant"
+              />
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Payment</span>
+            <span class="detail-row__value">
+              <app-admin-badge
+                [label]="paymentBadge(shipment()!.paymentStatus).label"
+                [variant]="paymentBadge(shipment()!.paymentStatus).variant"
+              />
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Weight</span>
+            <span class="detail-row__value">{{ shipment()!.packageWeight }} kg</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Value</span>
+            <span class="detail-row__value">${{ shipment()!.packageValue | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Created</span>
+            <span class="detail-row__value">{{ shipment()!.createdAt | date:'medium' }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Updated</span>
+            <span class="detail-row__value">{{ shipment()!.updatedAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+
+      @if (shipment()!.driver) {
+        <div class="detail-card">
+          <div class="detail-card__header">
+            <mat-icon>local_shipping</mat-icon>
+            <h3>Driver</h3>
+          </div>
+
+          <div class="detail-card__body">
+            <div class="person-cell">
+              <div class="person-avatar">{{ shipment()!.driver!.firstName.charAt(0) }}</div>
+              <div class="person-info">
+                <strong>{{ shipment()!.driver!.firstName }} {{ shipment()!.driver!.lastName }}</strong>
+                <span>ID: {{ shipment()!.driver!.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>shield</mat-icon>
+          <h3>Insurance</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <span class="detail-row__label">Selected</span>
+            <span class="detail-row__value">{{ shipment()!.insuranceSelected ? 'Yes' : 'No' }}</span>
+          </div>
+
+          @if (shipment()!.insuranceSelected) {
+            <div class="detail-row">
+              <span class="detail-row__label">Fee</span>
+              <span class="detail-row__value">${{ shipment()!.insuranceFee | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Declared Value</span>
+              <span class="detail-row__value">${{ shipment()!.declaredValue | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Coverage</span>
+              <span class="detail-row__value">${{ shipment()!.insuranceCoverageAmount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Optional: Quick admin actions -->
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>build</mat-icon>
+          <h3>Admin Actions</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <div class="action-bar">
+
+          @for (next of availableTransitions(shipment()!.status); track next) {
+
+            <button
+              class="btn btn--ghost"
+              [disabled]="acting()"
+              (click)="updateStatus(next)"
+            >
+              Set {{ next }}
+            </button>
+
+          }
+
+        </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -2,8 +2,11 @@ package com.shipmate.mapper.shipment;
 
 import com.shipmate.dto.request.shipment.CreateShipmentRequest;
 import com.shipmate.dto.request.shipment.UpdateShipmentRequest;
+import com.shipmate.dto.response.shipment.SenderSummary;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.model.shipment.Shipment;
+import com.shipmate.model.user.User;
+
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -33,6 +36,7 @@ public interface ShipmentMapper {
     @Mapping(target = "updatedAt", ignore = true)
 
     Shipment toEntity(CreateShipmentRequest request);
+
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
@@ -67,6 +71,23 @@ public interface ShipmentMapper {
     void updateEntity(@MappingTarget Shipment shipment, UpdateShipmentRequest request);
 
     @Mapping(source = "sender.id", target = "senderId")
+    @Mapping(source = "sender", target = "sender")
     @Mapping(target = "driver", ignore = true)
     ShipmentResponse toResponse(Shipment shipment);
+
+
+    default SenderSummary map(User user) {
+
+        if (user == null) {
+            return null;
+        }
+
+        SenderSummary sender = new SenderSummary();
+        sender.setId(user.getId());
+        sender.setFirstName(user.getFirstName());
+        sender.setLastName(user.getLastName());
+        sender.setEmail(user.getEmail());
+
+        return sender;
+    }
 }

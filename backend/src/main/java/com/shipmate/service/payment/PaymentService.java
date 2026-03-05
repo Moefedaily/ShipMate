@@ -16,6 +16,7 @@ import com.shipmate.model.user.User;
 import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.service.admin.AdminActionLogger;
 import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.earning.DriverEarningService;
 import com.stripe.model.PaymentIntent;
@@ -53,6 +54,7 @@ public class PaymentService {
     private final DeliveryCodeService deliveryCodeService;
     private final DeliveryCodeEventPublisher deliveryCodeEventPublisher;
     private final ApplicationEventPublisher eventPublisher;
+    private final AdminActionLogger adminActionLogger;
 
     public CreatePaymentIntentResponse createPaymentIntent(UUID shipmentId, UUID senderId) {
 
@@ -662,6 +664,11 @@ public class PaymentService {
         }
 
         refundPayment(payment);
+
+        adminActionLogger.paymentRefunded(
+                payment.getId(),
+                "Admin manually refunded payment"
+        );
 
         log.info("[ADMIN] Refund requested paymentId={}", paymentId);
     }

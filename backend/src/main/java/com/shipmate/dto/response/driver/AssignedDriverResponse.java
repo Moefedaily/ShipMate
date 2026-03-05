@@ -19,6 +19,7 @@ import lombok.Setter;
 public class AssignedDriverResponse {
     private UUID id;
     private String firstName;
+    private String lastName;
     private String avatarUrl;
     private VehicleType vehicleType;
 }

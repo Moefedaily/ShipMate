@@ -1,0 +1,92 @@
+@use '../../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../../styles/variables/typography' as *;
+@use '../../../../../../../styles/variables/admin-shared' as *;
+
+
+.shipment-hero {
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.hero-route {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.route-point {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.route-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--origin { background: $color-primary; box-shadow: 0 0 0 3px $color-primary-subtle; }
+  &--dest   { background: $color-success; box-shadow: 0 0 0 3px $color-success-subtle; }
+}
+
+.route-label {
+  display: block;
+  font-size: $text-size-caption;
+  color: $admin-text-muted;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.route-city {
+  font-size: $text-size-label;
+  font-weight: $font-weight-semibold;
+  color: $admin-text-primary;
+}
+
+.route-line {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mat-icon { color: $admin-text-primary; }
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hero-price {
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-bold;
+  color: $admin-text-primary;
+}
+
+.hero-date { font-size: $text-size-caption; color: $admin-text-muted; }
+
+// ── Amount ────────────────────────────────────────────────────────────────────
+
+.amount-val {
+  font-size: $text-size-subheading !important;
+  font-weight: $font-weight-bold !important;
+  color: $color-success !important;
+}
+
+// ── Card highlight variant ────────────────────────────────────────────────────
+
+.detail-card--highlight-danger {
+  border-color: rgba($color-danger, 0.2);
+
+  .detail-card__header {
+    background: $color-danger-subtle;
+    mat-icon { color: $color-danger; }
+  }
+}

@@ -85,6 +85,11 @@ export class LoginPage {
         this.submitting.set(false);
 
         if (!user) return;
+        
+        if (user.role === 'ADMIN') {
+          this.router.navigateByUrl('/admin');
+          return;
+        }
 
         if (user.userType === 'DRIVER') {
           this.router.navigateByUrl('/dashboard/driver');

@@ -1,0 +1,101 @@
+<div class="admin-page">
+
+  @if (loading()) {
+    <div class="table-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (!loading() && page()) {
+
+    <div class="page-toolbar">
+      <div class="toolbar-left">
+        <!-- Summary chips -->
+        <div class="summary-chips">
+          <div class="summary-chip summary-chip--success">
+            <mat-icon>check_circle</mat-icon>
+            <span>Paid: <strong>{{ paidTotal() | currency:currency() }}</strong></span>
+          </div>
+          <div class="summary-chip summary-chip--warning">
+            <mat-icon>schedule</mat-icon>
+            <span>Pending: <strong>{{ pendingTotal() | currency:currency() }}</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <span class="result-count">{{ page()!.totalElements }} earnings</span>
+      </div>
+    </div>
+
+    @if (page()!.content.length === 0) {
+      <div class="empty-state">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <span>No earnings found</span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Earning ID</th>
+              <th>Driver ID</th>
+              <th>Amount</th>
+              <th>Currency</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (earning of page()!.content; track earning.id) {
+              <tr>
+                <td class="mono">{{ earning.id | slice:0:8 }}…</td>
+                <td class="mono">{{ earning.driverId | slice:0:8 }}…</td>
+                <td>
+                  <span class="amount" [class.amount--paid]="earning.paid">
+                    {{ earning.amount | currency:earning.currency }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ earning.currency }}</td>
+                <td>
+                  @if (earning.paid) {
+                    <span class="status-chip status-chip--paid">Paid</span>
+                  } @else {
+                    <span class="status-chip status-chip--pending">Pending</span>
+                  }
+                </td>
+                <td class="text-muted">{{ earning.createdAt | date:'mediumDate' }}</td>
+                <td>
+                  @if (!earning.paid) {
+                    <button class="row-btn row-btn--success" (click)="markPaid(earning.id)" title="Mark as paid">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                  } @else {
+                    <span class="paid-check">
+                      <mat-icon>done_all</mat-icon>
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (page()!.totalPages > 1) {
+        <div class="pagination">
+          <button class="page-btn" [disabled]="page()!.number === 0" (click)="prevPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="page-info">
+            Page {{ page()!.number + 1 }} of {{ page()!.totalPages }}
+          </span>
+          <button class="page-btn" [disabled]="page()!.number >= page()!.totalPages - 1" (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    }
+
+  }
+
+</div>

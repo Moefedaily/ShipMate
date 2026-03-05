@@ -184,4 +184,12 @@ public class DriverEarningService {
             markAsPaid(id);
         }
     }
+
+    @Transactional(readOnly = true)
+    public Page<DriverEarningResponse> getAllEarnings(Pageable pageable) {
+
+        return driverEarningRepository
+                .findAll(pageable)
+                .map(driverEarningMapper::toResponse);
+    }
 }

@@ -123,4 +123,19 @@ public class UserProfileService {
         } catch (Exception e) {
         }
     }
+
+    @Transactional
+    public void deleteAccount(UUID userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setActive(false);
+
+        user.setEmail("deleted-" + user.getId() + "@deleted.local");
+        user.setFirstName("Deleted");
+        user.setLastName("User");
+
+        userRepository.save(user);
+    }
 }

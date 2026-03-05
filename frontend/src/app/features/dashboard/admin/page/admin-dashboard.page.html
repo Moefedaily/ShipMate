@@ -1,0 +1,148 @@
+<div class="admin-page">
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="page-loader">
+      <div class="loader-spinner"></div>
+      <span>Loading metrics…</span>
+    </div>
+  }
+  <!-- Error -->
+  @if (error()) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+  <!-- Content -->
+  @if (!loading() && !error()) {
+
+    <!-- Section: Platform Metrics -->
+    <section class="section">
+      <h2 class="section-title">Platform Health</h2>
+      <div class="stats-grid">
+        @for (card of statCards; track card.key) {
+          <a class="stat-card" [routerLink]="card.route" [class]="'stat-card--' + card.color">
+            <div class="stat-card__icon">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </div>
+            <div class="stat-card__body">
+              <span class="stat-card__value">{{ getStatValue(card) }}</span>
+              <span class="stat-card__label">{{ card.label }}</span>
+            </div>
+            <mat-icon class="stat-card__arrow">arrow_forward</mat-icon>
+          </a>
+        }
+      </div>
+    </section>
+
+    <!-- Section: Needs Attention -->
+    <section class="section">
+      <h2 class="section-title">Needs Attention</h2>
+      <div class="attention-grid">
+
+        <a class="attention-card" routerLink="/admin/drivers" [queryParams]="{ status: 'PENDING' }">
+          <mat-icon class="attention-icon attention-icon--warning">how_to_reg</mat-icon>
+          <div class="attention-card__text">
+            <strong>Pending Driver Applications</strong>
+            <span>Review new driver registrations</span>
+          </div>
+          <mat-icon class="attention-arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="attention-card" routerLink="/admin/claims" [queryParams]="{ status: 'SUBMITTED' }">
+          <mat-icon class="attention-icon attention-icon--danger">gavel</mat-icon>
+          <div class="attention-card__text">
+            <strong>Insurance Claims</strong>
+            <span>Claims waiting for review</span>
+          </div>
+          <mat-icon class="attention-arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="attention-card" routerLink="/admin/shipments" [queryParams]="{ status: 'IN_TRANSIT' }">
+          <mat-icon class="attention-icon attention-icon--info">local_shipping</mat-icon>
+          <div class="attention-card__text">
+            <strong>Shipments In Transit</strong>
+            <span>Monitor active deliveries</span>
+          </div>
+          <mat-icon class="attention-arrow">chevron_right</mat-icon>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Section: Quick Actions -->
+    <section class="section">
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="actions-grid">
+
+        <a class="action-card" routerLink="/admin/drivers" [queryParams]="{ status: 'PENDING' }">
+          <div class="action-card__icon action-card__icon--warning">
+            <mat-icon>how_to_reg</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>Pending Drivers</strong>
+            <span>Review & approve driver applications</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="action-card" routerLink="/admin/claims" [queryParams]="{ status: 'SUBMITTED' }">
+          <div class="action-card__icon action-card__icon--danger">
+            <mat-icon>gavel</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>Open Claims</strong>
+            <span>Approve or reject insurance claims</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="action-card" routerLink="/admin/shipments" [queryParams]="{ status: 'IN_TRANSIT' }">
+          <div class="action-card__icon action-card__icon--info">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>In-Transit Shipments</strong>
+            <span>Monitor ongoing deliveries</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="action-card" routerLink="/admin/users" [queryParams]="{ active: true }">
+          <div class="action-card__icon action-card__icon--success">
+            <mat-icon>manage_accounts</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>User Management</strong>
+            <span>Search, suspend or manage users</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="action-card" routerLink="/admin/bookings">
+          <div class="action-card__icon action-card__icon--info">
+            <mat-icon>event</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>Bookings</strong>
+            <span>Inspect booking activity</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+        <a class="action-card" routerLink="/admin/earnings">
+          <div class="action-card__icon action-card__icon--success">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <div class="action-card__text">
+            <strong>Driver Earnings</strong>
+            <span>Review and mark payouts</span>
+          </div>
+          <mat-icon class="action-card__arrow">chevron_right</mat-icon>
+        </a>
+
+      </div>
+    </section>
+
+  }
+</div>

@@ -1,6 +1,5 @@
 package com.shipmate.controller.insurance;
 
-import com.shipmate.dto.request.insurance.AdminClaimDecisionRequest;
 import com.shipmate.dto.request.insurance.CreateInsuranceClaimRequest;
 import com.shipmate.dto.response.insurance.InsuranceClaimResponse;
 import com.shipmate.service.insurance.InsuranceClaimService;
@@ -72,32 +71,7 @@ public class InsuranceClaimController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(
-            summary = "Review insurance claim (Admin)",
-            description = "Approve or reject an insurance claim."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Claim reviewed successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid decision"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
-    @PostMapping("/{claimId}/review")
-    public ResponseEntity<InsuranceClaimResponse> reviewClaim(
-            @PathVariable UUID claimId,
-            @AuthenticationPrincipal(expression = "username") String adminUserId,
-            @RequestBody AdminClaimDecisionRequest request
-    ) {
-
-        InsuranceClaimResponse response =
-                claimService.reviewClaim(
-                        claimId,
-                        UUID.fromString(adminUserId),
-                        request
-                );
-
-        return ResponseEntity.ok(response);
-    }
+  
     @PostMapping(
         value = "/claims/{claimId}/photos",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE

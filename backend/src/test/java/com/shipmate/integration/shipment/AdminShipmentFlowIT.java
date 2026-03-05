@@ -58,7 +58,7 @@ class AdminShipmentFlowIT extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/admin/shipments")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2));
+                .andExpect(jsonPath("$.content.size()").value(2));
     }
 
     @Test
