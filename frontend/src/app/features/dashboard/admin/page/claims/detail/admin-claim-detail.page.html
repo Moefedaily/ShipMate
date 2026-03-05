@@ -1,0 +1,232 @@
+<div class="admin-page">
+
+  <div>
+    <a class="back-btn" routerLink="/admin/claims">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Claims
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading">
+      <div class="loader-spinner"></div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && claim()) {
+
+    <!-- HERO -->
+    <div class="claim-hero">
+
+      <div class="hero-left">
+        <div class="claim-icon-wrap">
+          <mat-icon>gavel</mat-icon>
+        </div>
+
+        <div>
+          <div class="hero-title-row">
+            <h2 class="hero-title">
+              Claim #{{ claim()!.id | slice:0:8 }}
+            </h2>
+
+            <app-admin-badge
+              [label]="statusBadge(claim()!.claimStatus).label"
+              [variant]="statusBadge(claim()!.claimStatus).variant"
+            />
+          </div>
+
+          <span class="hero-date text-muted">
+            Submitted {{ claim()!.createdAt | date:'mediumDate' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-amounts">
+
+        <div class="amount-block">
+          <span class="amount-label">Compensation</span>
+          <span class="amount-value amount-value--primary">
+            ${{ claim()!.compensationAmount | number:'1.2-2' }}
+          </span>
+        </div>
+
+        <div class="amount-divider"></div>
+
+        <div class="amount-block">
+          <span class="amount-label">Declared Value</span>
+          <span class="amount-value">
+            ${{ claim()!.declaredValueSnapshot | number:'1.2-2' }}
+          </span>
+        </div>
+
+      </div>
+
+      @if (canAct()) {
+        <div class="action-bar">
+
+          <button
+            class="btn btn--success"
+            [disabled]="acting()"
+            (click)="approve()"
+          >
+            <mat-icon>check_circle</mat-icon>
+            Approve Claim
+          </button>
+
+          <button
+            class="btn btn--danger"
+            [disabled]="acting()"
+            (click)="reject()"
+          >
+            <mat-icon>cancel</mat-icon>
+            Reject Claim
+          </button>
+
+        </div>
+      }
+
+    </div>
+
+
+    <!-- ADMIN NOTES -->
+    @if (claim()!.claimStatus === 'REJECTED' && claim()!.adminNotes) {
+      <div class="rejection-notice">
+        <mat-icon>info_outline</mat-icon>
+        <div>
+          <strong>Admin Notes</strong>
+          <p>{{ claim()!.adminNotes }}</p>
+        </div>
+      </div>
+    }
+
+
+    <!-- DETAIL GRID -->
+    <div class="detail-grid">
+
+      <!-- DESCRIPTION -->
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>description</mat-icon>
+          <h3>Description</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <p class="claim-description">
+            {{ claim()!.description || 'No description provided.' }}
+          </p>
+        </div>
+      </div>
+
+
+      <!-- CLAIM INFO -->
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>info</mat-icon>
+          <h3>Claim Details</h3>
+        </div>
+
+        <div class="detail-card__body">
+
+          <div class="detail-row">
+            <span class="detail-row__label">Reason</span>
+            <span class="detail-row__value">
+              {{ claim()!.claimReason }}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Coverage</span>
+            <span class="detail-row__value">
+              ${{ claim()!.coverageAmount | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Deductible Rate</span>
+            <span class="detail-row__value">
+              {{ claim()!.deductibleRate }}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Resolved At</span>
+            <span class="detail-row__value">
+              {{ claim()!.resolvedAt ? (claim()!.resolvedAt | date:'mediumDate') : '—' }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- RELATED -->
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>link</mat-icon>
+          <h3>Related</h3>
+        </div>
+
+        <div class="detail-card__body">
+
+          <a
+            class="btn btn--ghost"
+            [routerLink]="['/admin/shipments', claim()!.shipmentId]"
+          >
+            <mat-icon>inventory_2</mat-icon>
+            View Shipment
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- PHOTOS -->
+    @if (claim()!.photos.length) {
+
+      <div class="detail-card">
+
+        <div class="detail-card__header">
+          <mat-icon>photo_library</mat-icon>
+          <h3>
+            Evidence Photos ({{ claim()!.photos.length }})
+          </h3>
+        </div>
+
+        <div class="photos-grid">
+
+          @for (url of claim()!.photos; track url) {
+
+            <a
+              class="photo-thumb"
+              [href]="url"
+              target="_blank"
+              rel="noopener"
+            >
+              <img [src]="url" alt="Evidence photo">
+
+              <div class="photo-overlay">
+                <mat-icon>open_in_new</mat-icon>
+              </div>
+
+            </a>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  }
+
+</div>

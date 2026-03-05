@@ -1,0 +1,308 @@
+<div class="admin-page">
+
+  <div>
+    <a class="back-btn" routerLink="/admin/users">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Users
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (error()) {
+    <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div>
+  }
+
+  @if (!loading() && user()) {
+
+    <!-- HERO -->
+    <div class="user-hero">
+
+      <div class="hero-avatar">
+        {{ user()!.firstName.charAt(0) }}{{ user()!.lastName.charAt(0) }}
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h2 class="hero-name">{{ user()!.firstName }} {{ user()!.lastName }}</h2>
+
+          <app-admin-badge
+            [label]="user()!.active ? 'Active' : 'Inactive'"
+            [variant]="user()!.active ? 'success' : 'danger'"
+          />
+
+          <app-admin-badge
+            [label]="userTypeBadge(user()!.userType).label"
+            [variant]="userTypeBadge(user()!.userType).variant"
+          />
+
+          @if (user()!.role === 'ADMIN') {
+            <app-admin-badge label="Admin" variant="primary" />
+          }
+        </div>
+
+        <span class="hero-email">{{ user()!.email }}</span>
+
+        @if (user()!.phone) {
+          <span class="hero-meta">{{ user()!.phone }}</span>
+        }
+      </div>
+
+      <div class="action-bar hero-actions">
+        @if (user()!.active) {
+          <button class="btn btn--danger" [disabled]="acting()" (click)="deactivate()">
+            <mat-icon>block</mat-icon>
+            {{ acting() ? 'Deactivating…' : 'Deactivate' }}
+          </button>
+        } @else {
+          <button class="btn btn--success" [disabled]="acting()" (click)="activate()">
+            <mat-icon>check_circle</mat-icon>
+            {{ acting() ? 'Activating…' : 'Activate' }}
+          </button>
+        }
+      </div>
+
+    </div>
+
+    <!-- CARDS -->
+    <div class="detail-grid">
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>person_outline</mat-icon>
+          <h3>Account Info</h3>
+        </div>
+
+        <div class="detail-card__body">
+
+          <div class="detail-row">
+            <span class="detail-row__label">User ID</span>
+            <span class="detail-row__value mono">{{ user()!.id }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Email verified</span>
+            <span class="detail-row__value">
+              <app-admin-badge
+                [label]="user()!.verified ? 'Verified' : 'Unverified'"
+                [variant]="user()!.verified ? 'success' : 'warning'"
+              />
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Role</span>
+            <span class="detail-row__value">{{ user()!.role }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Joined</span>
+            <span class="detail-row__value">{{ user()!.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SHIPMENTS -->
+    <div class="detail-card">
+      <div class="detail-card__header">
+        <mat-icon>inventory_2</mat-icon>
+        <h3>Shipments</h3>
+      </div>
+
+      @if (shipments() && shipments()!.content.length) {
+        <div class="table-wrap" style="border: none; border-radius: 0;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Pickup → Delivery</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (s of shipments()!.content; track s.id) {
+                <tr>
+                  <td class="mono">{{ shortId(s.id) }}</td>
+
+                  <td>
+                    <div class="route-cell">
+                      <span>{{ s.pickupAddress }}</span>
+                      <mat-icon>arrow_forward</mat-icon>
+                      <span>{{ s.deliveryAddress }}</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <app-admin-badge
+                      [label]="shipmentBadge(s.status).label"
+                      [variant]="shipmentBadge(s.status).variant"
+                    />
+                  </td>
+
+                  <td class="text-muted">{{ s.createdAt | date:'mediumDate' }}</td>
+
+                  <td>
+                    <a class="row-btn" [routerLink]="['/admin/shipments', s.id]">
+                      <mat-icon>chevron_right</mat-icon>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (shipments()!.totalPages > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="shipPage === 0" (click)="prevShip()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="page-info">Page {{ shipPage + 1 }} of {{ shipments()!.totalPages }}</span>
+            <button class="page-btn" [disabled]="shipPage >= shipments()!.totalPages - 1" (click)="nextShip()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="detail-card__body text-muted">No shipments found.</div>
+      }
+    </div>
+
+    <!-- CLAIMS -->
+    <div class="detail-card">
+      <div class="detail-card__header">
+        <mat-icon>gavel</mat-icon>
+        <h3>Claims</h3>
+      </div>
+
+      @if (claims() && claims()!.content.length) {
+        <div class="table-wrap" style="border: none; border-radius: 0;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (c of claims()!.content; track c.id) {
+                <tr>
+                  <td class="mono">{{ shortId(c.id) }}</td>
+
+                  <td>
+                    <app-admin-badge
+                      [label]="claimBadge(c.claimStatus).label"
+                      [variant]="claimBadge(c.claimStatus).variant"
+                    />
+                  </td>
+
+                  <td class="text-muted">{{ c.createdAt | date:'mediumDate' }}</td>
+
+                  <td>
+                    <a class="row-btn" [routerLink]="['/admin/claims', c.id]">
+                      <mat-icon>chevron_right</mat-icon>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (claims()!.totalPages > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="claimPage === 0" (click)="prevClaim()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="page-info">Page {{ claimPage + 1 }} of {{ claims()!.totalPages }}</span>
+            <button class="page-btn" [disabled]="claimPage >= claims()!.totalPages - 1" (click)="nextClaim()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="detail-card__body text-muted">No claims found.</div>
+      }
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="detail-card">
+      <div class="detail-card__header">
+        <mat-icon>account_balance</mat-icon>
+        <h3>Payments</h3>
+      </div>
+
+      @if (payments() && payments()!.content.length) {
+        <div class="table-wrap" style="border: none; border-radius: 0;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (p of payments()!.content; track p.id) {
+                <tr>
+                  <td class="mono">{{ shortId(p.id) }}</td>
+
+                  <td>
+                    <strong>
+                      {{ p.amountTotal | number:'1.2-2' }} {{ p.currency }}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <app-admin-badge
+                      [label]="paymentBadge(p.paymentStatus).label"
+                      [variant]="paymentBadge(p.paymentStatus).variant"
+                    />
+                  </td>
+
+                  <td class="text-muted">{{ p.createdAt | date:'mediumDate' }}</td>
+
+                  <td>
+                    <a class="row-btn" [routerLink]="['/admin/payments', p.id]">
+                      <mat-icon>chevron_right</mat-icon>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (payments()!.totalPages > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="payPage === 0" (click)="prevPay()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="page-info">Page {{ payPage + 1 }} of {{ payments()!.totalPages }}</span>
+            <button class="page-btn" [disabled]="payPage >= payments()!.totalPages - 1" (click)="nextPay()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="detail-card__body text-muted">No payments found.</div>
+      }
+    </div>
+
+  }
+
+</div>

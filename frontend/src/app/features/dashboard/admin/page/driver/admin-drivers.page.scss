@@ -1,0 +1,14 @@
+@use '../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../styles/variables/typography' as *;
+@use '../../../../../../styles/variables/admin-shared' as *;
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: $color-warning;
+  font-weight: $font-weight-semibold;
+  font-size: $text-size-label;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}

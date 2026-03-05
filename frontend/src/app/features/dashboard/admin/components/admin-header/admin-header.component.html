@@ -1,0 +1,58 @@
+<header class="admin-header">
+  <div class="header-inner">
+
+    <!-- Left: page title -->
+    <div class="header-left">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+    </div>
+
+    <!-- Right: actions + profile -->
+    <div class="header-right">
+
+      <!-- Back to app -->
+      <button
+        class="header-btn"
+        (click)="goToApp()"
+        matTooltip="Back to app"
+        matTooltipPosition="below"
+      >
+        <mat-icon>open_in_new</mat-icon>
+      </button>
+
+      <!-- Divider -->
+      <div class="header-divider"></div>
+
+      <!-- Profile menu trigger -->
+      <button class="profile-chip" [matMenuTriggerFor]="adminMenu">
+        <div class="chip-avatar">{{ userInitial() }}</div>
+        <span class="chip-name">{{ userName() }}</span>
+        <mat-icon class="chip-chevron">expand_more</mat-icon>
+      </button>
+
+      <mat-menu #adminMenu="matMenu" class="admin-profile-menu" xPosition="before">
+        <!-- Menu header -->
+        <div class="amenu-header" (click)="$event.stopPropagation()">
+          <div class="amenu-avatar">{{ userInitial() }}</div>
+          <div class="amenu-info">
+            <strong>{{ userName() }}</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+        <div class="amenu-divider"></div>
+
+        <button class="amenu-item" (click)="goToApp()">
+          <mat-icon>open_in_new</mat-icon>
+          Back to App
+        </button>
+
+        <div class="amenu-divider"></div>
+
+        <button class="amenu-item amenu-item--danger" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Sign out
+        </button>
+      </mat-menu>
+
+    </div>
+  </div>
+</header>

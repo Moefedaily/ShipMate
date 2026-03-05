@@ -40,6 +40,7 @@ public class ShipmentAssembler {
                     AssignedDriverResponse.builder()
                         .id(driver.getId())
                         .firstName(driver.getFirstName())
+                        .lastName(driver.getLastName())
                         .avatarUrl(driver.getAvatarUrl())
                         .vehicleType(profile.getVehicleType())
                         .build()

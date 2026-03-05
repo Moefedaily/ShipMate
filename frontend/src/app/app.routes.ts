@@ -6,6 +6,8 @@ import { authGuard } from './core/guards/auth.guard';
 import { senderGuard } from './core/guards/sender.guard';
 import { driverGuard } from './core/guards/driver.guard';
 import { driverDashboardResolver } from './core/services/driver/driver-dashboard.resolver';
+import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout-component';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
 
@@ -185,7 +187,85 @@ export const routes: Routes = [
         redirectTo: 'sender'
       }
     ]
+  },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [adminGuard],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/admin-dashboard.page')
+            .then(m => m.AdminDashboardPage),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/user/admin-user.page')
+            .then(m => m.AdminUsersPage),
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/user/detail/admin-user-detail.page')
+            .then(m => m.AdminUserDetailPage),
+      },
+      {
+        path: 'drivers',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/driver/admin-drivers.page')
+            .then(m => m.AdminDriversPage),
+      },
+      {
+        path: 'bookings',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/booking/admin-bookings.page')
+            .then(m => m.AdminBookingsPage),
+      },
+      {
+        path: 'earnings',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/earning/admin-earnings.page')
+            .then(m => m.AdminEarningsPage),
+      },
+      {
+        path: 'shipments',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/shipments/admin-shipments.page')
+            .then(m => m.AdminShipmentsPage),
+      },
+      {
+        path: 'shipments/:id',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/shipments/detail/admin-shipment-detail.page')
+            .then(m => m.AdminShipmentDetailPage),
+      },
+      {
+        path: 'claims',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/claims/admin-claims.page')
+            .then(m => m.AdminClaimsPage),
+      },
+      {
+        path: 'claims/:id',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/claims/detail/admin-claim-detail.page')
+            .then(m => m.AdminClaimDetailPage),
+      },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/payments/admin-payments.page')
+            .then(m => m.AdminPaymentsPage),
+      },
+      {
+        path: 'payments/:id',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/payments/detail/admin-payment-detail.page')
+            .then(m => m.AdminPaymentDetailPage),
+      }
+    ]
   }
-
-
 ];

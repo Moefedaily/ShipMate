@@ -1,0 +1,59 @@
+@use '../../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../../styles/variables/typography' as *;
+@use '../../../../../../../styles/variables/admin-shared' as *;
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+
+.payment-hero {
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 18px;
+  padding: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-icon-wrap {
+  width: 64px; height: 64px;
+  border-radius: 18px;
+  background: $color-info-subtle;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 30px; width: 30px; height: 30px; color: $color-info; }
+
+  &.icon--captured { background: $color-success-subtle; mat-icon { color: $color-success; } }
+  &.icon--refunded { background: $color-warning-subtle; mat-icon { color: $color-warning; } }
+  &.icon--failed   { background: $color-danger-subtle;  mat-icon { color: $color-danger;  } }
+}
+
+.hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-amount {
+  font-size: 2.25rem;
+  font-weight: $font-weight-bold;
+  color: $admin-text-primary;
+  letter-spacing: $letter-spacing-tight;
+  line-height: 1;
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+// ── Amount highlight ──────────────────────────────────────────────────────────
+
+.amount-green {
+  color: $color-success !important;
+  font-size: $text-size-subheading !important;
+  font-weight: $font-weight-bold !important;
+}

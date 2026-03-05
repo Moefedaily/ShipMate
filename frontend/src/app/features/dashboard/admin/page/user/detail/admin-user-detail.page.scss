@@ -1,0 +1,108 @@
+@use '../../../../../../../styles/variables/admin-colors' as *;
+@use '../../../../../../../styles/variables/typography' as *;
+@use '../../../../../../../styles/variables/admin-shared' as *;
+
+// ── User Hero ─────────────────────────────────────────────────────────────────
+
+.user-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: $admin-bg-card;
+  border: 1px solid $admin-border;
+  border-radius: 18px;
+  flex-wrap: wrap;
+}
+
+.hero-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary, $color-primary-hover);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: $font-weight-bold;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid $admin-border-strong;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.hero-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.hero-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-name {
+  margin: 0;
+  font-size: $text-size-subheading;
+  font-weight: $font-weight-bold;
+  color: $admin-text-primary;
+  letter-spacing: $letter-spacing-tight;
+}
+
+.hero-email { font-size: $text-size-label; color: $admin-text-muted; }
+.hero-meta  { font-size: $text-size-caption; color: $admin-text-muted; }
+
+.hero-actions {
+  margin-left: auto;
+  align-self: center;
+}
+
+// ── Driver rating ─────────────────────────────────────────────────────────────
+
+.rating-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: $color-warning !important;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
+// ── Strikes ───────────────────────────────────────────────────────────────────
+
+.strikes-list { gap: 0.5rem !important; }
+
+.strike-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  background: $color-danger-subtle;
+  border: 1px solid rgba($color-danger, 0.15);
+  border-radius: 10px;
+}
+
+.strike-icon {
+  font-size: 18px; width: 18px; height: 18px;
+  color: $color-danger;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.strike-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.strike-reason {
+  font-size: $text-size-label;
+  color: $admin-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.strike-date { font-size: $text-size-caption; color: $admin-text-muted; }

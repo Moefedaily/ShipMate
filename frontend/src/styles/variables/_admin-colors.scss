@@ -1,0 +1,37 @@
+// ─── Admin Dark Theme ─────────────────────────────────────────────────────────
+// Brand stays the same orange, backgrounds flip to dark neutrals
+
+/* ---------- Brand ---------- */
+$color-primary:        #ff7a00;
+$color-primary-hover:  #e96f00;
+$color-primary-active: #cc6200;
+$color-primary-subtle: rgba(#ff7a00, 0.12);
+$color-primary-glow:   rgba(#ff7a00, 0.25);
+
+/* ---------- Backgrounds ---------- */
+$admin-bg-base:    #0d0d0f;   // deepest background
+$admin-bg-surface: #141417;   // sidebar, panels
+$admin-bg-card:    #1c1c21;   // cards
+$admin-bg-raised:  #242429;   // inputs, hover states
+$admin-bg-overlay: #2a2a30;   // tooltips, dropdowns
+
+/* ---------- Borders ---------- */
+$admin-border:         rgba(#ffffff, 0.07);
+$admin-border-strong:  rgba(#ffffff, 0.12);
+$admin-border-primary: rgba(#ff7a00, 0.30);
+
+/* ---------- Text ---------- */
+$admin-text-primary:   #f1f1f3;
+$admin-text-secondary: #a0a0ab;
+$admin-text-muted:     #5e5e6e;
+$admin-text-inverse:   #0d0d0f;
+
+/* ---------- Status ---------- */
+$color-success:        #22c55e;
+$color-success-subtle: rgba(#22c55e, 0.12);
+$color-warning:        #f59e0b;
+$color-warning-subtle: rgba(#f59e0b, 0.12);
+$color-info:           #3b82f6;
+$color-info-subtle:    rgba(#3b82f6, 0.12);
+$color-danger:         #ef4444;
+$color-danger-subtle:  rgba(#ef4444, 0.12);

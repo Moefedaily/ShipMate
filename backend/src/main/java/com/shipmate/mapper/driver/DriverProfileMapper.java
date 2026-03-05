@@ -23,6 +23,9 @@ public interface DriverProfileMapper {
     DriverProfile toEntity(DriverApplyRequest request, User user);
     
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "email", source = "user.email")
     @Mapping(target = "licenseNumber", source = "licenseNumber")
     @Mapping(target = "vehicleType", source = "vehicleType")
     @Mapping(target = "maxWeightCapacity", source = "maxWeightCapacity")

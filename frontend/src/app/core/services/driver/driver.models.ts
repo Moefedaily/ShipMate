@@ -15,13 +15,30 @@ export enum DriverStatus {
 }
 
 export interface DriverProfileResponse {
+
   id: string;
-  status: DriverStatus;
+
+  licenseNumber: string;
+
   vehicleType: VehicleType;
+
+  vehicleDescription: string;
+
   maxWeightCapacity: number;
+
+  status: DriverStatus;
+
+  strikeCount: number;
+
+  createdAt: string;
+
   approvedAt: string | null;
+
   lastLatitude: number | null;
+
   lastLongitude: number | null;
+
+  lastLocationUpdatedAt: string | null;
 }
 
 export interface DriverApplyRequest {

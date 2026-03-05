@@ -1,0 +1,224 @@
+<div class="admin-page">
+
+  <div class="page-toolbar">
+
+    <div class="toolbar-left">
+
+      <div class="filter-chips">
+
+        <button
+          class="chip"
+          [class.active]="!filterStatus"
+          (click)="onStatusFilter()"
+        >
+          All
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filterStatus === 'PENDING'"
+          (click)="onStatusFilter('PENDING')"
+        >
+          Pending
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filterStatus === 'APPROVED'"
+          (click)="onStatusFilter('APPROVED')"
+        >
+          Approved
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filterStatus === 'REJECTED'"
+          (click)="onStatusFilter('REJECTED')"
+        >
+          Rejected
+        </button>
+
+        <button
+          class="chip"
+          [class.active]="filterStatus === 'SUSPENDED'"
+          (click)="onStatusFilter('SUSPENDED')"
+        >
+          Suspended
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="toolbar-right">
+      <span class="result-count">
+        {{ page()?.totalElements ?? 0 }} driver(s)
+      </span>
+    </div>
+
+  </div>
+
+
+  @if (loading()) {
+
+    <div class="table-loading">
+      <div class="loader-spinner"></div>
+    </div>
+
+  }
+
+
+  @if (error()) {
+
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+
+  }
+
+
+  @if (!loading() && page()) {
+
+    <div class="table-wrap">
+
+      <table class="admin-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Vehicle</th>
+            <th>Capacity</th>
+            <th>Strikes</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @if (!page()!.content.length) {
+
+            <tr>
+              <td colspan="7">
+
+                <div class="empty-state">
+
+                  <mat-icon>inventory_2</mat-icon>
+
+                  <span>No drivers found</span>
+
+                </div>
+
+              </td>
+            </tr>
+
+          }
+
+          @for (driver of page()!.content; track driver.id) {
+
+            <tr>
+
+              <td class="mono">
+                {{ driver.id | slice:0:8 }}…
+              </td>
+
+              <td class="text-muted">
+                {{ driver.vehicleType }}
+              </td>
+
+              <td>
+                {{ driver.maxWeightCapacity }} kg
+              </td>
+
+              <td>
+                {{ driver.strikeCount }}
+              </td>
+
+              <td>
+
+                <app-admin-badge
+                  [label]="statusBadge(driver.status).label"
+                  [variant]="statusBadge(driver.status).variant"
+                />
+
+              </td>
+
+              <td class="text-muted">
+                {{ driver.createdAt | date:'mediumDate' }}
+              </td>
+
+              <td>
+
+                <div class="row-actions">
+
+                  @if (driver.status === 'PENDING') {
+
+                    <button
+                      class="row-btn row-btn--success"
+                      [disabled]="acting() === driver.id"
+                      (click)="approve(driver.id)"
+                    >
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+
+                    <button
+                      class="row-btn row-btn--danger"
+                      [disabled]="acting() === driver.id"
+                      (click)="reject(driver.id)"
+                    >
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+
+                  }
+
+                  @if (driver.status === 'APPROVED') {
+
+                    <button
+                      class="row-btn row-btn--danger"
+                      [disabled]="acting() === driver.id"
+                      (click)="suspend(driver.id)"
+                    >
+                      <mat-icon>block</mat-icon>
+                    </button>
+
+                    <button
+                      class="row-btn"
+                      [disabled]="acting() === driver.id"
+                      (click)="addStrike(driver.id)"
+                    >
+                      <mat-icon>report</mat-icon>
+                    </button>
+
+                  }
+
+                  @if (driver.strikeCount > 0) {
+
+                    <button
+                      class="row-btn row-btn--warning"
+                      [disabled]="acting() === driver.id"
+                      (click)="resetStrikes(driver.id)"
+                    >
+                      <mat-icon>restart_alt</mat-icon>
+                    </button>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</div>
