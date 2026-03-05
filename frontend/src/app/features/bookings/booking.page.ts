@@ -18,42 +18,73 @@ import { BookingState } from '../../core/state/booking/booking.state';
   styleUrl: './booking.page.scss'
 })
 export class BookingPage implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+
+  private readonly route        = inject(ActivatedRoute);
+  private readonly router       = inject(Router);
   private readonly bookingState = inject(BookingState);
-  private readonly loader = inject(LoaderService);
-  private readonly toast = inject(ToastService);
+  private readonly loader       = inject(LoaderService);
+  private readonly toast        = inject(ToastService);
 
-  readonly loading = computed(() => this.bookingState.loading());
-  readonly booking = this.bookingState.booking;
+  readonly loading      = computed(() => this.bookingState.loading());
+  readonly booking      = this.bookingState.booking;
   readonly errorMessage = this.bookingState.errorMessage;
-  readonly acting = signal(false);
+  readonly acting       = signal(false);
 
+  // ── Photo lightbox ──────────────────────────────────────────────────────
+  readonly previewPhoto = signal<string | null>(null);
+  readonly photoSet     = signal<string[]>([]);
+  readonly photoIndex   = signal(0);
+
+  openPhoto(photo: string, set: string[] | null): void {
+    const photos = set ?? [photo];
+    this.photoSet.set(photos);
+    this.photoIndex.set(photos.indexOf(photo));
+    this.previewPhoto.set(photo);
+  }
+
+  closePhoto(): void {
+    this.previewPhoto.set(null);
+  }
+
+  prevPhoto(event: Event): void {
+    event.stopPropagation();
+    const i = this.photoIndex() - 1;
+    this.photoIndex.set(i);
+    this.previewPhoto.set(this.photoSet()[i]);
+  }
+
+  nextPhoto(event: Event): void {
+    event.stopPropagation();
+    const i = this.photoIndex() + 1;
+    this.photoIndex.set(i);
+    this.previewPhoto.set(this.photoSet()[i]);
+  }
+
+  // ── Init ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-
     if (!id) {
       this.toast.error('Invalid booking');
       this.router.navigate(['/dashboard']);
       return;
     }
-
     this.bookingState.load(id);
   }
 
-  readonly status = computed(() => this.booking()?.status);
-  readonly shipments = computed(() => this.booking()?.shipments ?? []);
-  readonly totalPrice = computed(() => this.booking()?.totalPrice ?? 0);
-  readonly driverEarnings = computed(() => this.booking()?.driverEarnings ?? 0);
+  // ── Computed ────────────────────────────────────────────────────────────
+  readonly status             = computed(() => this.booking()?.status);
+  readonly shipments          = computed(() => this.booking()?.shipments ?? []);
+  readonly totalPrice         = computed(() => this.booking()?.totalPrice ?? 0);
+  readonly driverEarnings     = computed(() => this.booking()?.driverEarnings ?? 0);
   readonly platformCommission = computed(() => this.booking()?.platformCommission ?? 0);
 
   readonly statusBadgeClass = computed(() => {
     switch (this.status()) {
-      case 'PENDING': return 'badge--warning';
+      case 'PENDING':     return 'badge--warning';
       case 'CONFIRMED':
       case 'IN_PROGRESS': return 'badge--info';
-      case 'CANCELLED': return 'badge--danger';
-      default: return 'badge--neutral';
+      case 'CANCELLED':   return 'badge--danger';
+      default:            return 'badge--neutral';
     }
   });
 
@@ -65,7 +96,6 @@ export class BookingPage implements OnInit {
     let order = 1;
 
     for (const shipment of booking.shipments) {
-      // PICKUP
       stops.push({
         id: `${shipment.id}-pickup`,
         type: 'PICKUP',
@@ -82,7 +112,6 @@ export class BookingPage implements OnInit {
         }]
       });
 
-      // DELIVERY
       stops.push({
         id: `${shipment.id}-delivery`,
         type: 'DELIVERY',
@@ -103,60 +132,44 @@ export class BookingPage implements OnInit {
     return stops;
   });
 
-  confirm(): void {
-    this.runAction('confirm', 'Booking confirmed');
-  }
+  readonly canStartBooking = computed(() => {
+    const booking = this.booking();
+    if (!booking) return false;
+    return booking.shipments.every(s =>
+      s.paymentStatus === 'AUTHORIZED' || s.paymentStatus === 'CAPTURED'
+    );
+  });
 
-  start(): void {
-    this.runAction('start', 'Delivery started');
-  }
+  // ── Actions ─────────────────────────────────────────────────────────────
+  confirm(): void { this.runAction('confirm', 'Booking confirmed'); }
+  start():   void { this.runAction('start',   'Delivery started');  }
 
   cancel(): void {
-    const ok = confirm('Cancel this booking?');
-    if (!ok) return;
-
+    if (!confirm('Cancel this booking?')) return;
     this.runAction('cancel', 'Booking cancelled');
   }
 
-  private runAction( action: 'confirm' | 'start' | 'cancel', successMessage: string ): void {
-    
-    const booking = this.booking();
-    if (!booking) return;
+  private runAction(action: 'confirm' | 'start' | 'cancel', successMessage: string): void {
+    if (!this.booking()) return;
 
     this.acting.set(true);
     this.loader.show();
 
     this.bookingState.runAction(action).subscribe({
-      next: (updated) => {
+      next: updated => {
         if (!updated) return;
-
         this.toast.success(successMessage);
-
         if (action === 'start') {
           this.router.navigate(['/dashboard/trip', updated.id]);
         }
-
         this.acting.set(false);
         this.loader.hide();
       },
       error: err => {
-        this.toast.error(
-          err.error?.message || 'Action failed'
-        );
+        this.toast.error(err.error?.message || 'Action failed');
         this.acting.set(false);
         this.loader.hide();
       }
     });
   }
-
-  readonly canStartBooking = computed(() => {
-    const booking = this.booking();
-    if (!booking) return false;
-
-    return booking.shipments.every(s =>
-      s.paymentStatus === 'AUTHORIZED' ||
-      s.paymentStatus === 'CAPTURED'
-    );
-  });
-
 }

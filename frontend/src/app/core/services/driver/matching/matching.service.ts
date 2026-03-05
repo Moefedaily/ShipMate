@@ -11,10 +11,7 @@ export class MatchingService {
   private readonly http = inject(HttpClient);
   private readonly api = environment.apiBaseUrl;
 
-  /**
-   * Fetch nearby shipments for an approved driver.
-   * Location is resolved server-side (driver profile).
-   */
+
   getNearbyShipments(options?: {
     radiusKm?: number;
     maxResults?: number;

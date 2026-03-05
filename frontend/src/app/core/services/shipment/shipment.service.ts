@@ -65,6 +65,9 @@ export class ShipmentService {
     );
   }
 
+  deleteShipment(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.api}/shipments/${id}`);
+  }
   cancelShipment(shipmentId: string): any {
     return this.http.post(
       `${this.api}/shipments/${shipmentId}/cancel`,

@@ -2,7 +2,7 @@
 
   @if (loading()) {
     <div class="loading-state">
-      <mat-icon class="spin">refresh</mat-icon>
+      <div class="loading-spinner"></div>
       <p>Loading booking details…</p>
     </div>
   }
@@ -19,6 +19,7 @@
 
   @if (booking()) {
 
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <div class="page-header">
       <div class="header-left">
         <button class="btn btn--ghost back-btn" routerLink="/dashboard/driver">
@@ -36,14 +37,17 @@
       </span>
     </div>
 
+    <!-- ── Map ───────────────────────────────────────────────────────────── -->
     <section class="booking-map">
       <app-leaflet-map mode="route" [stops]="mapStops()" />
     </section>
 
+    <!-- ── Body ──────────────────────────────────────────────────────────── -->
     <div class="booking-body">
 
       <section class="card booking-details">
 
+        <!-- 01 Route stops -->
         <div class="details-section">
           <div class="section-label">
             <span class="section-number">01</span>
@@ -54,9 +58,33 @@
             @for (shipment of shipments(); track shipment.id) {
               <li class="stop-card">
 
+                <!-- Photo gallery -->
+                @if (shipment.photos?.length) {
+                  <div class="photo-gallery">
+                    <div class="photo-grid" [class.photo-grid--single]="shipment.photos!.length === 1">
+                      @for (photo of shipment.photos!.slice(0, 4); track photo; let i = $index) {
+                        <button
+                          class="photo-cell"
+                          [class.photo-cell--more]="i === 3 && shipment.photos!.length > 4"
+                          (click)="openPhoto(photo, shipment.photos!)"
+                          type="button"
+                        >
+                          <img [src]="photo" alt="Package photo {{ i + 1 }}" loading="lazy" />
+                          @if (i === 3 && shipment.photos!.length > 4) {
+                            <div class="photo-more-overlay">
+                              <span>+{{ shipment.photos!.length - 4 }}</span>
+                            </div>
+                          }
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Route -->
                 <div class="stop-row">
                   <span class="stop-label pickup">
-                    <mat-icon>store</mat-icon>
+                    <mat-icon>trip_origin</mat-icon>
                     Pickup
                   </span>
                   <span class="stop-address">{{ shipment.pickupAddress }}</span>
@@ -66,19 +94,31 @@
 
                 <div class="stop-row">
                   <span class="stop-label delivery">
-                    <mat-icon>local_shipping</mat-icon>
+                    <mat-icon>place</mat-icon>
                     Delivery
                   </span>
                   <span class="stop-address">{{ shipment.deliveryAddress }}</span>
                 </div>
 
                 <div class="stop-meta">
-                  <span class="pill">{{ shipment.packageWeight }} kg</span>
-                  <span class="pill pill--accent">{{ shipment.basePrice | currency }}</span>
+                  <span class="pill">
+                    <mat-icon>scale</mat-icon>
+                    {{ shipment.packageWeight }} kg
+                  </span>
+                  <span class="pill pill--accent">
+                    <mat-icon>payments</mat-icon>
+                    {{ shipment.basePrice | currency }}
+                  </span>
                   @if (shipment.insuranceSelected) {
                     <span class="pill pill--insurance">
                       <mat-icon>verified_user</mat-icon>
                       Insured
+                    </span>
+                  }
+                  @if (shipment.photos?.length) {
+                    <span class="pill pill--photos">
+                      <mat-icon>photo_library</mat-icon>
+                      {{ shipment.photos!.length }} photo{{ shipment.photos!.length > 1 ? 's' : '' }}
                     </span>
                   }
                 </div>
@@ -90,6 +130,7 @@
 
         <div class="details-divider"></div>
 
+        <!-- 02 Earnings -->
         <div class="details-section">
           <div class="section-label">
             <span class="section-number">02</span>
@@ -104,7 +145,6 @@
               <span class="label">Your earnings</span>
               <strong>{{ driverEarnings() | currency }}</strong>
             </div>
-
             <div class="earning-card">
               <div class="earning-icon">
                 <mat-icon>storefront</mat-icon>
@@ -112,7 +152,6 @@
               <span class="label">Platform fee</span>
               <strong>{{ platformCommission() | currency }}</strong>
             </div>
-
             <div class="earning-card">
               <div class="earning-icon">
                 <mat-icon>receipt_long</mat-icon>
@@ -125,6 +164,7 @@
 
       </section>
 
+      <!-- Actions panel -->
       <div class="actions-panel">
 
         @if (status() === 'CONFIRMED' && !canStartBooking()) {
@@ -140,50 +180,31 @@
         }
 
         @if (status() === 'PENDING') {
-          <button
-            type="button"
-            class="btn btn--ghost action-btn action-btn--cancel"
-            (click)="cancel()"
-            [disabled]="acting()"
-          >
+          <button type="button" class="btn btn--ghost action-btn action-btn--cancel"
+            (click)="cancel()" [disabled]="acting()">
             @if (acting()) {
-              <span class="btn-spinner btn-spinner--dark"></span>
-              Cancelling…
+              <span class="btn-spinner btn-spinner--dark"></span> Cancelling…
             } @else {
-              <mat-icon>close</mat-icon>
-              Cancel booking
+              <mat-icon>close</mat-icon> Cancel booking
             }
           </button>
-
-          <button
-            type="button"
-            class="btn btn--primary action-btn"
-            (click)="confirm()"
-            [disabled]="acting()"
-          >
+          <button type="button" class="btn btn--primary action-btn"
+            (click)="confirm()" [disabled]="acting()">
             @if (acting()) {
-              <span class="btn-spinner"></span>
-              Confirming…
+              <span class="btn-spinner"></span> Confirming…
             } @else {
-              <mat-icon>check_circle</mat-icon>
-              Confirm booking
+              <mat-icon>check_circle</mat-icon> Confirm booking
             }
           </button>
         }
 
         @if (status() === 'CONFIRMED') {
-          <button
-            type="button"
-            class="btn btn--primary action-btn"
-            (click)="start()"
-            [disabled]="acting() || !canStartBooking()"
-          >
+          <button type="button" class="btn btn--primary action-btn"
+            (click)="start()" [disabled]="acting() || !canStartBooking()">
             @if (acting()) {
-              <span class="btn-spinner"></span>
-              Starting…
+              <span class="btn-spinner"></span> Starting…
             } @else {
-              <mat-icon>play_arrow</mat-icon>
-              Start delivery
+              <mat-icon>play_arrow</mat-icon> Start delivery
             }
           </button>
         }
@@ -195,3 +216,33 @@
   }
 
 </div>
+
+<!-- ── Photo lightbox ────────────────────────────────────────────────────── -->
+@if (previewPhoto()) {
+  <div class="photo-modal" (click)="closePhoto()">
+
+    <!-- Navigation -->
+    @if (photoIndex() > 0) {
+      <button class="modal-nav modal-nav--prev" (click)="prevPhoto($event)">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+    }
+    @if (photoIndex() < photoSet().length - 1) {
+      <button class="modal-nav modal-nav--next" (click)="nextPhoto($event)">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    }
+
+    <img class="photo-full" [src]="previewPhoto()" alt="Shipment photo" (click)="$event.stopPropagation()" />
+
+    <!-- Counter -->
+    @if (photoSet().length > 1) {
+      <div class="photo-counter">{{ photoIndex() + 1 }} / {{ photoSet().length }}</div>
+    }
+
+    <button class="close-btn" (click)="closePhoto()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+  </div>
+}
