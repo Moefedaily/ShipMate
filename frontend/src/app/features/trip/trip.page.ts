@@ -159,7 +159,6 @@ export class TripPage implements OnInit {
 
     const attempts = shipment.deliveryCodeAttempts ?? 0;
 
-    // ✅ Hard guard even if button was clickable by mistake
     if (shipment.deliveryLocked || attempts >= this.maxAttempts) {
       this.toast.error('Delivery confirmation is locked');
       return;
@@ -190,7 +189,6 @@ export class TripPage implements OnInit {
       return;
     }
 
-    // ✅ If already locked, don’t call backend
     if (this.isLocked()) {
       this.confirmError.set('Delivery confirmation is locked');
       return;
