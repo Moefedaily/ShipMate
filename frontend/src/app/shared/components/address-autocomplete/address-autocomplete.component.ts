@@ -18,6 +18,7 @@ import {
   of,
   takeUntil
 } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface AddressResult {
   address: string;
@@ -68,22 +69,11 @@ export class AddressAutocompleteComponent
             this.loading.set(false);
             return of([]);
           }
-
           this.loading.set(true);
-
           return this.http.get<any[]>(
-            'https://nominatim.openstreetmap.org/search',
+            `${environment.apiBaseUrl}/geocoding/search`,
             {
-              headers: {
-                Accept: 'application/json',
-                'User-Agent': 'ShipMate/1.0 (contact@shipmate.app)'
-              },
-              params: {
-                q: query,
-                format: 'json',
-                addressdetails: '1',
-                limit: '5'
-              }
+              params: { q: query }
             }
           );
         }),
@@ -96,7 +86,6 @@ export class AddressAutocompleteComponent
             lat: Number(r.lat),
             lng: Number(r.lon)
           }));
-
           this.results.set(mapped);
           this.loading.set(false);
         },
@@ -106,7 +95,6 @@ export class AddressAutocompleteComponent
         }
       });
   }
-
   /* ---------- Handle initial value ---------- */
 
   ngOnChanges(changes: SimpleChanges): void {
