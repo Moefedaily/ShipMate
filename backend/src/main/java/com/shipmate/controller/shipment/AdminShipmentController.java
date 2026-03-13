@@ -2,7 +2,6 @@ package com.shipmate.controller.shipment;
 
 import com.shipmate.dto.request.shipment.AdminUpdateShipmentStatusRequest;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
-import com.shipmate.mapper.shipment.ShipmentMapper;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.service.shipment.ShipmentService;
 
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class AdminShipmentController {
 
     private final ShipmentService shipmentService;
-    private final ShipmentMapper shipmentMapper;
 
 
     @Operation(
@@ -44,11 +42,7 @@ public class AdminShipmentController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentResponse> getShipment(@PathVariable UUID id) {
-        return ResponseEntity.ok(
-                shipmentMapper.toResponse(
-                        shipmentService.getShipmentById(id)
-                )
-        );
+        return ResponseEntity.ok(shipmentService.adminGetShipment(id));
     }
 
     @GetMapping
@@ -62,12 +56,9 @@ public class AdminShipmentController {
             @RequestParam(required = false) ShipmentStatus status,
             Pageable pageable
     ) {
-        Page<ShipmentResponse> page = shipmentService
-                .adminListShipments(status, pageable)
-                .map(shipmentMapper::toResponse);
-
-        return ResponseEntity.ok(page);
+        return ResponseEntity.ok(shipmentService.adminListShipments(status, pageable));
     }
+
     @PatchMapping("/{id}/status")
     @Operation(summary = "Update shipment status", description = "Admin updates a shipment status")
     @ApiResponses({
@@ -80,9 +71,7 @@ public class AdminShipmentController {
             @RequestBody AdminUpdateShipmentStatusRequest request
     ) {
         return ResponseEntity.ok(
-                shipmentMapper.toResponse(
-                        shipmentService.adminUpdateStatus(id, request.getStatus(), request.getAdminNotes())
-                )
+                shipmentService.adminUpdateStatus(id, request.getStatus(), request.getAdminNotes())
         );
     }
 

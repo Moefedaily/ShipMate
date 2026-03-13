@@ -1,17 +1,15 @@
 package com.shipmate.model.insuranceClaim;
 
+import com.shipmate.model.photo.Photo;
+import com.shipmate.model.shipment.Shipment;
+import com.shipmate.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import com.shipmate.model.shipment.Shipment;
-import com.shipmate.model.user.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -58,10 +56,9 @@ public class InsuranceClaim {
     @Enumerated(EnumType.STRING)
     @Column(name = "claim_status", nullable = false)
     private ClaimStatus claimStatus;
-    
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<String> photos;
+
+    @OneToMany(mappedBy = "insuranceClaim", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Photo> photos;
     
     @Column(name = "admin_notes", columnDefinition = "TEXT")
     private String adminNotes;

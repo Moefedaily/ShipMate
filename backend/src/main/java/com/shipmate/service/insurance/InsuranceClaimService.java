@@ -1,19 +1,14 @@
 package com.shipmate.service.insurance;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.shipmate.dto.request.insurance.AdminClaimDecisionRequest;
 import com.shipmate.dto.request.insurance.CreateInsuranceClaimRequest;
 import com.shipmate.dto.response.admin.AdminClaimResponse;
 import com.shipmate.dto.response.insurance.InsuranceClaimResponse;
-import com.shipmate.listener.notification.NotificationRequestedEvent;
-import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
 import com.shipmate.mapper.insurance.AdminClaimMapper;
 import com.shipmate.mapper.insurance.InsuranceClaimMapper;
-import com.shipmate.model.insuranceClaim.*;
-import com.shipmate.model.notification.NotificationType;
-import com.shipmate.model.notification.ReferenceType;
-import com.shipmate.model.payment.Payment;
+import com.shipmate.model.insuranceClaim.ClaimReason;
+import com.shipmate.model.insuranceClaim.ClaimStatus;
+import com.shipmate.model.insuranceClaim.InsuranceClaim;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
@@ -22,10 +17,14 @@ import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.payment.PaymentService;
-
+import com.shipmate.service.photo.PhotoService;
+import com.shipmate.listener.notification.NotificationRequestedEvent;
+import com.shipmate.listener.shipment.ShipmentStatusChangedEvent;
+import com.shipmate.model.notification.NotificationType;
+import com.shipmate.model.notification.ReferenceType;
+import com.shipmate.model.payment.Payment;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -34,13 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -58,7 +55,7 @@ public class InsuranceClaimService {
     private final PaymentService paymentService;
     private final InsuranceClaimMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final  Cloudinary cloudinary;
+    private final PhotoService photoService;
     private final AdminClaimMapper adminClaimMapper;
 
     
@@ -175,7 +172,7 @@ public class InsuranceClaimService {
                 .compensationAmount(compensation)
                 .claimReason(request.getClaimReason())
                 .claimDescription(request.getDescription())
-                .photos(new ArrayList<>())
+                .photos(new HashSet<>())
                 .claimStatus(ClaimStatus.SUBMITTED)
                 .build();
 
@@ -304,10 +301,6 @@ public class InsuranceClaimService {
 
     public InsuranceClaimResponse addClaimPhotos(UUID claimId, UUID userId, List<MultipartFile> files) {
 
-        if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("At least one photo is required");
-        }
-
         InsuranceClaim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new IllegalArgumentException("Claim not found"));
 
@@ -320,48 +313,9 @@ public class InsuranceClaimService {
             throw new IllegalStateException("Cannot upload photos for this claim state");
         }
 
-        if (claim.getPhotos() == null) {
-            claim.setPhotos(new ArrayList<>());
-        }
+        photoService.uploadInsuranceClaimPhotos(claim, files);
 
-        for (MultipartFile file : files) {
-
-            validateImage(file);
-
-            try {
-                Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap(
-                        "folder", "shipmate/claims/" + claimId,
-                        "resource_type", "image"
-                    )
-                );
-
-                String secureUrl = (String) uploadResult.get("secure_url");
-                claim.getPhotos().add(secureUrl);
-
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to upload claim photo", e);
-            }
-        }
-
-        return mapper.toResponse(claimRepository.save(claim));
-    }
-    private void validateImage(MultipartFile file) {
-
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
-        }
-
-        String contentType = file.getContentType();
-
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Only image files are allowed");
-        }
-
-        if (file.getSize() > 5_000_000) {
-            throw new IllegalArgumentException("File too large (max 5MB)");
-        }
+        return mapper.toResponse(claim);
     }
 
     @Transactional(readOnly = true)

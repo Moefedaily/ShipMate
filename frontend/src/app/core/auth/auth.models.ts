@@ -1,3 +1,5 @@
+import { PhotoResponse } from "../../shared/models/photo.models";
+
 export type UserType = 'DRIVER' | 'SENDER' | 'BOTH';
 export type Role = 'ADMIN' | 'USER';
 
@@ -11,7 +13,7 @@ export interface AuthUser {
   userType: UserType;
   verified: boolean;
   active: boolean;
-  avatarUrl?: string | null;
+  avatar?: PhotoResponse | null;
 }
 
 export interface JwtPayload {

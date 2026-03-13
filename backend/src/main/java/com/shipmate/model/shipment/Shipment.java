@@ -1,18 +1,17 @@
 package com.shipmate.model.shipment;
 
 import com.shipmate.model.booking.Booking;
+import com.shipmate.model.photo.Photo;
 import com.shipmate.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -96,9 +95,8 @@ public class Shipment {
     @Column(name = "delivered_at")
     private Instant deliveredAt;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<String> photos;
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Photo> photos;
 
     @Column(name = "delivery_code_hash")
     private String deliveryCodeHash;

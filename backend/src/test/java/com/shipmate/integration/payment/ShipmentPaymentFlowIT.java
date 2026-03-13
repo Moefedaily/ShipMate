@@ -25,8 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -90,7 +91,7 @@ class ShipmentPaymentFlowIT extends AbstractIntegrationTest {
                 .totalPrice(BigDecimal.valueOf(100))
                 .platformCommission(BigDecimal.valueOf(10))
                 .driverEarnings(BigDecimal.valueOf(90))
-                .shipments(new ArrayList<>())
+                .shipments(new HashSet<>())
                 .build();
 
         booking = bookingRepository.save(booking);

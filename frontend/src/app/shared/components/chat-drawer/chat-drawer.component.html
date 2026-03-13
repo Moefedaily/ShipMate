@@ -50,8 +50,8 @@
               >
                 
                 <div class="conversation-avatar">
-                  @if (convo.otherUserAvatarUrl) {
-                    <img [src]="convo.otherUserAvatarUrl" [alt]="convo.otherUserName" />
+                  @if (convo.otherUserAvatar?.url) {
+                    <img [src]="convo.otherUserAvatar?.url" [alt]="convo.otherUserName" />
                   } @else {
                     <mat-icon>person</mat-icon>
                   }
@@ -99,14 +99,13 @@
         </div>
       }
 
-      <!-- ACTIVE CHAT -->
       @else {
         <div class="chat-panel-header">
           <div class="panel-user-info">
             <div class="user-avatar">
-              @if (selectedConversation()!.otherUserAvatarUrl) {
+              @if (selectedConversation()?.otherUserAvatar?.url) {
                 <img 
-                  [src]="selectedConversation()!.otherUserAvatarUrl" 
+                  [src]="selectedConversation()!.otherUserAvatar!.url" 
                   [alt]="selectedConversation()!.otherUserName" 
                 />
               } @else {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.shipmate.dto.response.conversation.ConversationResponse;
 import com.shipmate.mapper.message.MessageMapper;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.message.Message;
 import com.shipmate.repository.message.MessageRepository;
 
@@ -22,6 +23,7 @@ public class MessageEventPublisher {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageMapper messageMapper;
     private final MessageRepository messageRepository;
+    private final PhotoMapper photoMapper;
 
 
     public void messageSent(Message message) {
@@ -88,7 +90,7 @@ public class MessageEventPublisher {
                                 ? otherUser.getFirstName() + " " + otherUser.getLastName()
                                 : null,
                         otherUser != null
-                                ? otherUser.getAvatarUrl()
+                                ? photoMapper.toResponse(otherUser.getAvatar())
                                 : null
                 );
 

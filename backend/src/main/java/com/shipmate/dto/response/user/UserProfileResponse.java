@@ -2,6 +2,7 @@ package com.shipmate.dto.response.user;
 
 import java.util.UUID;
 
+import com.shipmate.dto.response.photo.PhotoResponse;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.UserType; 
 
@@ -27,5 +28,5 @@ public class UserProfileResponse {
     private UserType userType;
     private boolean verified;
     private boolean active;
-    private String avatarUrl;
+    private PhotoResponse avatar;
 }
