@@ -17,6 +17,10 @@ public class AdminClaimResponse {
 
     private UUID id;
 
+    private UUID shipmentId;
+
+    private UUID claimantId;
+
     private ShipmentSummary shipment;
 
     private UserSummary sender;

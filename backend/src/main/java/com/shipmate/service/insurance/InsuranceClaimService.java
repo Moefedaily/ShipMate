@@ -27,6 +27,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -331,15 +333,13 @@ public class InsuranceClaimService {
     }
 
 
-    public List<AdminClaimResponse> listAdminClaims(ClaimStatus status) {
+    public Page<AdminClaimResponse> listAdminClaims(ClaimStatus status, Pageable pageable) {
 
-        List<InsuranceClaim> claims = (status == null)
-                ? claimRepository.findAllForAdmin()
-                : claimRepository.findAllForAdminByStatus(status);
+        Page<InsuranceClaim> claims = (status == null)
+                ? claimRepository.findAll(pageable)
+                : claimRepository.findByClaimStatus(status, pageable);
 
-        return claims.stream()
-                .map(adminClaimMapper::toAdminResponse)
-                .toList();
+        return claims.map(adminClaimMapper::toAdminResponse);
     }
 
     public AdminClaimResponse getAdminClaim(UUID id) {
