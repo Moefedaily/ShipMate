@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.shipmate.dto.response.driver.AssignedDriverResponse;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.payment.Payment;
 import com.shipmate.model.shipment.Shipment;
@@ -20,6 +21,7 @@ public class ShipmentAssembler {
     private final ShipmentMapper shipmentMapper;
     private final DriverProfileRepository driverProfileRepository;
     private final PaymentRepository paymentRepository;
+    private final PhotoMapper photoMapper;
 
 
     public ShipmentResponse toResponse(Shipment shipment) {
@@ -41,7 +43,7 @@ public class ShipmentAssembler {
                         .id(driver.getId())
                         .firstName(driver.getFirstName())
                         .lastName(driver.getLastName())
-                        .avatarUrl(driver.getAvatarUrl())
+                        .avatar(photoMapper.toResponse(driver.getAvatar()))
                         .vehicleType(profile.getVehicleType())
                         .build()
                 );

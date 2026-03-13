@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,7 +63,7 @@ class ShipmentServicePaymentTest {
                 .id(UUID.randomUUID())
                 .driver(driver)
                 .status(BookingStatus.IN_PROGRESS)
-                .shipments(new ArrayList<>())
+                .shipments(new HashSet<>())
                 .build();
 
         shipment = Shipment.builder()

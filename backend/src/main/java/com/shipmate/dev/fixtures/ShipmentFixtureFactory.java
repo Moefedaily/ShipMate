@@ -61,27 +61,6 @@ public final class ShipmentFixtureFactory {
 
                 .status(ShipmentStatus.CREATED)
 
-                .photos(List.of(
-                        "https://picsum.photos/id/20/800/600",
-                        "https://picsum.photos/id/26/800/600",
-                        "https://picsum.photos/id/250/800/600",
-                        "https://picsum.photos/id/21/800/600",
-                        "https://picsum.photos/id/27/800/600",
-                        "https://picsum.photos/id/251/800/600",
-                        "https://picsum.photos/id/22/800/600",
-                        "https://picsum.photos/id/28/800/600",
-                        "https://picsum.photos/id/252/800/600",
-                        "https://picsum.photos/id/23/800/600",
-                        "https://picsum.photos/id/29/800/600",
-                        "https://picsum.photos/id/253/800/600",
-                        "https://picsum.photos/id/24/800/600",
-                        "https://picsum.photos/id/30/800/600",
-                        "https://picsum.photos/id/254/800/600",
-                        "https://picsum.photos/id/25/800/600",
-                        "https://picsum.photos/id/31/800/600",
-                        "https://picsum.photos/id/255/800/600"
-                ))
-
                 .deliveryLocked(false)
 
                 .build();

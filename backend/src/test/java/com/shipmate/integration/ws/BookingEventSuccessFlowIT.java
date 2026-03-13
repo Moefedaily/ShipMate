@@ -135,7 +135,7 @@ class BookingEventSuccessFlowIT extends AbstractIntegrationTest {
 
     private void initializeAuthorizedPayment(TestContext ctx) {
 
-        var shipment = ctx.booking().getShipments().get(0);
+        var shipment = ctx.booking().getShipments().iterator().next();
 
         paymentRepository.saveAndFlush(
                 Payment.builder()

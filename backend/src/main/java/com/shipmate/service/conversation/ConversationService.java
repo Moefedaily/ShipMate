@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shipmate.dto.response.conversation.ConversationResponse;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.repository.message.MessageRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
@@ -23,6 +24,7 @@ public class ConversationService {
 
     private final ShipmentRepository shipmentRepository;
     private final MessageRepository messageRepository;
+    private final PhotoMapper photoMapper;
 
     public List<ConversationResponse> getMyConversations(UUID userId) {
 
@@ -70,7 +72,7 @@ public class ConversationService {
                 ? otherUser.getFirstName() + " " + otherUser.getLastName()
                 : null,
                 otherUser != null
-                ? otherUser.getAvatarUrl()
+                ? photoMapper.toResponse(otherUser.getAvatar())
                 : null
         );
         }

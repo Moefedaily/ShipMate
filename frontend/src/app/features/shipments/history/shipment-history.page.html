@@ -236,8 +236,8 @@
             @if (shipment.driver) {
               <div class="driver-strip">
                 <div class="driver-avatar">
-                  @if (shipment.driver.avatarUrl) {
-                    <img [src]="shipment.driver.avatarUrl" [alt]="shipment.driver.firstName" />
+                  @if (shipment.driver.avatar?.url) {
+                    <img [src]="shipment.driver.avatar?.url" [alt]="shipment.driver.firstName" />
                   } @else {
                     <mat-icon>person</mat-icon>
                   }

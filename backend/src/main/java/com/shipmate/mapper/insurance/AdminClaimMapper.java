@@ -6,11 +6,12 @@ import org.mapstruct.Mapping;
 import com.shipmate.dto.response.admin.AdminClaimResponse;
 import com.shipmate.dto.response.admin.ShipmentSummary;
 import com.shipmate.dto.response.admin.UserSummary;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.insuranceClaim.InsuranceClaim;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface AdminClaimMapper {
 
     @Mapping(target = "shipment", source = "shipment")

@@ -1,3 +1,5 @@
+import { PhotoResponse } from "../../../../shared/models/photo.models";
+
 export interface Shipment {
   id: string;
 
@@ -20,7 +22,7 @@ export interface Shipment {
 
   basePrice: number;
 
-  photos?: string[];
+  photos?: PhotoResponse[];
 
   status: 'CREATED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED';
 

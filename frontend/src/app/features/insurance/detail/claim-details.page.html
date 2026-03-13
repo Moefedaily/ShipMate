@@ -141,8 +141,8 @@
                 <span>Submitted photos</span>
               </div>
               <div class="photo-grid">
-                @for (photo of claim()!.photos; track photo) {
-                  <img [src]="photo" alt="Claim photo" />
+                @for (photo of claim()!.photos; track photo.id) {
+                  <img [src]="photo.url" alt="Claim photo" />
                 }
               </div>
             </div>

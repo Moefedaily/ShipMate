@@ -8,6 +8,7 @@ import { LeafletMapComponent } from '../../shared/components/map/leaflet-map.com
 import { MapStop } from '../../shared/components/map/leaflet-map.types';
 import { MatIconModule } from '@angular/material/icon';
 import { BookingState } from '../../core/state/booking/booking.state';
+import { PhotoResponse } from '../../shared/models/photo.models';
 
 @Component({
   standalone: true,
@@ -139,6 +140,10 @@ export class BookingPage implements OnInit {
       s.paymentStatus === 'AUTHORIZED' || s.paymentStatus === 'CAPTURED'
     );
   });
+
+  getPhotoUrls(photos: PhotoResponse[]): string[] {
+    return photos.map(p => p.url);
+  }
 
   // ── Actions ─────────────────────────────────────────────────────────────
   confirm(): void { this.runAction('confirm', 'Booking confirmed'); }

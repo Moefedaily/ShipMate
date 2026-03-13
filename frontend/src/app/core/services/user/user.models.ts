@@ -1,4 +1,5 @@
 import { Role, UserType } from "../../auth/auth.models";
+import { PhotoResponse } from "../../../shared/models/photo.models";
 
 
 export interface UserProfile {
@@ -11,7 +12,7 @@ export interface UserProfile {
   userType: UserType;
   verified: boolean;
   active: boolean;
-  avatarUrl?: string | null;
+  avatar?: PhotoResponse | null;
 }
 
 

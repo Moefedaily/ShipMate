@@ -61,7 +61,8 @@
         >
 
           <img
-            [src]="s.photos && s.photos.length ? s.photos[0] : 'assets/images/box.jpg'"
+            class="shipment-photo"
+            [src]="s.photos && s.photos.length ? s.photos[0].url : 'assets/images/box.jpg'"
             [alt]="s.packageDescription || 'Shipment'"
           />
 
@@ -126,8 +127,8 @@
               @if (s.driver) {
                 <div class="assigned-driver">
                   <div class="driver-avatar">
-                    @if (s.driver.avatarUrl) {
-                      <img [src]="s.driver.avatarUrl" alt="Driver avatar" />
+                    @if (s.driver.avatar?.url) {
+                      <img [src]="s.driver.avatar?.url" alt="Driver avatar" />
                     } @else {
                       <mat-icon>person</mat-icon>
                     }

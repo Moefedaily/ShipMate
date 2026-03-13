@@ -76,8 +76,8 @@
         @if (shipment()?.driver) {
           <div class="assigned-driver">
             <div class="driver-avatar">
-              @if (shipment()?.driver?.avatarUrl) {
-                <img [src]="shipment()?.driver?.avatarUrl" [alt]="shipment()?.driver?.firstName" />
+              @if (shipment()?.driver?.avatar?.url) {
+                <img [src]="shipment()?.driver?.avatar?.url" [alt]="shipment()?.driver?.firstName" />
               } @else {
                 <mat-icon>person</mat-icon>
               }
@@ -268,8 +268,8 @@
         Package photos
       </h3>
       <div class="photo-grid">
-        @for (photo of shipment()?.photos; track photo) {
-          <img [src]="photo" [alt]="'Package photo ' + ($index + 1)" />
+        @for (photo of shipment()?.photos; track photo.id) {
+          <img [src]="photo.url" [alt]="'Package photo ' + ($index + 1)" />
         }
       </div>
     </section>

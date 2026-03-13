@@ -1,3 +1,5 @@
+import { PhotoResponse } from "../../../shared/models/photo.models";
+
 export type ShipmentStatus =
   | 'CREATED'
   | 'ASSIGNED'
@@ -15,5 +17,5 @@ export interface ConversationSummary {
   unreadCount: number;
 
   otherUserName?: string;
-  otherUserAvatarUrl?: string;
+  otherUserAvatar?: PhotoResponse;
 }

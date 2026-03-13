@@ -2,6 +2,7 @@ package com.shipmate.dto.response.driver;
 
 import java.util.UUID;
 
+import com.shipmate.dto.response.photo.PhotoResponse;
 import com.shipmate.model.user.VehicleType;
 
 
@@ -20,6 +21,6 @@ public class AssignedDriverResponse {
     private UUID id;
     private String firstName;
     private String lastName;
-    private String avatarUrl;
+    private PhotoResponse avatar;
     private VehicleType vehicleType;
 }

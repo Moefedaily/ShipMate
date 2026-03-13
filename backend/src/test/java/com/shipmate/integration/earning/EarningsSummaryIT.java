@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +57,7 @@ class EarningsSummaryIT extends AbstractIntegrationTest {
                 Booking.builder()
                         .driver(driver)
                         .status(BookingStatus.COMPLETED)
-                        .shipments(new ArrayList<>())
+                        .shipments(new HashSet<>())
                         .build()
         );
 
