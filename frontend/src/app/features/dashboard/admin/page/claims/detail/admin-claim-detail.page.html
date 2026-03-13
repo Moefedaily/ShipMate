@@ -203,15 +203,15 @@
 
         <div class="photos-grid">
 
-          @for (url of claim()!.photos; track url) {
+          @for (photo of claim()!.photos; track photo.id) {
 
             <a
               class="photo-thumb"
-              [href]="url"
+              [href]="photo.url"
               target="_blank"
               rel="noopener"
             >
-              <img [src]="url" alt="Evidence photo">
+              <img [src]="photo.url" alt="Evidence photo">
 
               <div class="photo-overlay">
                 <mat-icon>open_in_new</mat-icon>

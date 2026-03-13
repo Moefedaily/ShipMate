@@ -1,8 +1,9 @@
 package com.shipmate.controller.insurance;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,10 +41,11 @@ public class AdminInsuranceController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Claims listed successfully")
     })
-	public ResponseEntity<List<AdminClaimResponse>> listClaims(
-			@RequestParam(required = false) ClaimStatus status
+	public ResponseEntity<Page<AdminClaimResponse>> listClaims(
+			@RequestParam(required = false) ClaimStatus status,
+            Pageable pageable
 	) {
-		return ResponseEntity.ok(claimService.listAdminClaims(status));
+		return ResponseEntity.ok(claimService.listAdminClaims(status, pageable));
 	}
 
 

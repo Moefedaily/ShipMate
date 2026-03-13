@@ -14,6 +14,8 @@ import com.shipmate.model.user.User;
 @Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface AdminClaimMapper {
 
+    @Mapping(target = "shipmentId", source = "shipment.id")
+    @Mapping(target = "claimantId", source = "claimant.id")
     @Mapping(target = "shipment", source = "shipment")
     @Mapping(target = "sender", source = "shipment.sender")
     @Mapping(target = "driver", source = "shipment.booking.driver")

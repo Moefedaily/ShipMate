@@ -8,6 +8,7 @@ import com.shipmate.model.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +30,12 @@ public interface InsuranceClaimRepository
     Page<InsuranceClaim> findByClaimant(User claimant, Pageable pageable);
 
     List<InsuranceClaim> findByClaimStatus(ClaimStatus status);
+
+    @EntityGraph(attributePaths = {"shipment", "shipment.sender", "claimant", "photos"})
+    Page<InsuranceClaim> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"shipment", "shipment.sender", "claimant", "photos"})
+    Page<InsuranceClaim> findByClaimStatus(ClaimStatus status, Pageable pageable);
 
     Optional<InsuranceClaim> findByShipmentId(UUID shipmentId);
 
@@ -69,6 +76,7 @@ public interface InsuranceClaimRepository
         left join fetch s.booking b
         left join fetch b.driver driver
         join fetch c.claimant claimant
+        left join fetch c.photos
         left join fetch c.adminUser adminUser
         where c.id = :id
     """)
