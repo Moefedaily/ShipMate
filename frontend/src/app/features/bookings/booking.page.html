@@ -59,20 +59,20 @@
               <li class="stop-card">
 
                 <!-- Photo gallery -->
-                @if (shipment.photos?.length) {
+                @if (shipment.photos.length) {
                   <div class="photo-gallery">
-                    <div class="photo-grid" [class.photo-grid--single]="shipment.photos!.length === 1">
-                      @for (photo of shipment.photos!.slice(0, 4); track photo; let i = $index) {
+                    <div class="photo-grid" [class.photo-grid--single]="shipment.photos.length === 1">
+                      @for (photo of shipment.photos.slice(0, 4); track photo.id; let i = $index) {
                         <button
                           class="photo-cell"
-                          [class.photo-cell--more]="i === 3 && shipment.photos!.length > 4"
-                          (click)="openPhoto(photo, shipment.photos!)"
+                          [class.photo-cell--more]="i === 3 && shipment.photos.length > 4"
+                          (click)="openPhoto(photo.url, getPhotoUrls(shipment.photos))"
                           type="button"
                         >
-                          <img [src]="photo" alt="Package photo {{ i + 1 }}" loading="lazy" />
-                          @if (i === 3 && shipment.photos!.length > 4) {
+                          <img [src]="photo.url" alt="Package photo {{ i + 1 }}" loading="lazy" />
+                          @if (i === 3 && shipment.photos.length > 4) {
                             <div class="photo-more-overlay">
-                              <span>+{{ shipment.photos!.length - 4 }}</span>
+                              <span>+{{ shipment.photos.length - 4 }}</span>
                             </div>
                           }
                         </button>
@@ -115,10 +115,10 @@
                       Insured
                     </span>
                   }
-                  @if (shipment.photos?.length) {
+                  @if (shipment.photos.length) {
                     <span class="pill pill--photos">
                       <mat-icon>photo_library</mat-icon>
-                      {{ shipment.photos!.length }} photo{{ shipment.photos!.length > 1 ? 's' : '' }}
+                      {{ shipment.photos.length }} photo{{ shipment.photos.length > 1 ? 's' : '' }}
                     </span>
                   }
                 </div>

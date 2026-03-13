@@ -6,10 +6,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.shipmate.model.photo.Photo;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -40,6 +42,9 @@ public class Message {
 
     @Column(name = "message_content", columnDefinition = "TEXT", nullable = false)
     private String messageContent;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Photo> photos;
 
     @Builder.Default
     @Column(name = "is_read", nullable = false)

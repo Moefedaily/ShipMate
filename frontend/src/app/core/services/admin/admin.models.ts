@@ -1,5 +1,6 @@
 // admin.models.ts
 import { PaymentStatus } from '../payment/payment.model';
+import { PhotoResponse } from '../../../shared/models/photo.models';
 
 export interface AdminDashboardStats {
   totalUsers: number;
@@ -36,7 +37,7 @@ export interface AdminUser {
   userType: UserType;
   verified: boolean;
   active: boolean;
-  avatarUrl?: string | null;
+  avatar?: PhotoResponse | null;
   createdAt: string;
 }
 
@@ -177,7 +178,7 @@ export interface AdminShipment {
     firstName: string;
     lastName: string;
     email?: string; // if you added it in AssignedDriverResponse
-    avatarUrl?: string | null;
+    avatar?: PhotoResponse | null;
     vehicleType?: VehicleType;
   } | null;
 
@@ -226,7 +227,7 @@ export interface AdminClaim {
   claimStatus: ClaimStatus;
 
   description?: string;
-  photos: string[];
+  photos: PhotoResponse[];
 
   adminNotes?: string;
 

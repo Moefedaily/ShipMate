@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +62,7 @@ class RefundFlowIT extends AbstractIntegrationTest {
                 Booking.builder()
                         .driver(driver)
                         .status(BookingStatus.IN_PROGRESS)
-                        .shipments(new ArrayList<>())
+                        .shipments(new HashSet<>())
                         .build()
         );
 

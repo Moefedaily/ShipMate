@@ -6,6 +6,7 @@ import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,16 +18,21 @@ import java.util.UUID;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
 
+    @EntityGraph(attributePaths = {"photos"})
     Page<Shipment> findBySender(User sender, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"photos"})
     Optional<Shipment> findByIdAndSender(UUID id, User sender);
 
+    @EntityGraph(attributePaths = {"photos"})
     Page<Shipment> findByStatus(ShipmentStatus status, Pageable pageable);
     
+    @EntityGraph(attributePaths = {"photos"})
     List<Shipment> findByBookingId(UUID bookingId);
     
     boolean existsByBooking_IdAndSender_Id(UUID bookingId, UUID senderId);
 
+    @EntityGraph(attributePaths = {"photos"})
     @Query("""
         select s from Shipment s
         join s.booking b
@@ -35,6 +41,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     """)
     List<Shipment> findAllUserShipments(UUID userId);
 
+    @EntityGraph(attributePaths = {"photos"})
     @Query("""
         select distinct s from Shipment s
         left join s.booking b
@@ -46,10 +53,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
                 @Param("userId") UUID userId,
                 Pageable pageable
         );
+
+    @EntityGraph(attributePaths = {"photos", "booking", "sender"})
     @Query("""
         select s from Shipment s
-        join fetch s.booking b
-        join fetch s.sender sender
         where s.id = :shipmentId
     """)
     Optional<Shipment> findWithBookingAndSender(@Param("shipmentId") UUID shipmentId);

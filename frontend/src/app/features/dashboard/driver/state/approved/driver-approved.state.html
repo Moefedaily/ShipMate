@@ -229,7 +229,7 @@
 
             <img
               class="shipment-photo"
-              [src]="m.shipment.photos?.[0] ?? 'assets/images/box.jpg'"
+              [src]="m.shipment.photos?.[0]?.url ?? 'assets/images/box.jpg'"
               [alt]="m.shipment.packageDescription || 'Shipment'"
             />
 

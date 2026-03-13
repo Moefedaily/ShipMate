@@ -6,10 +6,11 @@ import com.shipmate.dto.response.shipment.SenderSummary;
 import com.shipmate.dto.response.shipment.ShipmentResponse;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.user.User;
+import com.shipmate.mapper.photo.PhotoMapper;
 
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface ShipmentMapper {
 
     @Mapping(target = "id", ignore = true)

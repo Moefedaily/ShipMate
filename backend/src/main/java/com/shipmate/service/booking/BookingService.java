@@ -5,6 +5,7 @@ import com.shipmate.dto.response.booking.BookingResponse;
 import com.shipmate.dto.response.driver.AssignedDriverResponse;
 import com.shipmate.exception.BookingConstraintException;
 import com.shipmate.exception.DriverLocationException;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
@@ -31,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,6 +49,7 @@ public class BookingService {
     private final ShipmentService shipmentService;
     private final BookingAssembler bookingAssembler;
     private final ApplicationEventPublisher eventPublisher;
+    private final PhotoMapper photoMapper;
 
     private static final Duration LOCATION_MAX_AGE = Duration.ofMinutes(60);
     private static final double MAX_DISTANCE_KM = 10.0;
@@ -73,7 +75,7 @@ public class BookingService {
         Booking booking = resolveOrCreatePendingBooking(driver);
 
         if (booking.getShipments() == null) {
-            booking.setShipments(new ArrayList<>());
+            booking.setShipments(new HashSet<>());
         }
 
         validateDriverLocation(driverId, shipments.get(0));
@@ -278,7 +280,7 @@ public class BookingService {
             return;
         }
 
-        Shipment anchor = booking.getShipments().get(0);
+        Shipment anchor = booking.getShipments().iterator().next();
 
         double maxRadiusKm = switch (profile.getVehicleType()) {
             case BICYCLE -> 5.0;
@@ -313,7 +315,7 @@ public class BookingService {
 
         Shipment anchor = booking.getShipments().isEmpty()
                 ? incoming.get(0)
-                : booking.getShipments().get(0);
+                : booking.getShipments().iterator().next();
 
         double totalKm = 0;
 
@@ -419,7 +421,7 @@ public class BookingService {
         return AssignedDriverResponse.builder()
                 .id(profile.getId())
                 .firstName(driver.getFirstName())
-                .avatarUrl(driver.getAvatarUrl())
+                .avatar(photoMapper.toResponse(driver.getAvatar()))
                 .vehicleType(profile.getVehicleType())
                 .build();
     }

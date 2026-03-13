@@ -42,7 +42,7 @@
       <div class="header-divider"></div>
 
       <button class="profile-btn" [matMenuTriggerFor]="profileMenu">
-        <app-avatar [src]="user()?.avatarUrl" size="sm" />
+        <app-avatar [src]="user()?.avatar?.url" size="sm" />
         <div class="profile-text">
           <span class="profile-name">{{ userName() }}</span>
           <span class="profile-role">
@@ -57,7 +57,7 @@
       <mat-menu #profileMenu="matMenu" class="profile-menu-panel" xPosition="before">
 
         <div class="menu-header" (click)="$event.stopPropagation()">
-          <app-avatar [src]="user()?.avatarUrl" size="md" />
+          <app-avatar [src]="user()?.avatar?.url" size="md" />
           <div class="menu-user-info">
             <strong>{{ userName() }}</strong>
             <span class="menu-user-role">

@@ -1,4 +1,5 @@
 import { PaymentStatus } from "../payment/payment.model";
+import { PhotoResponse } from "../../../shared/models/photo.models";
 
 export interface CreateShipmentRequest {
   pickupAddress: string;
@@ -44,7 +45,7 @@ export interface AssignedDriver {
   id: string;
   firstName: string;
   lastName: string;
-  avatarUrl: string | null;
+  avatar: PhotoResponse | null;
   vehicleType: 'CAR' | 'VAN' | 'TRUCK';
 }
 export interface ShipmentResponse {
@@ -79,7 +80,7 @@ export interface ShipmentResponse {
     | 'CANCELLED'
     | 'LOST';
 
-  photos: string[] | null;
+  photos: PhotoResponse[];
   createdAt: string;
   updatedAt: string;
   driver?: AssignedDriver | null;

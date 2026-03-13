@@ -62,11 +62,9 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @Column(name = "avatar_url", length = 500)
-    private String avatarUrl;
-
-    @Column(name = "avatar_public_id", length = 255)
-    private String avatarPublicId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id")
+    private com.shipmate.model.photo.Photo avatar;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

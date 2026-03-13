@@ -120,7 +120,7 @@ public class ShipmentMatchingService {
 
                 Shipment anchor = booking.getShipments().isEmpty()
                         ? null
-                        : booking.getShipments().get(0);
+                        : booking.getShipments().iterator().next();
 
                 if (anchor != null) {
 

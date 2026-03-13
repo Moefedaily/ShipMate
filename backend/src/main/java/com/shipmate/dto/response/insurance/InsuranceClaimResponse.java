@@ -1,5 +1,6 @@
 package com.shipmate.dto.response.insurance;
 
+import com.shipmate.dto.response.photo.PhotoResponse;
 import com.shipmate.model.insuranceClaim.ClaimReason;
 import com.shipmate.model.insuranceClaim.ClaimStatus;
 import lombok.Builder;
@@ -34,7 +35,7 @@ public class InsuranceClaimResponse {
 
     private String description;
 
-    private List<String> photos;
+    private List<PhotoResponse> photos;
 
     private String adminNotes;
 

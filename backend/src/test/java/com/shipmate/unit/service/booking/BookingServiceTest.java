@@ -36,8 +36,10 @@ import org.springframework.security.access.AccessDeniedException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -80,7 +82,7 @@ class BookingServiceTest {
                 .totalPrice(BigDecimal.valueOf(100))
                 .platformCommission(BigDecimal.valueOf(10))
                 .driverEarnings(BigDecimal.valueOf(90))
-                .shipments(new ArrayList<>())
+                .shipments(new HashSet<>())
                 .build();
     }
 
@@ -102,7 +104,7 @@ class BookingServiceTest {
                 .sender(User.builder().id(UUID.randomUUID()).build())
                 .build();
 
-        booking.setShipments(List.of(s1, s2));
+        booking.setShipments(new HashSet<>(List.of(s1, s2)));
 
         when(bookingRepository.findWithShipmentsById(bookingId))
                 .thenReturn(Optional.of(booking));
@@ -151,7 +153,7 @@ class BookingServiceTest {
                 .sender(User.builder().id(UUID.randomUUID()).build())
                 .build();
 
-        booking.setShipments(List.of(firstAssigned));
+        booking.setShipments(new HashSet<>(List.of(firstAssigned)));
 
         when(bookingRepository.findWithShipmentsById(bookingId))
                 .thenReturn(Optional.of(booking));
@@ -334,6 +336,7 @@ class BookingServiceTest {
                 .id(UUID.randomUUID())
                 .driver(User.builder().id(UUID.randomUUID()).build())
                 .status(BookingStatus.CONFIRMED)
+                .shipments(new HashSet<>())
                 .build();
 
         when(bookingRepository.findAll()).thenReturn(List.of(booking, secondBooking));
@@ -359,7 +362,7 @@ class BookingServiceTest {
     @Test
     void createBooking_shouldFail_whenShipmentLimitExceeded_forCar() {
 
-        booking.setShipments(List.of(
+        booking.setShipments(new HashSet<>(List.of(
                 Shipment.builder()
                         .status(ShipmentStatus.CREATED)
                         .pickupLatitude(BigDecimal.ZERO)
@@ -384,7 +387,7 @@ class BookingServiceTest {
                         .deliveryLongitude(BigDecimal.ONE)
                         .basePrice(BigDecimal.TEN)
                         .build()
-        ));
+        )));
 
         Shipment incoming = Shipment.builder()
                 .status(ShipmentStatus.CREATED)
@@ -423,7 +426,7 @@ class BookingServiceTest {
     @Test
     void createBooking_shouldFail_whenPickupRadiusExceeded() {
 
-        booking.setShipments(List.of(
+        booking.setShipments(new HashSet<>(List.of(
                 Shipment.builder()
                         .status(ShipmentStatus.CREATED)
                         .pickupLatitude(BigDecimal.ZERO)
@@ -432,7 +435,7 @@ class BookingServiceTest {
                         .deliveryLongitude(BigDecimal.ONE)
                         .basePrice(BigDecimal.TEN)
                         .build()
-        ));
+        )));
 
         Shipment incoming = Shipment.builder()
                 .status(ShipmentStatus.CREATED)
@@ -469,7 +472,7 @@ class BookingServiceTest {
     @Test
     void createBooking_shouldFail_whenTripDistanceCapExceeded() {
 
-        booking.setShipments(List.of(
+        booking.setShipments(new HashSet<>(List.of(
                 Shipment.builder()
                         .status(ShipmentStatus.CREATED)
                         .pickupLatitude(BigDecimal.ZERO)
@@ -478,7 +481,7 @@ class BookingServiceTest {
                         .deliveryLongitude(BigDecimal.valueOf(30))
                         .basePrice(BigDecimal.TEN)
                         .build()
-        ));
+        )));
 
         Shipment incoming = Shipment.builder()
                 .status(ShipmentStatus.CREATED)

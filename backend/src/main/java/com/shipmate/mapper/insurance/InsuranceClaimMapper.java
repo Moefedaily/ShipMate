@@ -1,11 +1,12 @@
 package com.shipmate.mapper.insurance;
 
 import com.shipmate.dto.response.insurance.InsuranceClaimResponse;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.insuranceClaim.InsuranceClaim;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface InsuranceClaimMapper {
 
     @Mapping(target = "shipmentId", source = "shipment.id")

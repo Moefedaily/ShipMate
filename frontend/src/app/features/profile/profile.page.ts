@@ -31,7 +31,7 @@ export class ProfilePage implements OnInit {
   private readonly loader        = inject(LoaderService);
   private readonly toast         = inject(ToastService);
 
-  readonly avatarUrl    = computed(() => this.user()?.avatarUrl ?? null);
+  readonly avatarUrl    = computed(() => this.user()?.avatar?.url ?? null);
   readonly submitting   = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly driverProfile = signal<DriverProfileResponse | null>(null);
@@ -169,7 +169,7 @@ export class ProfilePage implements OnInit {
     this.loader.show();
     this.userService.deleteAvatar().subscribe({
       next: () => {
-        this.authService.updateCachedUser({ ...this.user()!, avatarUrl: null });
+        this.authService.updateCachedUser({ ...this.user()!, avatar: null });
         this.toast.success('Profile photo removed');
         this.loader.hide();
       },

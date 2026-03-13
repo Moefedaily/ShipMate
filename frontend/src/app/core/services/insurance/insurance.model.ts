@@ -1,3 +1,5 @@
+import { PhotoResponse } from "../../../shared/models/photo.models";
+
 export type ClaimReason = 'DAMAGED' | 'LOST' | 'OTHER';
 
 export type ClaimStatus =
@@ -20,7 +22,7 @@ export interface InsuranceClaim {
   claimStatus: ClaimStatus;
 
   description?: string;
-  photos: string[];
+  photos: PhotoResponse[];
 
   adminNotes?: string | null;
 

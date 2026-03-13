@@ -4,13 +4,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.shipmate.dto.response.driver.AssignedDriverResponse;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.user.User;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface AssignedDriverMapper {
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "firstName", target = "firstName")
-    @Mapping(source = "avatarUrl", target = "avatarUrl")
+    @Mapping(source = "avatar", target = "avatar")
     AssignedDriverResponse from(User user);
 }

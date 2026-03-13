@@ -22,6 +22,7 @@ import com.shipmate.repository.user.UserRepository;
 import com.shipmate.service.admin.AdminActionLogger;
 import com.shipmate.service.delivery.DeliveryCodeService;
 import com.shipmate.service.payment.PaymentService;
+import com.shipmate.service.photo.PhotoService;
 import com.shipmate.service.pricing.PricingService;
 import com.shipmate.util.GeoUtils;
 
@@ -36,19 +37,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -61,7 +57,7 @@ public class ShipmentService {
     private final UserRepository userRepository;
     private final ShipmentMapper shipmentMapper;
     private final ShipmentAssembler shipmentAssembler;
-    private final Cloudinary cloudinary;
+    private final PhotoService photoService;
     private final PricingService pricingService;
     private final ApplicationEventPublisher eventPublisher;
     private final BookingRepository bookingRepository;
@@ -243,11 +239,8 @@ public class ShipmentService {
 
         shipmentRepository.delete(shipment);
     }
-    public ShipmentResponse addPhotos( UUID shipmentId, UUID senderId, List<MultipartFile> files) {
-    
-        if (files == null || files.isEmpty()) {
-                throw new IllegalArgumentException("At least one photo is required");
-        }
+
+    public ShipmentResponse addPhotos(UUID shipmentId, UUID senderId, List<MultipartFile> files) {
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -257,51 +250,13 @@ public class ShipmentService {
 
         if (shipment.getStatus() != ShipmentStatus.CREATED &&
                 shipment.getStatus() != ShipmentStatus.ASSIGNED) {
-                throw new IllegalStateException("Photos cannot be added in current shipment state");
+            throw new IllegalStateException("Photos cannot be added in current shipment state");
         }
 
-        if (shipment.getPhotos() == null) {
-                shipment.setPhotos(new ArrayList<>());
-        }
+        photoService.uploadShipmentPhotos(shipment, files);
 
-        for (MultipartFile file : files) {
-                validateImage(file);
-
-                try {
-                Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                        file.getBytes(),
-                        ObjectUtils.asMap(
-                        "folder", "shipmate/shipments/" + shipmentId,
-                        "resource_type", "image"
-                        )
-                );
-
-                String secureUrl = (String) uploadResult.get("secure_url");
-                shipment.getPhotos().add(secureUrl);
-
-                } catch (IOException e) {
-                throw new RuntimeException("Failed to upload shipment photo", e);
-                }
-        }
-
-        Shipment saved = shipmentRepository.save(shipment);
-        return shipmentAssembler.toResponse(saved);
-        }
-
-    private void validateImage(MultipartFile file) {
-       
-        if (file == null || file.isEmpty()) {
-                throw new IllegalArgumentException("File must not be empty");
-        }
-
-        if (file.getSize() > maxFileSize) {
-                throw new IllegalArgumentException("File size exceeds maximum limit");
-        }
-
-        if (!ALLOWED_IMAGE_TYPES.contains(file.getContentType())) {
-                throw new IllegalArgumentException("Invalid image type");
-        }
-        }
+        return shipmentAssembler.toResponse(shipment);
+    }
 
     public ShipmentResponse markInTransit(UUID shipmentId, UUID driverId) {
 
@@ -584,7 +539,7 @@ public class ShipmentService {
         throw new IllegalArgumentException("Declared value exceeds supported insurance tiers");
     }
     @Transactional
-    public Shipment adminUpdateStatus(UUID shipmentId, ShipmentStatus target, String adminNotes) {
+    public ShipmentResponse adminUpdateStatus(UUID shipmentId, ShipmentStatus target, String adminNotes) {
 
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Shipment not found"));
@@ -628,15 +583,25 @@ public class ShipmentService {
             );
         }
 
-        return saved;
+        return shipmentAssembler.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public Page<Shipment> adminListShipments(ShipmentStatus status, Pageable pageable) {
+    public ShipmentResponse adminGetShipment(UUID id) {
+        Shipment shipment = shipmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Shipment not found"));
+        return shipmentAssembler.toResponse(shipment);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ShipmentResponse> adminListShipments(ShipmentStatus status, Pageable pageable) {
+        Page<Shipment> shipments;
         if (status == null) {
-            return shipmentRepository.findAll(pageable);
+            shipments = shipmentRepository.findAll(pageable);
+        } else {
+            shipments = shipmentRepository.findByStatus(status, pageable);
         }
-        return shipmentRepository.findByStatus(status, pageable);
+        return shipments.map(shipmentAssembler::toResponse);
     }
 
 }

@@ -11,7 +11,7 @@ import com.shipmate.model.user.User;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -68,6 +68,6 @@ public class Booking {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
-    private List<Shipment> shipments;
+    private Set<Shipment> shipments;
 
 }

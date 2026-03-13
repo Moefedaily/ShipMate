@@ -2,12 +2,13 @@ package com.shipmate.mapper.user;
 
 import com.shipmate.dto.request.user.UpdateUserProfileRequest;
 import com.shipmate.dto.response.user.UserProfileResponse;
+import com.shipmate.mapper.photo.PhotoMapper;
 import com.shipmate.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PhotoMapper.class})
 public interface UserProfileMapper {
     
     @Mapping(target = "id", source = "id")
@@ -17,7 +18,7 @@ public interface UserProfileMapper {
     @Mapping(target = "role", source = "role")
     @Mapping(target = "verified", source = "verified")
     @Mapping(target = "active", source = "active")
-    @Mapping(target = "avatarUrl", source = "avatarUrl")
+    @Mapping(target = "avatar", source = "avatar")
     UserProfileResponse toResponse(User user);
     
     @Mapping(target = "id", ignore = true)
