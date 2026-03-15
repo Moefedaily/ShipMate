@@ -3,7 +3,6 @@ package com.shipmate.dev.fixtures;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.user.User;
-import com.shipmate.model.user.VehicleType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,9 +18,6 @@ public final class DriverFixtureFactory {
         return DriverProfile.builder()
                 .user(driver)
                 .licenseNumber("DEV-LIC-" + index)
-                .vehicleType(VehicleType.CAR)
-                .maxWeightCapacity(BigDecimal.valueOf(50))
-                .vehicleDescription("Dev vehicle " + index)
 
                 .status(DriverStatus.APPROVED)
                 .approvedAt(Instant.now())

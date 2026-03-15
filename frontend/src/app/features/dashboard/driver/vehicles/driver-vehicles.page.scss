@@ -1,0 +1,543 @@
+@use '../../../../../styles/variables/colors' as *;
+@use '../../../../../styles/variables/typography' as *;
+
+.vehicles-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+// ── Card ──
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+.section--locked {
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.08);
+}
+
+// ── Section header ──
+.section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.section__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section__icon {
+  color: $color-primary;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.section__title {
+  font-size: $text-size-body;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0;
+}
+
+// ── Badges ──
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: $text-size-label;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+
+  &--approved {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+
+  &--pending {
+    background: rgba(234, 179, 8, 0.12);
+    color: #b45309;
+  }
+
+  &--rejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  &--sm {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+  }
+}
+
+// ── License info ──
+.license-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.info-label {
+  font-size: $text-size-label;
+  color: $text-muted;
+  min-width: 130px;
+}
+
+.info-value {
+  font-size: $text-size-body;
+  color: $text-primary;
+  font-weight: 500;
+}
+
+// ── Banners ──
+.info-banner,
+.warning-banner,
+.rejection-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: $text-size-label;
+  margin-bottom: 1rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.info-banner {
+  background: rgba($color-primary, 0.07);
+  color: ($color-primary, 10% black);
+}
+
+.warning-banner {
+  background: rgba(234, 179, 8, 0.1);
+  color: #92400e;
+}
+
+.rejection-reason {
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+.create-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.75rem;
+}
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: $font-weight-semibold;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: $bg-surface;
+    transform: translateX(-3px);
+  }
+}
+
+// ── Hint ──
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-size: $text-size-label;
+  color: $text-muted;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Forms ──
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+
+  &--vehicle {
+    background: rgba($color-primary, 0.025);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid rgba($color-primary, 0.1);
+    margin-top: 1rem;
+  }
+}
+
+.form__subtitle {
+  font-size: $text-size-body;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 0.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-label {
+  font-size: $text-size-label;
+  font-weight: 500;
+  color: $text-secondary;
+}
+
+.form-input {
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border-radius: 10px;
+  font-size: $text-size-body;
+  color: $text-primary;
+  background: #fff;
+  transition: border-color 0.2s;
+  outline: none;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.file-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.2rem;
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color: $text-muted;
+  font-size: $text-size-label;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    opacity: 0.5;
+  }
+
+  input[type='file'] {
+    display: none;
+  }
+
+  &:hover {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.03);
+    color: $color-primary;
+  }
+}
+
+.form-error {
+  font-size: 0.72rem;
+  color: #dc2626;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+// ── Vehicle grid ──
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.vehicle-grid--locked {
+  opacity: 0.68;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.photo {
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+
+  button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+.vehicle-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1rem;
+  border-radius: 14px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: #fafafa;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &--active {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.03);
+    box-shadow: 0 0 0 4px rgba($color-primary, 0.08);
+  }
+}
+
+.active-indicator {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: $color-primary;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.vehicle-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba($color-primary, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    color: $color-primary;
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.vehicle-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.vehicle-card__type {
+  font-weight: 600;
+  font-size: $text-size-body;
+  color: $text-primary;
+}
+
+.vehicle-card__capacity {
+  font-size: $text-size-label;
+  color: $text-muted;
+}
+
+.vehicle-card__plate {
+  font-size: $text-size-label;
+  font-weight: 500;
+  color: $text-secondary;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.vehicle-card__rejection {
+  font-size: 0.72rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+.vehicle-card__activate {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+// ── Empty state ──
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: $text-muted;
+  text-align: center;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    opacity: 0.35;
+  }
+
+  p {
+    margin: 0;
+    font-size: $text-size-body;
+  }
+}
+
+// ── Buttons ──
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: $text-size-body;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: white;
+    &:hover:not(:disabled) { opacity: 0.88; }
+  }
+
+  &--outline {
+    background: transparent;
+    border: 1.5px solid $color-primary;
+    color: $color-primary;
+    &:hover:not(:disabled) {
+      background: rgba($color-primary, 0.06);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $text-muted;
+    &:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &--sm {
+    padding: 0.4rem 0.9rem;
+    font-size: $text-size-label;
+  }
+}

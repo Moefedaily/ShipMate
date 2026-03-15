@@ -4,7 +4,6 @@ export type ClaimReason = 'DAMAGED' | 'LOST' | 'OTHER';
 
 export type ClaimStatus =
   | 'SUBMITTED'
-  | 'UNDER_REVIEW'
   | 'APPROVED'
   | 'REJECTED'
   | 'PAID';
@@ -33,5 +32,4 @@ export interface InsuranceClaim {
 export interface CreateInsuranceClaimRequest {
   claimReason: ClaimReason;
   description?: string;
-  photos?: string[];
 }

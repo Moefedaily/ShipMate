@@ -5,6 +5,9 @@ import com.shipmate.config.AbstractIntegrationTest;
 import com.shipmate.dto.request.booking.CreateBookingRequest;
 import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.DriverProfile.DriverStatus;
+
+import com.shipmate.model.vehicle.Vehicle;
+import com.shipmate.model.vehicle.VehicleStatus;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
@@ -15,6 +18,7 @@ import com.shipmate.model.user.VehicleType;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.repository.vehicle.VehicleRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,9 @@ class BookingControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private DriverProfileRepository driverProfileRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @Autowired
     private ShipmentRepository shipmentRepository;
@@ -147,17 +154,22 @@ class BookingControllerIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        driverProfileRepository.saveAndFlush(
-                DriverProfile.builder()
-                        .user(driver)
-                        .licenseNumber("LIC-" + UUID.randomUUID())
-                        .vehicleType(VehicleType.CAR)
-                        .maxWeightCapacity(BigDecimal.valueOf(500))
-                        .vehicleDescription("Test vehicle")
-                        .status(DriverStatus.APPROVED)
-                        .build()
-        );
+        DriverProfile profile = DriverProfile.builder()
+                .user(driver)
+                .licenseNumber("LIC-" + UUID.randomUUID())
+                .status(DriverStatus.APPROVED)
+                .build();
+        Vehicle vehicle = Vehicle.builder()
+                .driverProfile(profile)
+                .vehicleType(VehicleType.CAR)
+                .maxWeightCapacity(BigDecimal.valueOf(500))
+                .vehicleDescription("Test vehicle")
+                .status(VehicleStatus.APPROVED)
+                .active(true)
+                .build();
 
+        profile.getVehicles().add(vehicle);
+        driverProfileRepository.saveAndFlush(profile);
 
         return obtainAccessToken(driver.getEmail(), PASSWORD);
     }

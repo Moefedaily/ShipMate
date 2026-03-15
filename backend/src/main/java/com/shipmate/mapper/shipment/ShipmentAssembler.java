@@ -34,7 +34,7 @@ public class ShipmentAssembler {
             User driver = shipment.getBooking().getDriver();
 
             DriverProfile profile = driverProfileRepository
-                    .findByUser_Id(driver.getId())
+                    .findWithVehiclesByUser_Id(driver.getId())
                     .orElse(null);
 
             if (profile != null) {
@@ -44,7 +44,7 @@ public class ShipmentAssembler {
                         .firstName(driver.getFirstName())
                         .lastName(driver.getLastName())
                         .avatar(photoMapper.toResponse(driver.getAvatar()))
-                        .vehicleType(profile.getVehicleType())
+                        .vehicleType(profile.getActiveVehicle() != null ? profile.getActiveVehicle().getVehicleType() : null)
                         .build()
                 );
             }

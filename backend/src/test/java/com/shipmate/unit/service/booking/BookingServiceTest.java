@@ -8,12 +8,14 @@ import com.shipmate.listener.booking.BookingStatusChangedEvent;
 import com.shipmate.listener.payment.PaymentRequiredEvent;
 import com.shipmate.mapper.booking.BookingAssembler;
 import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.VehicleType;
+import com.shipmate.model.vehicle.Vehicle;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
@@ -304,10 +306,6 @@ class BookingServiceTest {
 
         when(bookingAssembler.toResponse(booking)).thenReturn(response);
 
-        // driver profile optional; if null, driver info not added
-        when(driverProfileRepository.findByUser_Id(driverId))
-                .thenReturn(Optional.empty());
-
         BookingResponse result = bookingService.getMyBooking(bookingId, driverId);
 
         assertThat(result).isSameAs(response);
@@ -399,7 +397,8 @@ class BookingServiceTest {
                 .build();
 
         DriverProfile profile = DriverProfile.builder()
-                .vehicleType(VehicleType.CAR)
+                .status(DriverStatus.APPROVED)
+                .vehicles(List.of(Vehicle.builder().vehicleType(VehicleType.CAR).active(true).build()))
                 .lastLatitude(BigDecimal.ZERO)
                 .lastLongitude(BigDecimal.ZERO)
                 .lastLocationUpdatedAt(Instant.now())
@@ -407,7 +406,7 @@ class BookingServiceTest {
 
         when(shipmentRepository.findAllById(any())).thenReturn(List.of(incoming));
         when(userRepository.findById(driverId)).thenReturn(Optional.of(driver));
-        when(driverProfileRepository.findByUser_Id(driverId)).thenReturn(Optional.of(profile));
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId)).thenReturn(Optional.of(profile));
 
         // ensure resolveOrCreatePendingBooking returns existing pending booking
         when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
@@ -447,7 +446,8 @@ class BookingServiceTest {
                 .build();
 
         DriverProfile profile = DriverProfile.builder()
-                .vehicleType(VehicleType.MOTORCYCLE)
+                .status(DriverStatus.APPROVED)
+                .vehicles(List.of(Vehicle.builder().vehicleType(VehicleType.MOTORCYCLE).active(true).build()))
                 .lastLatitude(BigDecimal.ZERO)
                 .lastLongitude(BigDecimal.ZERO)
                 .lastLocationUpdatedAt(Instant.now())
@@ -455,7 +455,7 @@ class BookingServiceTest {
 
         when(shipmentRepository.findAllById(any())).thenReturn(List.of(incoming));
         when(userRepository.findById(driverId)).thenReturn(Optional.of(driver));
-        when(driverProfileRepository.findByUser_Id(driverId)).thenReturn(Optional.of(profile));
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId)).thenReturn(Optional.of(profile));
         when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
                 .thenReturn(Optional.of(booking));
 
@@ -493,7 +493,8 @@ class BookingServiceTest {
                 .build();
 
         DriverProfile profile = DriverProfile.builder()
-                .vehicleType(VehicleType.CAR)
+                .status(DriverStatus.APPROVED)
+                .vehicles(List.of(Vehicle.builder().vehicleType(VehicleType.CAR).active(true).build()))
                 .lastLatitude(BigDecimal.ZERO)
                 .lastLongitude(BigDecimal.ZERO)
                 .lastLocationUpdatedAt(Instant.now())
@@ -501,7 +502,7 @@ class BookingServiceTest {
 
         when(shipmentRepository.findAllById(any())).thenReturn(List.of(incoming));
         when(userRepository.findById(driverId)).thenReturn(Optional.of(driver));
-        when(driverProfileRepository.findByUser_Id(driverId)).thenReturn(Optional.of(profile));
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId)).thenReturn(Optional.of(profile));
         when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
                 .thenReturn(Optional.of(booking));
 
@@ -530,7 +531,8 @@ class BookingServiceTest {
                 .build();
 
         DriverProfile profile = DriverProfile.builder()
-                .vehicleType(VehicleType.CAR)
+                .status(DriverStatus.APPROVED)
+                .vehicles(List.of(Vehicle.builder().vehicleType(VehicleType.CAR).active(true).build()))
                 .lastLatitude(BigDecimal.ZERO)
                 .lastLongitude(BigDecimal.ZERO)
                 .lastLocationUpdatedAt(Instant.now())
@@ -538,7 +540,7 @@ class BookingServiceTest {
 
         when(shipmentRepository.findAllById(any())).thenReturn(List.of(incoming));
         when(userRepository.findById(driverId)).thenReturn(Optional.of(driver));
-        when(driverProfileRepository.findByUser_Id(driverId)).thenReturn(Optional.of(profile));
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId)).thenReturn(Optional.of(profile));
         when(bookingRepository.findFirstByDriverAndStatusInOrderByCreatedAtDesc(any(), any()))
                 .thenReturn(Optional.of(booking));
 

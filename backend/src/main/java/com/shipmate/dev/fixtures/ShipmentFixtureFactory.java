@@ -8,7 +8,6 @@ import com.shipmate.model.user.User;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.List;
 
 public final class ShipmentFixtureFactory {
 

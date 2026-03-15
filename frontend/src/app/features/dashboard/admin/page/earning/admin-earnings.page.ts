@@ -14,23 +14,22 @@ import { AdminService } from '../../../../../core/services/admin/admin.service';
 export class AdminEarningsPage implements OnInit {
   private readonly adminService = inject(AdminService);
 
-  readonly page    = signal<PageResponse<AdminEarning> | null>(null);
+  readonly page = signal<PageResponse<AdminEarning> | null>(null);
   readonly loading = signal(true);
 
   private currentPage = 0;
-  private pageSize    = 20;
+  private pageSize = 20;
 
-  // ── Computed totals for the summary chips ──────────────────────────────────
   readonly paidTotal = computed(() =>
     (this.page()?.content ?? [])
-      .filter(e => e.paid)
-      .reduce((sum, e) => sum + e.amount, 0)
+      .filter(e => e.earningType === 'ORIGINAL' && e.payoutStatus === 'PAID')
+      .reduce((sum, e) => sum + e.netAmount, 0)
   );
 
   readonly pendingTotal = computed(() =>
     (this.page()?.content ?? [])
-      .filter(e => !e.paid)
-      .reduce((sum, e) => sum + e.amount, 0)
+      .filter(e => e.earningType === 'ORIGINAL' && e.payoutStatus !== 'PAID')
+      .reduce((sum, e) => sum + e.netAmount, 0)
   );
 
   readonly currency = computed(() =>
@@ -66,5 +65,16 @@ export class AdminEarningsPage implements OnInit {
   markPaid(id: string): void {
     if (!confirm('Mark payout as paid?')) return;
     this.adminService.markEarningPaid(id).subscribe(() => this.load());
+  }
+
+  isRefundAdjustment(earning: AdminEarning): boolean {
+    return earning.earningType === 'REFUND';
+  }
+
+  statusLabel(earning: AdminEarning): string {
+    if (this.isRefundAdjustment(earning)) {
+      return 'Applied';
+    }
+    return earning.payoutStatus === 'PAID' ? 'Paid' : 'Pending';
   }
 }

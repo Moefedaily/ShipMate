@@ -37,6 +37,7 @@ export class AdminDashboardPage implements OnInit {
     { label: 'Pending Claims',        key: 'pendingClaims',       icon: 'gavel',             color: 'danger',  route: '/admin/claims' },
     { label: 'Total Payments',        key: 'totalPayments',       icon: 'account_balance',   color: 'info',    route: '/admin/payments' },
     { label: 'Total Revenue',         key: 'totalRevenue',        icon: 'trending_up',       color: 'success', route: '/admin/payments', prefix: '$' },
+    { label: 'Pending Approvals',     key: 'pendingApprovals',    icon: 'hourglass_top',     color: 'warning', route: '/admin/drivers' },
   ];
 
   ngOnInit(): void {

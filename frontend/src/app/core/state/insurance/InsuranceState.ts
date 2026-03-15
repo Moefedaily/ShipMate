@@ -17,10 +17,6 @@ export class InsuranceState {
     () => this.claim()?.claimStatus === 'SUBMITTED'
   );
 
-  readonly isUnderReview = computed(
-    () => this.claim()?.claimStatus === 'UNDER_REVIEW'
-  );
-
   readonly isApproved = computed(
     () => this.claim()?.claimStatus === 'APPROVED'
   );
@@ -34,8 +30,7 @@ export class InsuranceState {
   );
 
   readonly isWaitingReview = computed(() =>
-    this.claim()?.claimStatus === 'SUBMITTED' ||
-    this.claim()?.claimStatus === 'UNDER_REVIEW'
+    this.claim()?.claimStatus === 'SUBMITTED'
   );
 
   readonly isRefundPending = computed(() =>

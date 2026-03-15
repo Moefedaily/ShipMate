@@ -1,5 +1,6 @@
 package com.shipmate.model.photo;
 
+import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.insuranceClaim.InsuranceClaim;
 import com.shipmate.model.message.Message;
 import com.shipmate.model.shipment.Shipment;
@@ -41,6 +42,10 @@ public class Photo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_profile_id")
+    private DriverProfile driverProfile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "insurance_claim_id")

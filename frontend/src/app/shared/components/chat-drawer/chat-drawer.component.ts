@@ -23,7 +23,6 @@ import { ConversationSummary } from '../../../core/services/conversation/convers
     ChatComponent,
     MatIconModule
   ],
-  providers: [ConversationListState],
   templateUrl: './chat-drawer.component.html',
   styleUrl: './chat-drawer.component.scss'
 })

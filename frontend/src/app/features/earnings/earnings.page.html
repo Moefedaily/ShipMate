@@ -75,7 +75,7 @@
               {{ e.netAmount < 0 ? '-' : '+' }}€{{ e.netAmount }}
             </strong>
             <span class="status">
-              {{ e.payoutStatus }}
+              {{ e.earningType === 'REFUND' ? 'APPLIED' : e.payoutStatus }}
             </span>
           </div>
 

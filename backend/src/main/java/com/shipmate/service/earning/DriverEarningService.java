@@ -107,9 +107,17 @@ public class DriverEarningService {
 
         BigDecimal totalNet = driverEarningRepository.sumNetByDriver(driver);
 
-        BigDecimal totalPending = driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PENDING);
+        BigDecimal totalPending = driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PENDING,
+                EarningType.ORIGINAL
+        );
 
-        BigDecimal totalPaid = driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PAID);
+        BigDecimal totalPaid = driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PAID,
+                EarningType.ORIGINAL
+        );
 
         return DriverEarningsSummaryResponse.builder()
                 .totalGross(totalGross)
@@ -146,7 +154,7 @@ public class DriverEarningService {
                 .grossAmount(original.getGrossAmount().negate())
                 .commissionAmount(original.getCommissionAmount().negate())
                 .netAmount(original.getNetAmount().negate())
-                .payoutStatus(PayoutStatus.PENDING)
+                .payoutStatus(PayoutStatus.PAID)
                 .build();
 
         driverEarningRepository.save(adjustment);

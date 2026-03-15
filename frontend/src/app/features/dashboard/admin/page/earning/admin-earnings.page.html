@@ -8,7 +8,6 @@
 
     <div class="page-toolbar">
       <div class="toolbar-left">
-        <!-- Summary chips -->
         <div class="summary-chips">
           <div class="summary-chip summary-chip--success">
             <mat-icon>check_circle</mat-icon>
@@ -37,6 +36,7 @@
             <tr>
               <th>Earning ID</th>
               <th>Driver ID</th>
+              <th>Type</th>
               <th>Amount</th>
               <th>Currency</th>
               <th>Status</th>
@@ -47,24 +47,33 @@
           <tbody>
             @for (earning of page()!.content; track earning.id) {
               <tr>
-                <td class="mono">{{ earning.id | slice:0:8 }}…</td>
-                <td class="mono">{{ earning.driverId | slice:0:8 }}…</td>
+                <td class="mono">{{ earning.id | slice:0:8 }}...</td>
+                <td class="mono">{{ earning.driverId | slice:0:8 }}...</td>
                 <td>
-                  <span class="amount" [class.amount--paid]="earning.paid">
-                    {{ earning.amount | currency:earning.currency }}
+                  @if (isRefundAdjustment(earning)) {
+                    <span class="status-chip">Refund Adjustment</span>
+                  } @else {
+                    <span class="status-chip status-chip--pending">Original</span>
+                  }
+                </td>
+                <td>
+                  <span class="amount" [class.amount--paid]="earning.payoutStatus === 'PAID'" [class.text-muted]="isRefundAdjustment(earning)">
+                    {{ earning.netAmount | currency:earning.currency }}
                   </span>
                 </td>
                 <td class="text-muted">{{ earning.currency }}</td>
                 <td>
-                  @if (earning.paid) {
-                    <span class="status-chip status-chip--paid">Paid</span>
+                  @if (isRefundAdjustment(earning)) {
+                    <span class="status-chip">{{ statusLabel(earning) }}</span>
+                  } @else if (earning.payoutStatus === 'PAID') {
+                    <span class="status-chip status-chip--paid">{{ statusLabel(earning) }}</span>
                   } @else {
-                    <span class="status-chip status-chip--pending">Pending</span>
+                    <span class="status-chip status-chip--pending">{{ statusLabel(earning) }}</span>
                   }
                 </td>
                 <td class="text-muted">{{ earning.createdAt | date:'mediumDate' }}</td>
                 <td>
-                  @if (!earning.paid) {
+                  @if (!isRefundAdjustment(earning) && earning.payoutStatus !== 'PAID') {
                     <button class="row-btn row-btn--success" (click)="markPaid(earning.id)" title="Mark as paid">
                       <mat-icon>check_circle</mat-icon>
                     </button>
@@ -80,7 +89,6 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       @if (page()!.totalPages > 1) {
         <div class="pagination">
           <button class="page-btn" [disabled]="page()!.number === 0" (click)="prevPage()">

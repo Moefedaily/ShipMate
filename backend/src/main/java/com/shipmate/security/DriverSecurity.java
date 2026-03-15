@@ -16,6 +16,19 @@ public class DriverSecurity {
 
     private final DriverProfileRepository driverProfileRepository;
 
+    public boolean hasDriverProfile(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return false;
+        }
+
+        try {
+            UUID userId = UUID.fromString(authentication.getName());
+            return driverProfileRepository.findByUser_Id(userId).isPresent();
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
+
     /**
      * True if user has an APPROVED driver profile
      */

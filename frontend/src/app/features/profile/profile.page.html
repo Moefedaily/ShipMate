@@ -1,4 +1,12 @@
 <div class="profile-page">
+  <div class="dashboard-hero profile-header">
+    <div class="header-left">
+      <button type="button" class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+    </div>
+  </div>
 
   @if (errorMessage()) {
     <div class="error-banner" role="alert">
@@ -7,7 +15,6 @@
     </div>
   }
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="page-header">
     <div class="page-header__text">
       <h1>My Profile</h1>
@@ -23,9 +30,7 @@
     </span>
   </div>
 
-  <!-- ── Avatar + Quick Stats ────────────────────────────────────────────── -->
   <section class="profile-card identity-card">
-
     <div class="identity-left">
       <div class="avatar-wrap">
         <app-avatar
@@ -61,7 +66,6 @@
       </div>
     </div>
 
-    <!-- Quick-stat chips -->
     <div class="identity-stats">
       <div class="stat-item">
         <mat-icon>mail_outline</mat-icon>
@@ -89,15 +93,15 @@
           <mat-icon>fitness_center</mat-icon>
           <div>
             <span class="stat-label">Max Load</span>
-            <span class="stat-value">{{ driverMaxWeight() }} kg</span>
+            <span class="stat-value">
+              {{ driverMaxWeight() !== null ? driverMaxWeight() + ' kg' : '—' }}
+            </span>
           </div>
         </div>
       }
     </div>
-
   </section>
 
-  <!-- ── Personal Information ────────────────────────────────────────────── -->
   <section class="profile-card">
     <div class="card-head">
       <div class="card-title">
@@ -112,7 +116,6 @@
     </div>
 
     <form class="profile-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
-
       <div class="form-row">
         <div class="form-field">
           <label for="firstName">
@@ -178,7 +181,6 @@
         </div>
       </div>
 
-      <!-- Read-only info -->
       <div class="readonly-grid">
         <div class="readonly-item">
           <mat-icon>mail</mat-icon>
@@ -220,11 +222,9 @@
           <span class="hint"><mat-icon>check</mat-icon> No changes to save.</span>
         }
       </div>
-
     </form>
   </section>
 
-  <!-- ── Driver Section ──────────────────────────────────────────────────── -->
   @if (showDriverSection()) {
     <section class="profile-card">
       <div class="card-head">
@@ -246,7 +246,7 @@
         >
           <mat-icon>
             {{ driverStatus() === 'APPROVED' ? 'verified' :
-               driverStatus() === 'PENDING'  ? 'schedule' : 'cancel' }}
+              driverStatus() === 'PENDING' ? 'schedule' : 'cancel' }}
           </mat-icon>
           {{ driverStatus() }}
         </span>
@@ -254,49 +254,88 @@
 
       <div class="readonly-grid">
         <div class="readonly-item">
+          <mat-icon>badge</mat-icon>
+          <div>
+            <span class="readonly-label">License number</span>
+            <span class="readonly-value">{{ driverProfile()?.licenseNumber || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="readonly-item">
+          <mat-icon>event</mat-icon>
+          <div>
+            <span class="readonly-label">License expiry</span>
+            <span class="readonly-value">
+              {{ driverProfile()?.licenseExpiry ? (driverProfile()?.licenseExpiry | date:'mediumDate') : '—' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="readonly-item">
           <mat-icon>directions_car</mat-icon>
           <div>
-            <span class="readonly-label">Vehicle type</span>
+            <span class="readonly-label">Active vehicle</span>
             <span class="readonly-value">{{ driverVehicleTypeLabel() }}</span>
           </div>
         </div>
+
         <div class="readonly-item">
           <mat-icon>fitness_center</mat-icon>
           <div>
             <span class="readonly-label">Max capacity</span>
-            <span class="readonly-value">{{ driverMaxWeight() }} kg</span>
+            <span class="readonly-value">
+              {{ driverMaxWeight() !== null ? driverMaxWeight() + ' kg' : '—' }}
+            </span>
           </div>
         </div>
+
         <div class="readonly-item">
           <mat-icon>event_available</mat-icon>
           <div>
             <span class="readonly-label">Approved at</span>
             <span class="readonly-value">
-              @if (driverApprovedAt()) { {{ driverApprovedAt() | date:'mediumDate' }} } @else { — }
+              @if (driverApprovedAt()) {
+                {{ driverApprovedAt() | date:'mediumDate' }}
+              } @else { — }
             </span>
           </div>
         </div>
       </div>
 
-      <div class="driver-note" [class.driver-note--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'">
+      <div class="driver-note"
+          [class.driver-note--danger]="driverStatus() === 'REJECTED' || driverStatus() === 'SUSPENDED'">
         <mat-icon>
-          {{ driverStatus() === 'PENDING'   ? 'hourglass_empty' :
-             driverStatus() === 'APPROVED'  ? 'check_circle' : 'warning_amber' }}
+          {{ driverStatus() === 'PENDING' ? 'hourglass_empty' :
+            driverStatus() === 'APPROVED' ? 'check_circle' : 'warning_amber' }}
         </mat-icon>
         @if (driverStatus() === 'PENDING') {
           Your application is under review. You will be notified once it's approved.
         } @else if (driverStatus() === 'APPROVED') {
-          Your driver profile is approved. You can access driver deliveries in the dashboard.
+          @if (!driverActiveVehicle()) {
+            Your profile is approved. Add and activate a vehicle to start delivering.
+          } @else {
+            Your driver profile is approved. You can access driver deliveries in the dashboard.
+          }
         } @else if (driverStatus() === 'REJECTED') {
           Your application was not approved. If you believe this is an error, contact support.
         } @else {
           Your driver access is suspended. Contact support for more details.
         }
       </div>
+
+      <div class="actions">
+        <a class="btn btn--outline" routerLink="/dashboard/driver/vehicles">
+          <mat-icon>directions_car</mat-icon>
+          Manage Vehicles
+        </a>
+        <a class="btn btn--ghost" routerLink="/dashboard/driver/vehicles">
+          <mat-icon>badge</mat-icon>
+          Update License
+        </a>
+      </div>
     </section>
   }
 
-  <!-- ── Danger Zone ──────────────────────────────────────────────────────── -->
   <section class="profile-card danger-zone">
     <div class="card-head">
       <div class="card-title">

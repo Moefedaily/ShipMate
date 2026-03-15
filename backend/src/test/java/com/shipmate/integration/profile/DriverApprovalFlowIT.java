@@ -4,6 +4,7 @@ package com.shipmate.integration.profile;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -36,14 +37,8 @@ class DriverApprovalFlowIT extends AbstractIntegrationTest {
     void driverLifecycle_shouldFollowValidTransitions() {
         User user = createUser("flow-" + UUID.randomUUID() + "@shipmate.com");
 
-        DriverApplyRequest request = DriverApplyRequest.builder()
-                .licenseNumber("FLOW-001")
-                .vehicleType(VehicleType.TRUCK)
-                .maxWeightCapacity(BigDecimal.valueOf(500))
-                .build();
-
         // User applies
-        driverProfileService.apply(user.getId() , request);
+        driverProfileService.apply(user.getId(), buildApplyRequest());
 
         DriverProfile profile = driverProfileRepository
                 .findByUser(user)
@@ -84,6 +79,17 @@ class DriverApprovalFlowIT extends AbstractIntegrationTest {
             .build();
         
         return userRepository.save(user);
+    }
+
+    private DriverApplyRequest buildApplyRequest() {
+        return DriverApplyRequest.builder()
+                .licenseNumber("LIC-" + UUID.randomUUID())
+                .licenseExpiry(LocalDate.now().plusYears(2))
+                .vehicleType(VehicleType.CAR)
+                .maxWeightCapacity(BigDecimal.valueOf(500))
+                .plateNumber("TEST-" + UUID.randomUUID().toString().substring(0, 8))
+                .vehicleDescription("Integration test vehicle")
+                .build();
     }
 
 }

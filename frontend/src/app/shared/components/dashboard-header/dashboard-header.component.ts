@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 
 import { AuthState } from '../../../core/auth/auth.state';
+import { ConversationListState } from '../../../core/state/conversation/conversation-list.state';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { NotificationsComponent } from '../notifications/notifications.component';
 
@@ -30,8 +31,11 @@ export type ActiveRole = 'SENDER' | 'DRIVER';
 export class DashboardHeaderComponent {
 
   private readonly authState = inject(AuthState);
+  private readonly conversationState = inject(ConversationListState);
 
   readonly user = computed(() => this.authState.user());
+  readonly unreadMessages = this.conversationState.totalUnread;
+  readonly hasUnreadMessages = this.conversationState.hasUnread;
 
   readonly userName = computed(() => {
     const u = this.user();

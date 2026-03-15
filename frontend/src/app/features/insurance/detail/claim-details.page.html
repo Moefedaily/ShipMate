@@ -22,8 +22,6 @@
           <div class="status-icon-wrap">
             @if (claim()!.claimStatus === 'SUBMITTED') {
               <mat-icon>hourglass_empty</mat-icon>
-            } @else if (claim()!.claimStatus === 'UNDER_REVIEW') {
-              <mat-icon>manage_search</mat-icon>
             } @else if (claim()!.claimStatus === 'APPROVED') {
               <mat-icon>thumb_up</mat-icon>
             } @else if (claim()!.claimStatus === 'REJECTED') {
@@ -42,11 +40,6 @@
           <div class="timeline-step" [class.done]="isStepDone('SUBMITTED')" [class.active]="claim()!.claimStatus === 'SUBMITTED'">
             <span class="step-dot"></span>
             <span class="step-label">Submitted</span>
-          </div>
-          <div class="timeline-connector"></div>
-          <div class="timeline-step" [class.done]="isStepDone('UNDER_REVIEW')" [class.active]="claim()!.claimStatus === 'UNDER_REVIEW'">
-            <span class="step-dot"></span>
-            <span class="step-label">Under review</span>
           </div>
           <div class="timeline-connector"></div>
           <div class="timeline-step" [class.done]="isStepDone('APPROVED')" [class.active]="claim()!.claimStatus === 'APPROVED'">

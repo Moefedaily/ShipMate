@@ -99,7 +99,7 @@ class DriverEarningRefundTest {
                 adjustment.getGrossAmount().compareTo(new BigDecimal("-100.00")) == 0 &&
                 adjustment.getCommissionAmount().compareTo(new BigDecimal("-10.00")) == 0 &&
                 adjustment.getNetAmount().compareTo(new BigDecimal("-90.00")) == 0 &&
-                adjustment.getPayoutStatus() == PayoutStatus.PENDING
+                adjustment.getPayoutStatus() == PayoutStatus.PAID
         ));
     }
 

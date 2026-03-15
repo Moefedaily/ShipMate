@@ -2,6 +2,7 @@ package com.shipmate.service.photo;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.shipmate.model.DriverProfile.DriverProfile;
 import com.shipmate.model.insuranceClaim.InsuranceClaim;
 import com.shipmate.model.message.Message;
 import com.shipmate.model.photo.Photo;
@@ -75,6 +76,43 @@ public class PhotoService {
         return uploadedPhotos;
     }
 
+    public List<Photo> uploadDriverLicensePhotos(DriverProfile driverProfile, List<MultipartFile> files) {
+        return uploadDriverLicensePhotos(driverProfile, files, "DRIVER_LICENSE");
+    }
+
+    public List<Photo> uploadPendingDriverLicensePhotos(DriverProfile driverProfile, List<MultipartFile> files) {
+        return uploadDriverLicensePhotos(driverProfile, files, "PENDING_DRIVER_LICENSE");
+    }
+
+    public List<Photo> getDriverLicensePhotos(UUID driverProfileId) {
+        return photoRepository.findByDriverProfile_IdAndPhotoType(driverProfileId, "DRIVER_LICENSE");
+    }
+
+    public List<Photo> getPendingDriverLicensePhotos(UUID driverProfileId) {
+        return photoRepository.findByDriverProfile_IdAndPhotoType(driverProfileId, "PENDING_DRIVER_LICENSE");
+    }
+
+    private List<Photo> uploadDriverLicensePhotos(DriverProfile driverProfile, List<MultipartFile> files, String photoType) {
+        List<Photo> uploadedPhotos = new ArrayList<>();
+        String folder = "shipmate/drivers/" + driverProfile.getId() + "/license";
+
+        for (MultipartFile file : files) {
+            validateImage(file);
+            Map<?, ?> uploadResult = uploadToCloudinary(file, folder);
+
+            Photo photo = Photo.builder()
+                    .url((String) uploadResult.get("secure_url"))
+                    .publicId((String) uploadResult.get("public_id"))
+                    .photoType(photoType)
+                    .user(driverProfile.getUser())
+                    .driverProfile(driverProfile)
+                    .build();
+
+            uploadedPhotos.add(photoRepository.save(photo));
+        }
+        return uploadedPhotos;
+    }
+
     public List<Photo> uploadInsuranceClaimPhotos(InsuranceClaim claim, List<MultipartFile> files) {
         List<Photo> uploadedPhotos = new ArrayList<>();
         String folder = "shipmate/claims/" + claim.getId();
@@ -96,6 +134,10 @@ public class PhotoService {
     }
 
     public void deletePhoto(Photo photo) {
+        if (photo.getDriverProfile() != null && photo.getDriverProfile().getLicensePhotos() != null) {
+            photo.getDriverProfile().getLicensePhotos().removeIf(existing -> existing.getId().equals(photo.getId()));
+            photo.setDriverProfile(null);
+        }
         deleteFromCloudinary(photo.getPublicId());
         photoRepository.delete(photo);
     }

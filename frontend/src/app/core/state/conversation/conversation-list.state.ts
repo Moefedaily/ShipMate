@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, effect } from '@angular/core';
+import { Injectable, signal, computed, inject, effect, untracked } from '@angular/core';
 import { catchError, of, finalize, Subscription } from 'rxjs';
 
 import { ConversationService } from '../../services/conversation/conversation.service';
@@ -7,7 +7,7 @@ import { ConversationUpdateWsDto } from '../../services/ws/ws.models';
 import { AuthState } from '../../auth/auth.state';
 import { MessageWsService } from '../../services/ws/message-ws.service';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ConversationListState {
 
   private readonly conversationService = inject(ConversationService);
@@ -54,8 +54,12 @@ export class ConversationListState {
 
       if (!userId) {
         this.conversations.set([]);
+        this.errorMessage.set(null);
+        this.loading.set(false);
         return;
       }
+
+      untracked(() => this.load());
 
       this.conversationSub =
         this.wsService.watchConversationUpdates(userId)

@@ -31,6 +31,7 @@
 		<lombok.version>1.18.34</lombok.version>
     	<mapstruct.version>1.6.3</mapstruct.version>
 		<flyway.version>11.20.0</flyway.version>
+		<jacoco.version>0.8.14</jacoco.version>
 	</properties>
 	<dependencies>
 
@@ -287,6 +288,26 @@
 					<user>shipmate</user>
 					<password>${POSTGRES_PASSWORD}</password>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

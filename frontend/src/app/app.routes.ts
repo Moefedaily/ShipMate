@@ -152,6 +152,14 @@ export const routes: Routes = [
             .then(m => m.DriverMatchingPage)
       },
       {
+        path: 'driver/vehicles',
+        canActivate: [driverGuard],
+        data: { dashboardRole: 'DRIVER' },
+        loadComponent: () =>
+          import('./features/dashboard/driver/vehicles/driver-vehicles.page')
+            .then(m => m.DriverVehiclesPage)
+      },
+      {
         path: 'earnings',
         canActivate: [driverGuard],
         data: { dashboardRole: 'DRIVER' },
@@ -219,6 +227,12 @@ export const routes: Routes = [
             .then(m => m.AdminDriversPage),
       },
       {
+        path: 'drivers/:id',
+        loadComponent: () =>
+          import('./features/dashboard/admin/page/driver/detail/admin-driver-detail.page')
+            .then(m => m.AdminDriverDetailPage),
+      },
+      {
         path: 'bookings',
         loadComponent: () =>
           import('./features/dashboard/admin/page/booking/admin-bookings.page')
@@ -265,7 +279,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/admin/page/payments/detail/admin-payment-detail.page')
             .then(m => m.AdminPaymentDetailPage),
-      }
+      },
     ]
   }
 ];

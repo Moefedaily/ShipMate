@@ -60,4 +60,17 @@ public interface DriverEarningRepository extends JpaRepository<DriverEarning, UU
             @Param("driver") User driver,
             @Param("status") PayoutStatus status
     );
+
+    @Query("""
+        SELECT COALESCE(SUM(e.netAmount), 0)
+        FROM DriverEarning e
+        WHERE e.driver = :driver
+        AND e.payoutStatus = :status
+        AND e.earningType = :earningType
+        """)
+    BigDecimal sumNetByDriverAndStatusAndType(
+            @Param("driver") User driver,
+            @Param("status") PayoutStatus status,
+            @Param("earningType") EarningType earningType
+    );
 }
