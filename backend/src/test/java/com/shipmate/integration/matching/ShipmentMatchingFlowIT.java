@@ -16,16 +16,20 @@ import org.springframework.data.domain.PageRequest;
 import com.shipmate.config.AbstractIntegrationTest;
 import com.shipmate.dto.response.matching.MatchResultResponse;
 import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.model.user.VehicleType;
+import com.shipmate.model.vehicle.Vehicle;
+import com.shipmate.model.vehicle.VehicleStatus;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.repository.vehicle.VehicleRepository;
 import com.shipmate.service.matching.ShipmentMatchingService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +47,9 @@ class ShipmentMatchingFlowIT extends AbstractIntegrationTest {
     private DriverProfileRepository driverProfileRepository;
 
     @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
     private ShipmentRepository shipmentRepository;
 
     @Autowired
@@ -52,6 +59,7 @@ class ShipmentMatchingFlowIT extends AbstractIntegrationTest {
         void setUp() {
                 bookingRepository.deleteAll();  
                 shipmentRepository.deleteAll();
+                vehicleRepository.deleteAll();
                 driverProfileRepository.deleteAll();
                 userRepository.deleteAll();
     }
@@ -75,17 +83,25 @@ class ShipmentMatchingFlowIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        DriverProfile profile = driverProfileRepository.save(
-                DriverProfile.builder()
-                        .user(driver)
-                        .vehicleType(VehicleType.CAR)
-                        .vehicleDescription("My car")
-                        .licenseNumber("ABC-123")
-                        .maxWeightCapacity(BigDecimal.valueOf(50))
-                        .lastLatitude(BigDecimal.valueOf(48.8566))
-                        .lastLongitude(BigDecimal.valueOf(2.3522))
-                        .build()
-        );
+        DriverProfile profile = DriverProfile.builder()
+                .user(driver)
+                .status(DriverStatus.APPROVED)
+                .licenseNumber("ABC-123")
+                .lastLatitude(BigDecimal.valueOf(48.8566))
+                .lastLongitude(BigDecimal.valueOf(2.3522))
+                .build();
+
+        Vehicle vehicle = Vehicle.builder()
+                .driverProfile(profile)
+                .vehicleType(VehicleType.CAR)
+                .vehicleDescription("My car")
+                .maxWeightCapacity(BigDecimal.valueOf(50))
+                .status(VehicleStatus.APPROVED)
+                .active(true)
+                .build();
+
+        profile.getVehicles().add(vehicle);
+        driverProfileRepository.saveAndFlush(profile);
 
         log.info("Driver profile created: {}", profile);
 

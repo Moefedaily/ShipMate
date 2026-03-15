@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ class DriverProfileControllerIT extends AbstractIntegrationTest {
         
         DriverApplyRequest request = DriverApplyRequest.builder()
                 .licenseNumber("API-123")
+                .licenseExpiry(LocalDate.now().plusYears(2))
                 .vehicleType(VehicleType.CAR)
                 .maxWeightCapacity(BigDecimal.valueOf(100))
                 .build();
@@ -58,10 +60,11 @@ class DriverProfileControllerIT extends AbstractIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.licenseNumber").exists());
     }
-    
+
     private void applyDriver(User user, String token) throws Exception {
         DriverApplyRequest request = DriverApplyRequest.builder()
                 .licenseNumber("API-456")
+                .licenseExpiry(LocalDate.now().plusYears(2))
                 .vehicleType(VehicleType.VAN)
                 .maxWeightCapacity(BigDecimal.valueOf(200))
                 .build();

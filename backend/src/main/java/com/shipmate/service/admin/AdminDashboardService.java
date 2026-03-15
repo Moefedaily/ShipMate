@@ -50,8 +50,7 @@ public class AdminDashboardService {
         long pendingClaims =
                 claimRepository.countByClaimStatusIn(
                         List.of(
-                                ClaimStatus.SUBMITTED,
-                                ClaimStatus.UNDER_REVIEW
+                                ClaimStatus.SUBMITTED
                         )
                 );
 
@@ -61,6 +60,9 @@ public class AdminDashboardService {
         var totalRevenue =
                 paymentRepository.sumAmountByStatus(PaymentStatus.CAPTURED);
 
+        long pendingApprovals =
+                driverProfileRepository.countByStatus(DriverStatus.PENDING);
+
         return AdminDashboardResponse.builder()
                 .totalUsers(totalUsers)
                 .totalDrivers(totalDrivers)
@@ -69,6 +71,7 @@ public class AdminDashboardService {
                 .pendingClaims(pendingClaims)
                 .totalPayments(totalPayments)
                 .totalRevenue(totalRevenue)
+                .pendingApprovals(pendingApprovals)
                 .build();
     }
 }

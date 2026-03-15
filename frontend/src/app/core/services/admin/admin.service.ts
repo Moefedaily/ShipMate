@@ -174,6 +174,10 @@ export class AdminService {
     );
   }
 
+  getDriverById(id: string): Observable<AdminDriverProfile> {
+    return this.http.get<AdminDriverProfile>(`${this.api}/drivers/${id}`);
+  }
+
   getPendingDrivers(): Observable<AdminDriverProfile[]> {
     return this.http.get<AdminDriverProfile[]>(`${this.api}/drivers/pending`);
   }

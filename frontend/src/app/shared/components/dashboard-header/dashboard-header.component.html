@@ -34,8 +34,11 @@
     <div class="header-right">
       <div class="header-actions">
         <app-notifications />
-        <button class="icon-btn" (click)="chatToggle.emit()">
+        <button class="icon-btn message-btn" (click)="chatToggle.emit()" [class.has-notifications]="hasUnreadMessages()">
           <mat-icon>chat_bubble_outline</mat-icon>
+          @if (hasUnreadMessages()) {
+            <span class="message-badge">{{ unreadMessages() }}</span>
+          }
         </button>
       </div>
 

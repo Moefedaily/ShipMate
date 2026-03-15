@@ -16,11 +16,14 @@ import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.model.user.VehicleType;
+import com.shipmate.model.vehicle.Vehicle;
+import com.shipmate.model.vehicle.VehicleStatus;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.message.MessageRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.repository.vehicle.VehicleRepository;
 import com.shipmate.service.conversation.ConversationService;
 
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,7 @@ class ConversationServiceIT extends AbstractIntegrationTest {
     @Autowired private MessageRepository messageRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private DriverProfileRepository driverProfileRepository;
+    @Autowired private VehicleRepository vehicleRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Test
@@ -228,19 +232,27 @@ class ConversationServiceIT extends AbstractIntegrationTest {
     }
 
     private void createDriverProfile(User driver) {
-        driverProfileRepository.save(
-                DriverProfile.builder()
-                        .user(driver)
-                        .status(DriverStatus.APPROVED)
-                        .vehicleType(VehicleType.CAR)
-                        .licenseNumber("LIC-" + UUID.randomUUID())
-                        .maxWeightCapacity(BigDecimal.valueOf(100))
-                        .approvedAt(Instant.now())
-                        .lastLatitude(BigDecimal.valueOf(48.8566))
-                        .lastLongitude(BigDecimal.valueOf(2.3522))
-                        .lastLocationUpdatedAt(Instant.now())
-                        .build()
-        );
+        DriverProfile profile = DriverProfile.builder()
+                .user(driver)
+                .status(DriverStatus.APPROVED)
+                .licenseNumber("LIC-" + UUID.randomUUID())
+                .approvedAt(Instant.now())
+                .lastLatitude(BigDecimal.valueOf(48.8566))
+                .lastLongitude(BigDecimal.valueOf(2.3522))
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        Vehicle vehicle = Vehicle.builder()
+                .driverProfile(profile)
+                .vehicleType(VehicleType.CAR)
+                .vehicleDescription("Test car")
+                .maxWeightCapacity(BigDecimal.valueOf(100))
+                .status(VehicleStatus.APPROVED)
+                .active(true)
+                .build();
+
+        profile.getVehicles().add(vehicle);
+        driverProfileRepository.saveAndFlush(profile);
     }
 
     private record TestContext(User sender, User driver, Shipment shipment) {}

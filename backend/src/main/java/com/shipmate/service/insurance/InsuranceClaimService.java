@@ -192,8 +192,7 @@ public class InsuranceClaimService {
         InsuranceClaim claim = claimRepository.findAdminById(claimId)
                 .orElseThrow(() -> new IllegalArgumentException("Claim not found"));
 
-        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED &&
-            claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
+        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
             throw new IllegalStateException("Claim already processed");
         }
 
@@ -310,8 +309,7 @@ public class InsuranceClaimService {
             throw new IllegalStateException("Not your claim");
         }
 
-        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED &&
-            claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
+        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
             throw new IllegalStateException("Cannot upload photos for this claim state");
         }
 

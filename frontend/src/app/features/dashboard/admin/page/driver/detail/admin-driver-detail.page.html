@@ -1,0 +1,168 @@
+<div class="admin-page">
+
+  <div>
+    <a class="back-btn" routerLink="/admin/drivers">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Drivers
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading"><div class="loader-spinner"></div></div>
+  }
+
+  @if (error()) {
+    <div class="page-error"><mat-icon>error_outline</mat-icon>{{ error() }}</div>
+  }
+
+  @if (!loading() && driver()) {
+    <div class="driver-hero">
+      <div class="hero-avatar">
+        {{ driver()!.firstName.charAt(0) }}{{ driver()!.lastName.charAt(0) }}
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h2 class="hero-name">{{ driver()!.firstName }} {{ driver()!.lastName }}</h2>
+          <app-admin-badge
+            [label]="statusBadge(driver()!.status).label"
+            [variant]="statusBadge(driver()!.status).variant"
+          />
+        </div>
+
+        <span class="hero-email">{{ driver()!.email }}</span>
+        <span class="hero-meta">License {{ driver()!.licenseNumber || '-' }}</span>
+      </div>
+
+      <div class="action-bar hero-actions">
+        @if (driver()!.status === 'PENDING') {
+          <button class="btn btn--success" [disabled]="acting()" (click)="approve()">
+            <mat-icon>check_circle</mat-icon>
+            {{ acting() ? 'Saving...' : 'Approve' }}
+          </button>
+          <button class="btn btn--danger" [disabled]="acting()" (click)="reject()">
+            <mat-icon>cancel</mat-icon>
+            {{ acting() ? 'Saving...' : 'Reject' }}
+          </button>
+        } @else if (driver()!.status === 'APPROVED') {
+          <button class="btn btn--danger" [disabled]="acting()" (click)="suspend()">
+            <mat-icon>block</mat-icon>
+            {{ acting() ? 'Saving...' : 'Suspend' }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>badge</mat-icon>
+          <h3>License Details</h3>
+        </div>
+
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <span class="detail-row__label">Expiry</span>
+            <span class="detail-row__value">{{ driver()!.licenseExpiry || '-' }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Submitted</span>
+            <span class="detail-row__value">{{ driver()!.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Approved At</span>
+            <span class="detail-row__value">{{ driver()!.approvedAt ? (driver()!.approvedAt | date:'medium') : '-' }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-row__label">Strikes</span>
+            <span class="detail-row__value">{{ driver()!.strikeCount }}</span>
+          </div>
+        </div>
+
+        @if (driver()!.licensePhotoUrls.length > 0) {
+          <div class="photo-grid">
+            @for (photo of driver()!.licensePhotoUrls; track photo) {
+              <div class="photo">
+                <img [src]="photo" alt="Driver license photo" />
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="detail-card__body text-muted">No license photos uploaded.</div>
+        }
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>directions_car</mat-icon>
+          <h3>Vehicle Request</h3>
+        </div>
+
+        @if (primaryVehicle()) {
+          <div class="detail-card__body">
+            <div class="detail-row">
+              <span class="detail-row__label">Type</span>
+              <span class="detail-row__value">{{ primaryVehicle()!.vehicleType }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Capacity</span>
+              <span class="detail-row__value">{{ primaryVehicle()!.maxWeightCapacity }} kg</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Plate</span>
+              <span class="detail-row__value">{{ primaryVehicle()!.plateNumber || '-' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Insurance Expiry</span>
+              <span class="detail-row__value">{{ primaryVehicle()!.insuranceExpiry || '-' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">Vehicle Status</span>
+              <span class="detail-row__value">{{ primaryVehicle()!.status }}</span>
+            </div>
+
+            @if (primaryVehicle()!.vehicleDescription) {
+              <div class="detail-note">
+                {{ primaryVehicle()!.vehicleDescription }}
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="detail-card__body text-muted">No vehicle information available.</div>
+        }
+      </div>
+    </div>
+
+    @if (driver()!.vehicles.length > 1) {
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <mat-icon>garage</mat-icon>
+          <h3>All Vehicles</h3>
+        </div>
+
+        <div class="vehicle-list">
+          @for (vehicle of driver()!.vehicles; track vehicle.id) {
+            <div class="vehicle-item">
+              <div>
+                <strong>{{ vehicle.vehicleType }}</strong>
+                <span>{{ vehicle.maxWeightCapacity }} kg</span>
+              </div>
+              <app-admin-badge
+                [label]="vehicle.status"
+                [variant]="vehicle.status === 'APPROVED' ? 'success' : vehicle.status === 'PENDING' ? 'warning' : 'danger'"
+              />
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+</div>

@@ -28,7 +28,7 @@ export class AdminClaimDetailPage implements OnInit {
 
   readonly canAct = computed(() => {
     const s = this.claim()?.claimStatus;
-    return s === 'SUBMITTED' || s === 'UNDER_REVIEW';
+    return s === 'SUBMITTED';
   });
 
   ngOnInit(): void {

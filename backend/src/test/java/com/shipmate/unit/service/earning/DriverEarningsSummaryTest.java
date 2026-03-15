@@ -1,6 +1,7 @@
 package com.shipmate.unit.service.earning;
 
 import com.shipmate.dto.response.earning.DriverEarningsSummaryResponse;
+import com.shipmate.model.earning.EarningType;
 import com.shipmate.model.earning.PayoutStatus;
 import com.shipmate.model.user.User;
 import com.shipmate.repository.earning.DriverEarningRepository;
@@ -58,10 +59,18 @@ class DriverEarningsSummaryTest {
         when(driverEarningRepository.sumNetByDriver(driver))
                 .thenReturn(new BigDecimal("800.00"));
 
-        when(driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PENDING))
+        when(driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PENDING,
+                EarningType.ORIGINAL
+        ))
                 .thenReturn(new BigDecimal("300.00"));
 
-        when(driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PAID))
+        when(driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PAID,
+                EarningType.ORIGINAL
+        ))
                 .thenReturn(new BigDecimal("500.00"));
 
         DriverEarningsSummaryResponse summary =
@@ -99,10 +108,18 @@ class DriverEarningsSummaryTest {
         when(driverEarningRepository.sumNetByDriver(driver))
                 .thenReturn(null);
 
-        when(driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PENDING))
+        when(driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PENDING,
+                EarningType.ORIGINAL
+        ))
                 .thenReturn(null);
 
-        when(driverEarningRepository.sumNetByDriverAndStatus(driver, PayoutStatus.PAID))
+        when(driverEarningRepository.sumNetByDriverAndStatusAndType(
+                driver,
+                PayoutStatus.PAID,
+                EarningType.ORIGINAL
+        ))
                 .thenReturn(null);
 
         DriverEarningsSummaryResponse summary =

@@ -1,0 +1,104 @@
+<section class="card apply-card">
+  <h2>Apply to become a driver</h2>
+
+  <p class="apply-card__description">
+    Fill out the form below to submit your application to join ShipMate as a driver.
+  </p>
+
+  @if (errorMessage()) {
+    <div class="error-banner">{{ errorMessage() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+    <div class="form-section">
+      <div class="section-label">
+        <span class="section-number">01</span>
+        <span>License</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group">
+          <label for="licenseNumber">License Number</label>
+          <input id="licenseNumber" type="text" formControlName="licenseNumber" placeholder="ABC-1234567">
+        </div>
+
+        <div class="field-group">
+          <label for="licenseExpiry">License Expiry Date</label>
+          <input id="licenseExpiry" type="date" formControlName="licenseExpiry">
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label class="file-upload-area">
+          <mat-icon>add_photo_alternate</mat-icon>
+          <span>Click to upload license photos</span>
+          <input type="file" multiple accept="image/*" (change)="onFileInputChange($event)" />
+        </label>
+        @if (photos().length === 0) {
+          <small class="hint">Upload front and back license photos please.</small>
+        }
+
+        @if (photoPreviews().length > 0) {
+          <div class="photo-grid">
+            @for (src of photoPreviews(); track $index; let i = $index) {
+              <div class="photo">
+                <img [src]="src" [alt]="'License photo ' + (i + 1)" />
+                <button type="button" (click)="removePhoto(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-label">
+        <span class="section-number">02</span>
+        <span>Vehicle</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group">
+          <label for="vehicleType">Vehicle Type</label>
+          <select id="vehicleType" formControlName="vehicleType">
+            @for (type of vehicleTypes; track type) {
+              <option [value]="type">{{ vehicleTypeLabels[type] }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="maxWeightCapacity">Max Weight Capacity (kg)</label>
+          <input id="maxWeightCapacity" type="number" step="0.1" formControlName="maxWeightCapacity" placeholder="e.g. 500">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group">
+          <label for="plateNumber">Plate Number</label>
+          <input id="plateNumber" type="text" formControlName="plateNumber" placeholder="XYZ-999">
+        </div>
+
+        <div class="field-group">
+          <label for="vehicleDescription">Description</label>
+          <input id="vehicleDescription" type="text" formControlName="vehicleDescription" placeholder="e.g. White Toyota Hilux">
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="btn btn--primary submit-btn"
+      type="submit"
+      [disabled]="submitting() || form.disabled">
+      @if (submitting()) {
+        <span class="btn-spinner"></span>
+        Submitting…
+      } @else {
+        <mat-icon>local_shipping</mat-icon>
+        Submit Application
+      }
+    </button>
+  </form>
+</section>

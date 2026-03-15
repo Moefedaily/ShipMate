@@ -153,6 +153,57 @@
   }
 }
 
+.message-btn.has-notifications {
+  mat-icon {
+    animation: bell-ring 2s ease-in-out infinite;
+  }
+}
+
+.message-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: $color-danger;
+  border: 2px solid $border-default;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  color: #fff;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba($color-danger, 0.4);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bell-ring {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30% {
+    transform: rotate(-10deg);
+  }
+  20%, 40% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 // ── PROFILE BUTTON ────────────────────────────────────
 
 .profile-btn {

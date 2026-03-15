@@ -35,6 +35,7 @@ import com.shipmate.service.payment.PaymentService;
 import com.shipmate.service.pricing.PricingService;
 import com.shipmate.service.shipment.ShipmentService;
 import com.shipmate.listener.delivery.DeliveryCodeEventPublisher;
+import com.shipmate.service.admin.AdminActionLogger;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +53,7 @@ class ShipmentServiceTest {
     @Mock private PaymentService paymentService;
     @Mock private DeliveryCodeService deliveryCodeService;
     @Mock private DeliveryCodeEventPublisher deliveryCodeEventPublisher;
+    @Mock private AdminActionLogger adminActionLogger;
 
     @InjectMocks
     private ShipmentService shipmentService;
@@ -403,5 +405,39 @@ class ShipmentServiceTest {
         verify(eventPublisher)
         .publishEvent(any(com.shipmate.listener.shipment.ShipmentStatusChangedEvent.class));
         assertThat(response).isNotNull();
+    }
+
+    @Test
+    void adminUpdateStatus_shouldRejectDeliveredTarget() {
+        UUID shipmentId = UUID.randomUUID();
+        Shipment shipment = Shipment.builder()
+                .id(shipmentId)
+                .status(ShipmentStatus.ASSIGNED)
+                .build();
+
+        when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(shipment));
+
+        assertThatThrownBy(() -> shipmentService.adminUpdateStatus(shipmentId, ShipmentStatus.DELIVERED, "note"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Use delivery flow");
+    }
+
+    @Test
+    void adminUpdateStatus_shouldMarkLostAndLogAdminAction() {
+        UUID shipmentId = UUID.randomUUID();
+        Shipment shipment = Shipment.builder()
+                .id(shipmentId)
+                .status(ShipmentStatus.IN_TRANSIT)
+                .build();
+
+        when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.save(shipment)).thenReturn(shipment);
+        when(shipmentAssembler.toResponse(shipment)).thenReturn(new ShipmentResponse());
+
+        ShipmentResponse response = shipmentService.adminUpdateStatus(shipmentId, ShipmentStatus.LOST, "Lost by admin");
+
+        assertThat(response).isNotNull();
+        assertThat(shipment.getStatus()).isEqualTo(ShipmentStatus.LOST);
+        verify(adminActionLogger).shipmentMarkedLost(shipmentId, "Lost by admin");
     }
 }

@@ -24,14 +24,6 @@
 
         <button
           class="chip"
-          [class.active]="filters.status === 'UNDER_REVIEW'"
-          (click)="onStatusFilter('UNDER_REVIEW')"
-        >
-          Under Review
-        </button>
-
-        <button
-          class="chip"
           [class.active]="filters.status === 'APPROVED'"
           (click)="onStatusFilter('APPROVED')"
         >
@@ -139,7 +131,7 @@
                     <mat-icon>visibility</mat-icon>
                   </a>
 
-                  @if (claim.claimStatus === 'SUBMITTED' || claim.claimStatus === 'UNDER_REVIEW') {
+                  @if (claim.claimStatus === 'SUBMITTED') {
 
                     <button
                       class="row-btn row-btn--success"

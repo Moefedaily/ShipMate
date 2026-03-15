@@ -12,6 +12,7 @@ import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
+import com.shipmate.model.vehicle.Vehicle;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
@@ -69,8 +70,12 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found"));
 
         DriverProfile profile = driverProfileRepository
-                .findByUser_Id(driverId)
+                .findWithVehiclesByUser_Id(driverId)
                 .orElseThrow(() -> new IllegalStateException("Driver profile not found"));
+
+        if (!profile.isReadyForBooking()) {
+            throw new IllegalStateException("Driver must have an approved license and an active vehicle to create a booking");
+        }
 
         Booking booking = resolveOrCreatePendingBooking(driver);
 
@@ -231,7 +236,7 @@ public class BookingService {
 
     private void validateDriverLocation(UUID driverId, Shipment shipment) {
         DriverProfile profile = driverProfileRepository
-                .findByUser_Id(driverId)
+                .findWithVehiclesByUser_Id(driverId)
                 .orElseThrow(() -> new IllegalStateException("Driver profile not found"));
 
         if (profile.getLastLatitude() == null ||
@@ -262,7 +267,12 @@ public class BookingService {
                 ? booking.getShipments().size()
                 : 0;
 
-        int maxAllowed = switch (profile.getVehicleType()) {
+        Vehicle activeVehicle = profile.getActiveVehicle();
+        if (activeVehicle == null) {
+            throw new IllegalStateException("No active vehicle");
+        }
+
+        int maxAllowed = switch (activeVehicle.getVehicleType()) {
             case BICYCLE -> 1;
             case MOTORCYCLE -> 2;
             case CAR -> 3;
@@ -282,7 +292,11 @@ public class BookingService {
 
         Shipment anchor = booking.getShipments().iterator().next();
 
-        double maxRadiusKm = switch (profile.getVehicleType()) {
+        Vehicle activeVehicle = profile.getActiveVehicle();
+        if (activeVehicle == null) {
+            throw new IllegalStateException("No active vehicle");
+        }
+        double maxRadiusKm = switch (activeVehicle.getVehicleType()) {
             case BICYCLE -> 5.0;
             case MOTORCYCLE -> 8.0;
             case CAR -> 12.0;
@@ -305,7 +319,11 @@ public class BookingService {
     }
 
     private void validateTripDistanceCap(DriverProfile profile, Booking booking, List<Shipment> incoming) {
-        double maxKm = switch (profile.getVehicleType()) {
+        Vehicle activeVehicle = profile.getActiveVehicle();
+        if (activeVehicle == null) {
+            throw new IllegalStateException("No active vehicle");
+        }
+        double maxKm = switch (activeVehicle.getVehicleType()) {
             case BICYCLE -> 20;
             case MOTORCYCLE -> 40;
             case CAR -> 120;
@@ -413,7 +431,7 @@ public class BookingService {
 
     private AssignedDriverResponse buildAssignedDriver(User driver) {
         DriverProfile profile = driverProfileRepository
-                .findByUser_Id(driver.getId())
+                .findWithVehiclesByUser_Id(driver.getId())
                 .orElse(null);
 
         if (profile == null) return null;
@@ -422,7 +440,7 @@ public class BookingService {
                 .id(profile.getId())
                 .firstName(driver.getFirstName())
                 .avatar(photoMapper.toResponse(driver.getAvatar()))
-                .vehicleType(profile.getVehicleType())
+                .vehicleType(profile.getActiveVehicle() != null ? profile.getActiveVehicle().getVehicleType() : null)
                 .build();
     }
 

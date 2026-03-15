@@ -58,35 +58,26 @@
 
   </div>
 
-
   @if (loading()) {
-
     <div class="table-loading">
       <div class="loader-spinner"></div>
     </div>
-
   }
 
-
   @if (error()) {
-
     <div class="page-error">
       <mat-icon>error_outline</mat-icon>
       {{ error() }}
     </div>
-
   }
 
-
   @if (!loading() && page()) {
-
     <div class="table-wrap">
-
       <table class="admin-table">
-
         <thead>
           <tr>
             <th>ID</th>
+            <th>Driver</th>
             <th>Vehicle</th>
             <th>Capacity</th>
             <th>Strikes</th>
@@ -97,39 +88,40 @@
         </thead>
 
         <tbody>
-
           @if (!page()!.content.length) {
-
             <tr>
-              <td colspan="7">
-
+              <td colspan="8">
                 <div class="empty-state">
-
                   <mat-icon>inventory_2</mat-icon>
-
                   <span>No drivers found</span>
-
                 </div>
-
               </td>
             </tr>
-
           }
 
           @for (driver of page()!.content; track driver.id) {
-
             <tr>
-
               <td class="mono">
-                {{ driver.id | slice:0:8 }}…
-              </td>
-
-              <td class="text-muted">
-                {{ driver.vehicleType }}
+                {{ driver.id | slice:0:8 }}...
               </td>
 
               <td>
-                {{ driver.maxWeightCapacity }} kg
+                <div class="driver-cell">
+                  <strong>{{ driver.firstName }} {{ driver.lastName }}</strong>
+                  <span class="text-muted">{{ driver.email }}</span>
+                </div>
+              </td>
+
+              <td class="text-muted">
+                {{ primaryVehicle(driver).vehicleType || '-' }}
+              </td>
+
+              <td>
+                @if (primaryVehicle(driver).maxWeightCapacity != null) {
+                  {{ primaryVehicle(driver)!.maxWeightCapacity }} kg
+                } @else {
+                  -
+                }
               </td>
 
               <td>
@@ -137,12 +129,10 @@
               </td>
 
               <td>
-
                 <app-admin-badge
                   [label]="statusBadge(driver.status).label"
                   [variant]="statusBadge(driver.status).variant"
                 />
-
               </td>
 
               <td class="text-muted">
@@ -150,11 +140,16 @@
               </td>
 
               <td>
-
                 <div class="row-actions">
+                  <a
+                    class="row-btn"
+                    [routerLink]="['/admin/drivers', driver.id]"
+                    title="View details"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </a>
 
                   @if (driver.status === 'PENDING') {
-
                     <button
                       class="row-btn row-btn--success"
                       [disabled]="acting() === driver.id"
@@ -170,11 +165,9 @@
                     >
                       <mat-icon>cancel</mat-icon>
                     </button>
-
                   }
 
                   @if (driver.status === 'APPROVED') {
-
                     <button
                       class="row-btn row-btn--danger"
                       [disabled]="acting() === driver.id"
@@ -190,11 +183,9 @@
                     >
                       <mat-icon>report</mat-icon>
                     </button>
-
                   }
 
                   @if (driver.strikeCount > 0) {
-
                     <button
                       class="row-btn row-btn--warning"
                       [disabled]="acting() === driver.id"
@@ -202,23 +193,14 @@
                     >
                       <mat-icon>restart_alt</mat-icon>
                     </button>
-
                   }
-
                 </div>
-
               </td>
-
             </tr>
-
           }
-
         </tbody>
-
       </table>
-
     </div>
-
   }
 
 </div>
