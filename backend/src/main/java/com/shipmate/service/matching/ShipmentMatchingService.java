@@ -2,6 +2,7 @@ package com.shipmate.service.matching;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -63,9 +64,12 @@ public class ShipmentMatchingService {
     ) {
 
         DriverProfile driverProfile = driverProfileRepository
-                .findByUser_Id(driverId)
+                .findWithVehiclesByUser_Id(driverId)
                 .orElseThrow(() -> new IllegalArgumentException("Driver profile not found"));
-
+                
+        if (!driverProfile.hasApprovedLicense() || driverProfile.getActiveVehicle() == null) {
+            return Collections.emptyList();
+        }
 
         double effectiveLat;
         double effectiveLng;
@@ -213,15 +217,19 @@ public class ShipmentMatchingService {
     }
 
     private BigDecimal calculateRemainingCapacity(DriverProfile driver, Booking booking) {
+        BigDecimal maxWeight = driver.getActiveVehicle() != null 
+                ? driver.getActiveVehicle().getMaxWeightCapacity() 
+                : BigDecimal.ZERO;
+
         if (booking == null) {
-            return driver.getMaxWeightCapacity();
+            return maxWeight;
         }
 
         BigDecimal used = booking.getShipments().stream()
                 .map(Shipment::getPackageWeight)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return driver.getMaxWeightCapacity()
+        return maxWeight
                 .subtract(used)
                 .max(BigDecimal.ZERO);
     }

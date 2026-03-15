@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,32 @@ class AdminDriverControllerIT extends AbstractIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].status").value("PENDING"));
     }
+
+    @Test
+    void admin_shouldGetDriverDetails() throws Exception {
+        User admin = createUser("admin-detail@shipmate.com", Role.ADMIN);
+        User driver = createUser("driver-detail@shipmate.com", Role.USER);
+
+        String adminToken = obtainAccessToken(admin.getEmail(), "Password123!");
+        String driverToken = obtainAccessToken(driver.getEmail(), "Password123!");
+
+        applyDriver(driverToken);
+
+        String driverProfileId = mockMvc.perform(get("/api/admin/drivers/pending")
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        String id = objectMapper.readTree(driverProfileId).get(0).get("id").asText();
+
+        mockMvc.perform(get("/api/admin/drivers/{id}", id)
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.licenseNumber").value("ADMIN-001"))
+            .andExpect(jsonPath("$.vehicles").isArray());
+    }
     
     @Test
     void nonAdmin_shouldBeForbidden() throws Exception {
@@ -54,6 +81,7 @@ class AdminDriverControllerIT extends AbstractIntegrationTest {
     private void applyDriver(String token) throws Exception {
         DriverApplyRequest request = DriverApplyRequest.builder()
                 .licenseNumber("ADMIN-001")
+                .licenseExpiry(LocalDate.now().plusYears(2))
                 .vehicleType(VehicleType.TRUCK)
                 .maxWeightCapacity(BigDecimal.valueOf(300))
                 .build();

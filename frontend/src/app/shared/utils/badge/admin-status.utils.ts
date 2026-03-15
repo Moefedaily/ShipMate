@@ -17,7 +17,6 @@ export function shipmentStatusBadge(status: ShipmentStatus): { label: string; va
 export function claimStatusBadge(status: ClaimStatus): { label: string; variant: BadgeVariant } {
   const map: Record<ClaimStatus, { label: string; variant: BadgeVariant }> = {
     SUBMITTED:    { label: 'Submitted',    variant: 'info'    },
-    UNDER_REVIEW: { label: 'Under Review', variant: 'warning' },
     APPROVED:     { label: 'Approved',     variant: 'success' },
     REJECTED:     { label: 'Rejected',     variant: 'danger'  },
     PAID:         { label: 'Paid',         variant: 'primary' },

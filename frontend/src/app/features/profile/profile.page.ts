@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterModule } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
 import { AuthState } from '../../core/auth/auth.state';
@@ -12,12 +13,12 @@ import { LoaderService } from '../../core/ui/loader/loader.service';
 import { ToastService } from '../../core/ui/toast/toast.service';
 import { UserService } from '../../core/services/user/user.service';
 import { DriverService } from '../../core/services/driver/driver.service';
-import { DriverProfileResponse, VEHICLE_TYPE_LABELS } from '../../core/services/driver/driver.models';
+import { DriverProfileResponse, VehicleType } from '../../core/services/driver/driver.models';
 
 @Component({
   standalone: true,
   selector: 'app-profile-page',
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, AvatarComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, RouterModule, AvatarComponent],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss'
 })
@@ -30,6 +31,7 @@ export class ProfilePage implements OnInit {
   private readonly driverService = inject(DriverService);
   private readonly loader        = inject(LoaderService);
   private readonly toast         = inject(ToastService);
+  private readonly router        = inject(Router);
 
   readonly avatarUrl    = computed(() => this.user()?.avatar?.url ?? null);
   readonly submitting   = signal(false);
@@ -84,6 +86,17 @@ export class ProfilePage implements OnInit {
   readonly verified  = computed(() => !!this.user()?.verified);
   readonly active    = computed(() => !!this.user()?.active);
   readonly userType  = computed(() => this.user()?.userType);
+  readonly backTarget = computed(() => {
+    switch (this.userType()) {
+      case 'DRIVER':
+        return '/dashboard/driver';
+      case 'SENDER':
+        return '/dashboard/sender';
+      case 'BOTH':
+      default:
+        return '/dashboard';
+    }
+  });
 
   readonly isFirstNameInvalid = computed(() =>
     this.form.controls.firstName.touched && this.form.controls.firstName.invalid
@@ -110,11 +123,26 @@ export class ProfilePage implements OnInit {
   readonly showDriverSection      = computed(() => !!this.driverProfile());
   readonly driverStatus           = computed(() => this.driverProfile()?.status);
   readonly driverApprovedAt       = computed(() => this.driverProfile()?.approvedAt);
-  readonly driverMaxWeight        = computed(() => this.driverProfile()?.maxWeightCapacity);
+  readonly driverActiveVehicle = computed(() =>
+    this.driverProfile()?.activeVehicle ?? null
+  );
+
   readonly driverVehicleTypeLabel = computed(() => {
-    const type = this.driverProfile()?.vehicleType;
-    return type ? VEHICLE_TYPE_LABELS[type] : '';
+    const type = this.driverActiveVehicle()?.vehicleType;
+    if (!type) return '—';
+    const labels: Record<VehicleType, string> = {
+      [VehicleType.BICYCLE]:    'Bicycle',
+      [VehicleType.MOTORCYCLE]: 'Motorcycle',
+      [VehicleType.CAR]:        'Car',
+      [VehicleType.VAN]:        'Van',
+      [VehicleType.TRUCK]:      'Truck'
+    };
+    return labels[type] ?? type;
   });
+
+  readonly driverMaxWeight = computed(() =>
+    this.driverActiveVehicle()?.maxWeightCapacity ?? null
+  );
 
   // ── Actions ───────────────────────────────────────────────────────────────
   save(): void {
@@ -193,5 +221,9 @@ export class ProfilePage implements OnInit {
         this.loader.hide();
       }
     });
+  }
+
+  goBack(): void {
+    this.router.navigate([this.backTarget()]);
   }
 }

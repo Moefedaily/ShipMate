@@ -2,7 +2,7 @@
 @use '../../../styles/variables/typography' as *;
 
 // ── Mat Icon sizing helper ────────────────────────────────────────────────────
-// Keeps icons consistent without fighting Material's defaults
+
 mat-icon {
   font-size: 18px !important;
   width:  18px !important;
@@ -23,6 +23,39 @@ mat-icon {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: $font-weight-semibold;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  &:hover {
+    background: $bg-surface;
+    transform: translateX(-3px);
+  }
 }
 
 // ── Header ────────────────────────────────────────────────────────────────────
@@ -514,4 +547,35 @@ mat-icon {
   color: $text-muted;
 
   mat-icon { color: $text-muted; font-size: 15px !important; width: 15px !important; height: 15px !important; }
+}
+
+.inline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+
+  &--approved {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+
+  &--pending {
+    background: rgba(234, 179, 8, 0.12);
+    color: #b45309;
+  }
+
+  &--rejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
 }

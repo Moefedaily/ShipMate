@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AdminService } from '../../../../../core/services/admin/admin.service';
 import { AdminBadgeComponent } from '../../components/admin-badge/admin-badge.component';
@@ -17,7 +17,7 @@ import {
 @Component({
   selector: 'app-admin-drivers',
   standalone: true,
-  imports: [CommonModule, MatIconModule, AdminBadgeComponent],
+  imports: [CommonModule, MatIconModule, RouterLink, AdminBadgeComponent],
   templateUrl: './admin-drivers.page.html',
   styleUrl: './admin-drivers.page.scss',
 })
@@ -164,6 +164,10 @@ export class AdminDriversPage implements OnInit {
 
   statusBadge(status: DriverStatus) {
     return driverStatusBadge(status);
+  }
+
+  primaryVehicle(driver: AdminDriverProfile) {
+    return driver.activeVehicle ?? driver.vehicles?.[0] ?? null;
   }
 
 }

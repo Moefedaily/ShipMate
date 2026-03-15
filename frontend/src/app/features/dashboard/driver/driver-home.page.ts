@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -7,9 +7,9 @@ import { DriverDashboardState } from './state/driver-dashboard.state';
 import { DriverApprovedState } from './state/approved/driver-approved.state';
 import { DriverNotAppliedState } from './state/not-applied/driver-not-applied.state';
 import { DriverPendingState } from './state/pending/driver-pending.state';
-import { DriverRejectedState } from './components/driver-rejected-state/driver-rejected-state.component';
-import { DriverSuspendedState } from './components/driver-suspended-state/driver-suspended-state.component';
-import { DriverApplyFormComponent } from './components/driver-apply-form/driver-apply-form.component';
+import { DriverRejectedState } from './state/driver-rejected/driver-rejected-state.component';
+import { DriverSuspendedState } from './state/driver-suspended/driver-suspended-state.component';
+import { DriverApplyFormComponent } from './state/driver-apply/driver-apply-form.component';
 import { DriverLocationSetupPage } from './setup/driver-location-setup.page';
 
 @Component({
@@ -31,7 +31,6 @@ import { DriverLocationSetupPage } from './setup/driver-location-setup.page';
 export class DriverHomePage {
 
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
 
   readonly DriverDashboardState = DriverDashboardState;
 
@@ -48,11 +47,12 @@ export class DriverHomePage {
   onApply(): void {
     this.state.set(DriverDashboardState.APPLYING);
   }
-  onLocationCompleted(): void {
-    this.state.set(DriverDashboardState.APPROVED);
-  }
-
+  
   onApplied(): void {
     this.state.set(DriverDashboardState.PENDING);
+  }
+
+  onLocationCompleted(): void {
+    this.state.set(DriverDashboardState.APPROVED);
   }
 }

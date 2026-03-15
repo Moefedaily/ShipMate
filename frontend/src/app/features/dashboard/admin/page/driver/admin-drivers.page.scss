@@ -2,13 +2,13 @@
 @use '../../../../../../styles/variables/typography' as *;
 @use '../../../../../../styles/variables/admin-shared' as *;
 
-.rating {
-  display: inline-flex;
-  align-items: center;
+.driver-cell {
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
-  color: $color-warning;
-  font-weight: $font-weight-semibold;
-  font-size: $text-size-label;
 
-  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+  strong {
+    color: $admin-text-primary;
+    font-weight: $font-weight-semibold;
+  }
 }

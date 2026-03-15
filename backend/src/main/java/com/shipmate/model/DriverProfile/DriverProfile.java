@@ -2,14 +2,19 @@ package com.shipmate.model.DriverProfile;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.shipmate.model.vehicle.Vehicle;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.shipmate.model.photo.Photo;
 import com.shipmate.model.user.User;
-import com.shipmate.model.user.VehicleType;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +24,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -44,23 +50,30 @@ public class DriverProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(unique = true, length = 50)
     private String licenseNumber;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private VehicleType vehicleType;
+    @Column(name = "pending_license_number", length = 50)
+    private String pendingLicenseNumber;
 
-    @Column(nullable = false, precision = 6, scale = 2)
-    private BigDecimal maxWeightCapacity;
+    @Builder.Default
+    @OneToMany(mappedBy = "driverProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Photo> licensePhotos = new ArrayList<>();
 
-    @Column(columnDefinition = "text")
-    private String vehicleDescription;
+    @Column(name = "license_expiry")
+    private LocalDate licenseExpiry;
+
+    @Column(name = "pending_license_expiry")
+    private LocalDate pendingLicenseExpiry;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private DriverStatus status = DriverStatus.PENDING;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "driverProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vehicle> vehicles = new ArrayList<>();
 
     @Column(name = "strike_count", nullable = false)
     @Builder.Default
@@ -85,4 +98,19 @@ public class DriverProfile {
     @Column(name = "last_location_updated_at")
     private Instant lastLocationUpdatedAt;
 
+    public Vehicle getActiveVehicle() {
+        if (vehicles == null) return null;
+        return vehicles.stream()
+                .filter(Vehicle::isActive)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean hasApprovedLicense() {
+        return this.status == DriverStatus.APPROVED;
+    }
+
+    public boolean isReadyForBooking() {
+        return this.status == DriverStatus.APPROVED && getActiveVehicle() != null;
+    }
 }

@@ -1,0 +1,258 @@
+<div class="vehicles-page">
+   <div class="dashboard-hero create-header">
+    <div class="header-left">
+      <button type="button" class="btn btn--ghost back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back
+      </button>
+    </div>
+  </div>
+  <section class="card section">
+    <div class="section__header">
+      <div class="section__title-group">
+        <mat-icon class="section__icon">badge</mat-icon>
+        <h2 class="section__title">License</h2>
+      </div>
+
+      <button
+        class="btn btn--outline btn--sm"
+        type="button"
+        (click)="showLicenseForm.set(!showLicenseForm())">
+        <mat-icon>edit</mat-icon>
+        {{ showLicenseForm() ? 'Close' : 'Update License' }}
+      </button>
+    </div>
+
+    @if (driverProfile()) {
+      <div class="license-info">
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="badge" [class]="'badge--' + driverProfile()!.status.toLowerCase()">
+            {{ driverProfile()!.status }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">License Number</span>
+          <span class="info-value">{{ driverProfile()!.licenseNumber || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Expiry Date</span>
+          <span class="info-value">{{ driverProfile()!.licenseExpiry || '-' }}</span>
+        </div>
+      </div>
+
+      @if (driverProfile()!.licensePhotoUrls.length > 0) {
+        <div class="photo-grid">
+          @for (photo of driverProfile()!.licensePhotoUrls; track photo) {
+            <div class="photo">
+              <img [src]="photo" alt="License photo" />
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if (showLicenseForm()) {
+      <form class="form" [formGroup]="licenseForm" (ngSubmit)="submitLicense()">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">License Number</label>
+            <input class="form-input" type="text" formControlName="licenseNumber" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">License Expiry</label>
+            <input class="form-input" type="date" formControlName="licenseExpiry" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="file-upload-area">
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span>Click to upload updated license photos</span>
+            <input type="file" multiple accept="image/*" (change)="onLicenseFileInputChange($event)" />
+          </label>
+
+          @if (licensePhotos().length === 0) {
+            <small class="hint">Upload at least one new license photo when resubmitting.</small>
+          }
+
+          @if (licensePhotoPreviews().length > 0) {
+            <div class="photo-grid">
+              @for (src of licensePhotoPreviews(); track $index; let i = $index) {
+                <div class="photo">
+                  <img [src]="src" [alt]="'Updated license photo ' + (i + 1)" />
+                  <button type="button" (click)="removeLicensePhoto(i)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="warning-banner">
+          <mat-icon>warning</mat-icon>
+          Resubmitting your license sends your profile back to pending review. Vehicle actions stay locked until an admin approves again.
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+            {{ submitting() ? 'Saving...' : 'Resubmit License' }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="card section" [class.section--locked]="vehicleAreaLocked()">
+    <div class="section__header">
+      <div class="section__title-group">
+        <mat-icon class="section__icon">directions_car</mat-icon>
+        <h2 class="section__title">My Vehicles</h2>
+      </div>
+
+      <button
+        class="btn btn--primary btn--sm"
+        (click)="showVehicleForm.set(true)"
+        [disabled]="!canAddVehicle() || showVehicleForm()">
+        <mat-icon>add</mat-icon>
+        Add Vehicle
+      </button>
+    </div>
+
+    @if (!canAddVehicle()) {
+      <div class="info-banner">
+        <mat-icon>lock</mat-icon>
+        @if (driverStatus() === 'PENDING') {
+          Your driver profile is under review. Vehicle activation and new vehicle requests are locked until admin approval.
+        } @else if (driverStatus() === 'REJECTED') {
+          Your driver application was rejected. Vehicle changes are unavailable.
+        } @else if (driverStatus() === 'SUSPENDED') {
+          Your driver profile is suspended. Update and resubmit your license before using vehicles again.
+        } @else {
+          Your driver profile must be approved before you can add vehicles.
+        }
+      </div>
+    }
+
+    @if (showVehicleForm()) {
+      <form class="form form--vehicle" [formGroup]="vehicleForm" (ngSubmit)="submitVehicle()">
+        <h3 class="form__subtitle">New Vehicle</h3>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Vehicle Type *</label>
+            <select class="form-input form-select" formControlName="vehicleType">
+              @for (type of vehicleTypes; track type) {
+                <option [value]="type">{{ vehicleLabels[type] }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Max Capacity (kg) *</label>
+            <input
+              class="form-input"
+              type="number"
+              min="1"
+              formControlName="maxWeightCapacity"
+              placeholder="e.g. 150" />
+            @if (vehicleForm.get('maxWeightCapacity')?.touched &&
+                 vehicleForm.get('maxWeightCapacity')?.invalid) {
+              <span class="form-error">Valid capacity required</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Plate Number</label>
+            <input class="form-input" formControlName="plateNumber" placeholder="e.g. AB-123-CD" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Insurance Expiry</label>
+            <input class="form-input" type="date" formControlName="insuranceExpiry" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-input form-textarea"
+            formControlName="vehicleDescription"
+            placeholder="e.g. White Renault Kangoo, clean interior..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn--ghost"
+            (click)="showVehicleForm.set(false)"
+            [disabled]="submitting()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+            {{ submitting() ? 'Adding...' : 'Add Vehicle' }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (vehicles().length > 0) {
+      <div class="vehicle-grid" [class.vehicle-grid--locked]="vehicleAreaLocked()">
+        @for (vehicle of vehicles(); track vehicle.id) {
+          <div class="vehicle-card" [class.vehicle-card--active]="vehicle.active">
+            @if (vehicle.active) {
+              <span class="active-indicator">
+                <mat-icon>check_circle</mat-icon>
+                Active
+              </span>
+            }
+
+            <div class="vehicle-card__icon">
+              <mat-icon>{{ vehicleIcons[vehicle.vehicleType] }}</mat-icon>
+            </div>
+
+            <div class="vehicle-card__info">
+              <span class="vehicle-card__type">
+                {{ vehicleLabels[vehicle.vehicleType] }}
+              </span>
+              <span class="vehicle-card__capacity">
+                {{ vehicle.maxWeightCapacity }} kg
+              </span>
+              @if (vehicle.plateNumber) {
+                <span class="vehicle-card__plate">{{ vehicle.plateNumber }}</span>
+              }
+            </div>
+
+            <span class="badge badge--sm" [class]="'badge--' + vehicle.status.toLowerCase()">
+              @switch (vehicle.status) {
+                @case ('APPROVED') { Approved }
+                @case ('PENDING') { Under Review }
+                @case ('REJECTED') { Rejected }
+              }
+            </span>
+
+            @if (vehicle.rejectionReason) {
+              <p class="vehicle-card__rejection">{{ vehicle.rejectionReason }}</p>
+            }
+
+            @if (vehicle.status === 'APPROVED' && !vehicle.active && !vehicleAreaLocked()) {
+              <button class="btn btn--outline btn--sm vehicle-card__activate" (click)="activate(vehicle)">
+                <mat-icon>power_settings_new</mat-icon>
+                Set as Active
+              </button>
+            }
+          </div>
+        }
+      </div>
+    } @else if (!showVehicleForm()) {
+      <div class="empty-state">
+        <mat-icon>directions_car</mat-icon>
+        <p>No vehicles added yet.</p>
+      </div>
+    }
+  </section>
+</div>

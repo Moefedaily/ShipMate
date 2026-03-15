@@ -1,9 +1,8 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { LoaderService } from '../../../core/ui/loader/loader.service';
-import { ToastService } from '../../../core/ui/toast/toast.service';
 import { InsuranceState } from '../../../core/state/insurance/InsuranceState';
 import { ClaimStatus } from '../../../core/services/insurance/insurance.model';
 
@@ -23,14 +22,12 @@ export class ClaimDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly insuranceState = inject(InsuranceState);
   private readonly loader = inject(LoaderService);
-  private readonly toast = inject(ToastService);
 
   readonly claim = this.insuranceState.claim;
   readonly loading = this.insuranceState.loading;
 
   private readonly statusOrder: ClaimStatus[] = [
     'SUBMITTED',
-    'UNDER_REVIEW',
     'APPROVED',
     'PAID'
   ];
@@ -58,10 +55,9 @@ export class ClaimDetailsPage implements OnInit {
   getStatusLabel(status: string | undefined): string {
     switch (status) {
       case 'SUBMITTED': return 'Waiting for admin review';
-      case 'UNDER_REVIEW': return 'Under review';
-      case 'APPROVED': return 'Approved — refund requested';
+      case 'APPROVED': return 'Approved - refund requested';
       case 'REJECTED': return 'Rejected';
-      case 'PAID': return 'Paid — refund confirmed';
+      case 'PAID': return 'Paid - refund confirmed';
       default: return status || '';
     }
   }

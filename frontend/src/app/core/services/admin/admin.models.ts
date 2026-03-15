@@ -10,6 +10,7 @@ export interface AdminDashboardStats {
   pendingClaims: number;
   totalPayments: number;
   totalRevenue: number;
+  pendingApprovals: number;
 }
 
 export type UserType = 'SENDER' | 'DRIVER' | 'BOTH';
@@ -89,20 +90,35 @@ export type VehicleType =
 
 export interface AdminDriverProfile {
   id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   licenseNumber: string;
-  vehicleType: VehicleType;
-  maxWeightCapacity: number;
-  vehicleDescription: string;
+  licensePhotoUrl?: string | null;
+  licensePhotoUrls: string[];
+  licenseExpiry: string;
   status: DriverStatus;
-
+  vehicles: AdminVehicle[];
+  activeVehicle?: AdminVehicle | null;
   lastLatitude: number | null;
   lastLongitude: number | null;
   lastLocationUpdatedAt: string | null;
-
   createdAt: string;
   approvedAt: string | null;
-
   strikeCount: number;
+}
+
+export interface AdminVehicle {
+  id: string;
+  vehicleType: VehicleType;
+  maxWeightCapacity: number;
+  plateNumber?: string | null;
+  insuranceExpiry?: string | null;
+  vehicleDescription?: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  active: boolean;
+  rejectionReason?: string | null;
+  createdAt?: string | null;
 }
 
 export interface DriverFilterParams {
@@ -201,7 +217,6 @@ export interface AdminUpdateShipmentStatusRequest {
 
 export type ClaimStatus =
   | 'SUBMITTED'
-  | 'UNDER_REVIEW'
   | 'APPROVED'
   | 'REJECTED'
   | 'PAID';
@@ -282,9 +297,14 @@ export interface BookingFilterParams {
 export interface AdminEarning {
   id: string;
   driverId: string;
-  amount: number;
+  shipmentId: string;
+  paymentId: string;
+  grossAmount: number;
+  commissionAmount: number;
+  netAmount: number;
   currency: string;
-  paid: boolean;
+  payoutStatus: 'PENDING' | 'PAID';
+  earningType: 'ORIGINAL' | 'REFUND';
   createdAt: string;
 }
 

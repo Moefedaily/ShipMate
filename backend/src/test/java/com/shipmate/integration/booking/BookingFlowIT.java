@@ -27,10 +27,13 @@ import com.shipmate.model.user.Role;
 import com.shipmate.model.user.User;
 import com.shipmate.model.user.UserType;
 import com.shipmate.model.user.VehicleType;
+import com.shipmate.model.vehicle.Vehicle;
+import com.shipmate.model.vehicle.VehicleStatus;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.payment.PaymentRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.repository.user.UserRepository;
+import com.shipmate.repository.vehicle.VehicleRepository;
 import com.shipmate.service.booking.BookingService;
 
 class BookingFlowIT extends AbstractIntegrationTest {
@@ -49,6 +52,9 @@ class BookingFlowIT extends AbstractIntegrationTest {
 
     @Autowired
     private DriverProfileRepository driverProfileRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -174,19 +180,26 @@ class BookingFlowIT extends AbstractIntegrationTest {
                         .build()
         );
 
-        driverProfileRepository.saveAndFlush(
-                DriverProfile.builder()
-                        .user(driver)
-                        .vehicleType(VehicleType.CAR)
-                        .licenseNumber("LIC-" + UUID.randomUUID())
-                        .vehicleDescription("Test car")
-                        .maxWeightCapacity(BigDecimal.valueOf(500))
-                        .status(DriverStatus.APPROVED)
-                        .lastLatitude(BigDecimal.valueOf(48.8566))
-                        .lastLongitude(BigDecimal.valueOf(2.3522))
-                        .lastLocationUpdatedAt(Instant.now())
-                        .build()
-        );
+        DriverProfile profile = DriverProfile.builder()
+                .user(driver)
+                .licenseNumber("LIC-" + UUID.randomUUID())
+                .status(DriverStatus.APPROVED)
+                .lastLatitude(BigDecimal.valueOf(48.8566))
+                .lastLongitude(BigDecimal.valueOf(2.3522))
+                .lastLocationUpdatedAt(Instant.now())
+                .build();
+
+        Vehicle vehicle = Vehicle.builder()
+                .driverProfile(profile)
+                .vehicleType(VehicleType.CAR)
+                .vehicleDescription("Test car")
+                .maxWeightCapacity(BigDecimal.valueOf(500))
+                .status(VehicleStatus.APPROVED)
+                .active(true)
+                .build();
+
+        profile.getVehicles().add(vehicle);
+        driverProfileRepository.saveAndFlush(profile);
 
         return driver;
     }

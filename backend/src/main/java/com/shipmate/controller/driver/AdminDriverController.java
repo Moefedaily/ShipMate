@@ -46,6 +46,15 @@ public class AdminDriverController {
         return ResponseEntity.ok(driverProfileService.getPendingDrivers());
     }
 
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Get driver application details",
+        description = "Retrieves a single driver profile with license and vehicle details for admin review."
+    )
+    public ResponseEntity<DriverProfileResponse> getDriver(@PathVariable UUID id) {
+        return ResponseEntity.ok(driverProfileService.getDriver(id));
+    }
+
 
     @Operation(
         summary = "Approve driver application",

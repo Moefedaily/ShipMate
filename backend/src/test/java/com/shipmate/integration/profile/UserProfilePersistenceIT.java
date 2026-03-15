@@ -4,6 +4,8 @@ package com.shipmate.integration.profile;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +37,13 @@ class DriverProfilePersistenceIT extends AbstractIntegrationTest {
     void shouldPersistDriverProfile_onApply() {
         User user = createUser("driver1@shipmate.com");
 
-        DriverApplyRequest request = DriverApplyRequest.builder()
-                .licenseNumber("LIC-12345")
-                .vehicleType(VehicleType.CAR)
-                .maxWeightCapacity(BigDecimal.valueOf(100))
-                .build();
-
-        driverProfileService.apply(user.getId(), request);
+        driverProfileService.apply(user.getId(), buildApplyRequest());
 
         DriverProfile profile = driverProfileRepository
                 .findByUser(user)
                 .orElseThrow();
 
         assertThat(profile.getStatus()).isEqualTo(DriverStatus.PENDING);
-        assertThat(profile.getLicenseNumber()).isEqualTo("LIC-12345");
         assertThat(profile.getUser().getId()).isEqualTo(user.getId());
     }
 
@@ -56,15 +51,9 @@ class DriverProfilePersistenceIT extends AbstractIntegrationTest {
     void shouldFail_whenDriverProfileAlreadyExists() {
         User user = createUser("driver2@shipmate.com");
 
-        DriverApplyRequest request = DriverApplyRequest.builder()
-                .licenseNumber("LIC-67890")
-                .vehicleType(VehicleType.VAN)
-                .maxWeightCapacity(BigDecimal.valueOf(200))
-                .build();
+        driverProfileService.apply(user.getId(), buildApplyRequest());
 
-        driverProfileService.apply(user.getId(), request);
-
-        assertThatThrownBy(() -> driverProfileService.apply(user.getId(), request))
+        assertThatThrownBy(() -> driverProfileService.apply(user.getId(), buildApplyRequest()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -81,5 +70,16 @@ class DriverProfilePersistenceIT extends AbstractIntegrationTest {
             .build();
         
         return userRepository.save(user);
+    }
+
+    private DriverApplyRequest buildApplyRequest() {
+        return DriverApplyRequest.builder()
+                .licenseNumber("LIC-" + UUID.randomUUID())
+                .licenseExpiry(LocalDate.now().plusYears(2))
+                .vehicleType(VehicleType.CAR)
+                .maxWeightCapacity(BigDecimal.valueOf(500))
+                .plateNumber("TEST-" + UUID.randomUUID().toString().substring(0, 8))
+                .vehicleDescription("Integration test vehicle")
+                .build();
     }
 }

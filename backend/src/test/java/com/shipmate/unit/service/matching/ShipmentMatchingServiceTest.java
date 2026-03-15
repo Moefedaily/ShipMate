@@ -23,11 +23,13 @@ import com.shipmate.dto.response.matching.MatchResultResponse;
 import com.shipmate.dto.response.matching.MatchingMetricsResponse;
 import com.shipmate.mapper.matching.MatchResultMapper;
 import com.shipmate.model.DriverProfile.DriverProfile;
+import com.shipmate.model.DriverProfile.DriverStatus;
 import com.shipmate.model.booking.Booking;
 import com.shipmate.model.booking.BookingStatus;
 import com.shipmate.model.shipment.Shipment;
 import com.shipmate.model.shipment.ShipmentStatus;
 import com.shipmate.model.user.User;
+import com.shipmate.model.vehicle.Vehicle;
 import com.shipmate.repository.booking.BookingRepository;
 import com.shipmate.repository.driver.DriverProfileRepository;
 import com.shipmate.repository.shipment.ShipmentRepository;
@@ -59,7 +61,12 @@ class ShipmentMatchingServiceTest {
         driverId = UUID.randomUUID();
 
         driverProfile = new DriverProfile();
-        driverProfile.setMaxWeightCapacity(new BigDecimal("50"));
+        Vehicle vehicle = Vehicle.builder()
+                .maxWeightCapacity(new BigDecimal("50"))
+                .active(true)
+                .build();
+        driverProfile.setVehicles(List.of(vehicle));
+        driverProfile.setStatus(DriverStatus.APPROVED);
         driverProfile.setLastLatitude(new BigDecimal("48.8566"));
         driverProfile.setLastLongitude(new BigDecimal("2.3522"));
     }
@@ -77,7 +84,7 @@ class ShipmentMatchingServiceTest {
 
         Page<Shipment> page = new PageImpl<>(List.of(shipment));
 
-        when(driverProfileRepository.findByUser_Id(driverId))
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId))
                 .thenReturn(Optional.of(driverProfile));
 
         when(shipmentRepository.findByStatus(eq(ShipmentStatus.CREATED), any()))
@@ -114,7 +121,7 @@ class ShipmentMatchingServiceTest {
 
         Page<Shipment> page = new PageImpl<>(List.of(farShipment));
 
-        when(driverProfileRepository.findByUser_Id(driverId))
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId))
                 .thenReturn(Optional.of(driverProfile));
 
         when(shipmentRepository.findByStatus(eq(ShipmentStatus.CREATED), any()))
@@ -146,7 +153,7 @@ class ShipmentMatchingServiceTest {
 
         Page<Shipment> page = new PageImpl<>(List.of(heavyShipment));
 
-        when(driverProfileRepository.findByUser_Id(driverId))
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId))
                 .thenReturn(Optional.of(driverProfile));
 
         when(shipmentRepository.findByStatus(eq(ShipmentStatus.CREATED), any()))
@@ -175,7 +182,7 @@ class ShipmentMatchingServiceTest {
         booking.setStatus(BookingStatus.IN_PROGRESS);
         booking.setDriver(driver);
 
-        when(driverProfileRepository.findByUser_Id(driverId))
+        when(driverProfileRepository.findWithVehiclesByUser_Id(driverId))
                 .thenReturn(Optional.of(driverProfile));
 
         when(bookingRepository.findWithShipmentsById(any()))

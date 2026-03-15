@@ -22,4 +22,6 @@ public class AdminDashboardResponse {
     private long totalPayments;
 
     private BigDecimal totalRevenue;
+
+    private long pendingApprovals;
 }

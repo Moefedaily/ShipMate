@@ -1,12 +1,6 @@
 
-/**
- * DriverStatus represents the BACKEND / DOMAIN state.
- * 
- * - Comes directly from the API and database
- * - Used for business rules, permissions, and lifecycle enforcement
- * - MUST NOT include UI-only states
- * - MUST NOT be mutated by the frontend
- */
+import { Vehicle } from './vehicle/vehicle.models';
+
 export enum DriverStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
@@ -15,37 +9,37 @@ export enum DriverStatus {
 }
 
 export interface DriverProfileResponse {
-
   id: string;
-
+  firstName: string;
+  lastName: string;
+  email: string;
   licenseNumber: string;
-
-  vehicleType: VehicleType;
-
-  vehicleDescription: string;
-
-  maxWeightCapacity: number;
-
+  licensePhotoUrl: string | null;
+  licensePhotoUrls: string[];
+  licenseExpiry: string | null;
   status: DriverStatus;
-
   strikeCount: number;
-
   createdAt: string;
-
   approvedAt: string | null;
-
+  vehicles: Vehicle[];
+  activeVehicle: Vehicle | null;
   lastLatitude: number | null;
-
   lastLongitude: number | null;
-
   lastLocationUpdatedAt: string | null;
 }
 
 export interface DriverApplyRequest {
   licenseNumber: string;
-  vehicleType: string;
+  licenseExpiry: string;
+  vehicleType: VehicleType;
   maxWeightCapacity: number;
-  vehicleDescription: string;
+  plateNumber?: string;
+  vehicleDescription?: string;
+}
+
+export interface UpdateLicenseRequest {
+  licenseNumber: string;
+  licenseExpiry: string;
 }
 
 export enum VehicleType {
