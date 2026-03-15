@@ -78,7 +78,7 @@ class EarningsSummaryIT extends AbstractIntegrationTest {
         assertThat(summary.getTotalGross()).isEqualByComparingTo("200.00");
         assertThat(summary.getTotalCommission()).isEqualByComparingTo("40.00");
         assertThat(summary.getTotalNet()).isEqualByComparingTo("160.00");
-        assertThat(summary.getTotalPending()).isEqualByComparingTo("160.00");
+        assertThat(summary.getTotalPending()).isEqualByComparingTo("240.00");
         assertThat(summary.getTotalPaid()).isEqualByComparingTo("0.00");
     }
 

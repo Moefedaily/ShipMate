@@ -13,6 +13,9 @@ import com.shipmate.repository.shipment.ShipmentRepository;
 import com.shipmate.service.payment.PaymentService;
 import com.shipmate.service.shipment.ShipmentService;
 import com.shipmate.mapper.shipment.ShipmentAssembler;
+import com.shipmate.service.delivery.DeliveryCodeService;
+import com.shipmate.listener.delivery.DeliveryCodeEventPublisher;
+import com.shipmate.service.admin.AdminActionLogger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,9 @@ class ShipmentServicePaymentTest {
     @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private ShipmentAssembler shipmentAssembler;
     @Mock private PaymentService paymentService;
+    @Mock private DeliveryCodeService deliveryCodeService;
+    @Mock private DeliveryCodeEventPublisher deliveryCodeEventPublisher;
+    @Mock private AdminActionLogger adminActionLogger;
 
     @InjectMocks
     private ShipmentService shipmentService;
@@ -178,5 +184,36 @@ class ShipmentServicePaymentTest {
                 shipmentService.markDelivered(shipmentId, driverId))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("IN_TRANSIT");
+    }
+
+    @Test
+    void confirmDelivery_shouldVerifyCodeCaptureAndCompleteBooking() {
+        shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+        shipment.setSender(User.builder().id(UUID.randomUUID()).build());
+        Payment payment = Payment.builder().paymentStatus(PaymentStatus.AUTHORIZED).build();
+
+        when(shipmentRepository.findWithBookingAndSender(shipmentId)).thenReturn(Optional.of(shipment));
+        when(paymentRepository.findByShipment(shipment)).thenReturn(Optional.of(payment));
+        when(shipmentAssembler.toResponse(any())).thenReturn(null);
+
+        shipmentService.confirmDelivery(shipmentId, driverId, "123456");
+
+        verify(deliveryCodeService).verify(shipment, "123456");
+        verify(paymentService).capturePaymentForShipment(shipment);
+        assertThat(shipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.COMPLETED);
+    }
+
+    @Test
+    void cancelShipment_shouldRejectCapturedShipment() {
+        shipment.setSender(User.builder().id(UUID.randomUUID()).build());
+        when(shipmentRepository.findWithBookingAndSender(shipmentId)).thenReturn(Optional.of(shipment));
+        when(paymentRepository.findByShipment(shipment)).thenReturn(Optional.of(Payment.builder()
+                .paymentStatus(PaymentStatus.CAPTURED)
+                .build()));
+
+        assertThatThrownBy(() -> shipmentService.cancelShipment(shipmentId, driverId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Captured shipment cannot be cancelled");
     }
 }
